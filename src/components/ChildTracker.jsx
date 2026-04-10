@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { DAYS, DEFAULT_ACTIVITIES, MAX_TOTAL } from '../utils/constants'
-import { getBadge, initChecks, loadFromStorage, saveToStorage } from '../utils/helpers'
+import { getBadge, initChecks } from '../utils/helpers'
+import { useFirestoreSync } from '../firebase/useFirestoreSync'
 import ConfettiEffect from './ConfettiEffect'
 import StickerCheck from './StickerCheck'
 import VirtualPet from './VirtualPet'
@@ -10,28 +11,21 @@ import RewardUnlock from './RewardUnlock'
 import WeeklyHistory from './WeeklyHistory'
 
 const ChildTracker = ({ theme, onScoreChange }) => {
-  const storageKey = (k) => `tracker-${theme.key}-${k}`
+  const {
+    checks, setChecks,
+    customLabel, setCustomLabel,
+    childName, setChildName,
+    badges, setBadges,
+    weekHistory, setWeekHistory,
+    reward, setReward,
+  } = useFirestoreSync(theme.key, theme.name)
 
-  const [checks, setChecks] = useState(() => loadFromStorage(storageKey('checks'), initChecks(DEFAULT_ACTIVITIES, DAYS)))
-  const [customLabel, setCustomLabel] = useState(() => loadFromStorage(storageKey('customLabel'), ''))
   const [editingCustom, setEditingCustom] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [childName, setChildName] = useState(() => loadFromStorage(storageKey('name'), theme.name))
   const [editingName, setEditingName] = useState(false)
-  const [badges, setBadges] = useState(() => loadFromStorage(storageKey('badges'), []))
-  const [weekHistory, setWeekHistory] = useState(() => loadFromStorage(storageKey('history'), []))
-  const [reward, setReward] = useState(() => loadFromStorage(storageKey('reward'), null))
 
   const totalChecked = Object.values(checks).filter(Boolean).length
   const currentBadge = getBadge(totalChecked, theme)
-
-  // Persist to localStorage
-  useEffect(() => { saveToStorage(storageKey('checks'), checks) }, [checks])
-  useEffect(() => { saveToStorage(storageKey('customLabel'), customLabel) }, [customLabel])
-  useEffect(() => { saveToStorage(storageKey('name'), childName) }, [childName])
-  useEffect(() => { saveToStorage(storageKey('badges'), badges) }, [badges])
-  useEffect(() => { saveToStorage(storageKey('history'), weekHistory) }, [weekHistory])
-  useEffect(() => { saveToStorage(storageKey('reward'), reward) }, [reward])
 
   useEffect(() => { onScoreChange(totalChecked) }, [totalChecked, onScoreChange])
 
