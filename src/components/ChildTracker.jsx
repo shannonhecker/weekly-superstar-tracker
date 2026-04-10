@@ -127,7 +127,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
         <div className="flex-1">
           <div className="h-3.5 rounded-full bg-gray-100 overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-400"
+              className="h-full rounded-full transition-all duration-500"
               style={{
                 background: totalChecked === MAX_TOTAL
                   ? `linear-gradient(90deg, ${theme.accent}, #F7B731, #FC5C65, ${theme.accent})`
