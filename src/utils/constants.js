@@ -4,6 +4,8 @@ export const DEFAULT_ACTIVITIES = [
   { id: 'sleep', emoji: '😴', label: 'Good Sleep', color: '#7C6FF7' },
   { id: 'bath', emoji: '🛁', label: 'Good Bath', color: '#4ECDC4' },
   { id: 'teeth', emoji: '🪥', label: 'Brush Teeth', color: '#45B7D1' },
+  { id: 'breakfast', emoji: '🍳', label: 'Eat Breakfast Nicely', color: '#FF9F43' },
+  { id: 'shoes', emoji: '👟', label: 'Shoes On Quickly', color: '#EE5A24' },
   { id: 'school-book', emoji: '📖', label: 'School Book', color: '#F7B731' },
   { id: 'fun-book', emoji: '📚', label: 'Fun Book', color: '#FC5C65' },
   { id: 'mandarin', emoji: '🀄', label: 'Mandarin', color: '#FF6348' },

@@ -4,10 +4,10 @@ export function getPetState(score, theme) {
 
 export function getBadge(score, theme) {
   const bi = theme.badgeIcons
-  if (score >= 50) return { icon: bi.diamond, label: 'Diamond', color: '#B388FF', glow: '#B388FF55' }
-  if (score >= 40) return { icon: bi.gold, label: 'Gold', color: '#FFD700', glow: '#FFD70055' }
-  if (score >= 30) return { icon: bi.silver, label: 'Silver', color: '#C0C0C0', glow: '#C0C0C055' }
-  if (score >= 15) return { icon: bi.bronze, label: 'Bronze', color: '#CD7F32', glow: '#CD7F3255' }
+  if (score >= 60) return { icon: bi.diamond, label: 'Diamond', color: '#B388FF', glow: '#B388FF55' }
+  if (score >= 50) return { icon: bi.gold, label: 'Gold', color: '#FFD700', glow: '#FFD70055' }
+  if (score >= 35) return { icon: bi.silver, label: 'Silver', color: '#C0C0C0', glow: '#C0C0C055' }
+  if (score >= 20) return { icon: bi.bronze, label: 'Bronze', color: '#CD7F32', glow: '#CD7F3255' }
   return null
 }
 
