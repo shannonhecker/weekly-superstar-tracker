@@ -18,7 +18,7 @@ const VirtualPet = ({ score, name, theme }) => {
       className="flex items-center gap-2.5 sm:gap-3.5 rounded-2xl p-3 sm:p-3.5"
       style={{ background: pet.bg, border: `2px solid ${theme.accentLight}` }}
     >
-      <div className={`text-[36px] sm:text-[44px] shrink-0 ${anim}`}>
+      <div className={`text-[52px] sm:text-[64px] shrink-0 ${anim}`}>
         {pet.face}
       </div>
       <div className="flex-1 min-w-0">
