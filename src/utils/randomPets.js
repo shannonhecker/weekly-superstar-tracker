@@ -99,6 +99,56 @@ const RANDOM_PETS = [
       { face: '🌟', mood: 'GALAXY BOSS!', msg: 'RULER OF SPACE!' },
     ],
   },
+  {
+    name: 'Pikachu',
+    states: [
+      { face: '⚡', mood: 'Sleepy Pika', msg: 'Pika... zzz' },
+      { face: '🐭', mood: 'Pika Pika!', msg: 'Pika pika!' },
+      { face: '⚡', mood: 'Thundershock!', msg: 'PIKA CHUUU!' },
+      { face: '🌩️', mood: 'Thunder Bolt!', msg: 'FEEL THE POWER!' },
+      { face: '👑', mood: 'PIKA LEGEND!', msg: 'I CHOOSE YOU!' },
+    ],
+  },
+  {
+    name: 'Charmander',
+    states: [
+      { face: '🔥', mood: 'Tiny Flame', msg: 'Keep my tail lit!' },
+      { face: '🦎', mood: 'Char Char!', msg: 'Getting warmer!' },
+      { face: '🔥', mood: 'Charmeleon!', msg: 'FIRE SPIN!' },
+      { face: '🐉', mood: 'Charizard!', msg: 'FLAMETHROWER!' },
+      { face: '🌋', mood: 'MEGA CHARIZARD!', msg: 'BLAST BURN!' },
+    ],
+  },
+  {
+    name: 'Squirtle',
+    states: [
+      { face: '🐢', mood: 'Shy Squirtle', msg: 'Hiding in shell...' },
+      { face: '💧', mood: 'Squirtle Squad!', msg: 'Water gun!' },
+      { face: '🌊', mood: 'Wartortle!', msg: 'HYDRO PUMP!' },
+      { face: '🐚', mood: 'Blastoise!', msg: 'SURF\'S UP!' },
+      { face: '💎', mood: 'MEGA BLASTOISE!', msg: 'TIDAL WAVE!' },
+    ],
+  },
+  {
+    name: 'Bulbasaur',
+    states: [
+      { face: '🌱', mood: 'Little Seed', msg: 'Soaking up sun...' },
+      { face: '🍃', mood: 'Bulba Bulba!', msg: 'Vine whip!' },
+      { face: '🌿', mood: 'Ivysaur!', msg: 'RAZOR LEAF!' },
+      { face: '🌸', mood: 'Venusaur!', msg: 'SOLAR BEAM!' },
+      { face: '🌺', mood: 'MEGA VENUSAUR!', msg: 'NATURE POWER!' },
+    ],
+  },
+  {
+    name: 'Eevee',
+    states: [
+      { face: '🦊', mood: 'Cute Eevee', msg: 'Eevee!' },
+      { face: '✨', mood: 'Playful Eevee!', msg: 'Who will I be?' },
+      { face: '🔥', mood: 'Flareon!', msg: 'FIRE BLAST!' },
+      { face: '⚡', mood: 'Jolteon!', msg: 'THUNDERBOLT!' },
+      { face: '🌈', mood: 'SYLVEON!', msg: 'FAIRY POWER!' },
+    ],
+  },
 ]
 
 const BG_COLORS = ['#FFF8E1', '#F1F8E9', '#E8F5E9', '#E3F2FD', '#FFF3E0']
