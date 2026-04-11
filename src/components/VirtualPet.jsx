@@ -1,17 +1,23 @@
-import { getPetState } from '../utils/helpers'
+import { useMemo } from 'react'
+import { getRandomPetForWeek, getRandomPetState } from '../utils/randomPets'
 
 const PET_ANIMATIONS = [
-  'animate-pet-sleep',   // tier 0: sleeping/low
-  'animate-pet-wiggle',  // tier 1: awake, wiggling
-  'animate-pet-dance',   // tier 2: happy, dancing
-  'animate-pet-jump',    // tier 3: excited, jumping
-  'animate-pet-party',   // tier 4: superstar, full party
+  'animate-pet-sleep',
+  'animate-pet-wiggle',
+  'animate-pet-dance',
+  'animate-pet-jump',
+  'animate-pet-party',
 ]
 
 const VirtualPet = ({ score, name, theme }) => {
-  const pet = getPetState(score, theme)
-  const tier = theme.petStates.indexOf(pet)
-  const anim = PET_ANIMATIONS[tier] || PET_ANIMATIONS[0]
+  const weekPet = useMemo(() => getRandomPetForWeek(theme.key), [theme.key])
+  const pet = getRandomPetState(score, weekPet)
+  const thresholds = [0, 11, 21, 33, 43]
+  let tier = 0
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (score >= thresholds[i]) { tier = i; break }
+  }
+  const anim = PET_ANIMATIONS[tier]
 
   return (
     <div
@@ -23,7 +29,7 @@ const VirtualPet = ({ score, name, theme }) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-[11px] sm:text-[13px] font-extrabold mb-0.5" style={{ color: theme.accent }}>
-          {name}'s Buddy
+          {name}'s {weekPet.name}
         </div>
         <div className="text-[13px] sm:text-[15px] font-bold text-gray-800">{pet.mood}</div>
         <div className="text-[10px] sm:text-xs font-semibold italic text-gray-400 truncate">"{pet.msg}"</div>
