@@ -2,7 +2,6 @@ const RANDOM_PETS = [
   {
     name: 'Kitty',
     states: [
-      { face: '😿', mood: 'Sleepy Kitty', msg: 'Mew... so tired' },
       { face: '🐱', mood: 'Curious Kitty', msg: 'What\'s that?!' },
       { face: '😺', mood: 'Happy Kitty', msg: 'Purrrr!' },
       { face: '😸', mood: 'Super Kitty!', msg: 'ZOOM ZOOM!' },
@@ -12,8 +11,7 @@ const RANDOM_PETS = [
   {
     name: 'Puppy',
     states: [
-      { face: '🐶', mood: 'Sleepy Pup', msg: 'Zzz... woof' },
-      { face: '🐕', mood: 'Waggy Pup', msg: 'Wag wag wag!' },
+      { face: '🐶', mood: 'Waggy Pup', msg: 'Wag wag wag!' },
       { face: '🦮', mood: 'Good Boy!', msg: 'FETCH! FETCH!' },
       { face: '🐺', mood: 'Super Dog!', msg: 'AWOOOO!' },
       { face: '🌟', mood: 'LEGENDARY DOG!', msg: 'BEST BOY EVER!' },
@@ -22,7 +20,6 @@ const RANDOM_PETS = [
   {
     name: 'Bunny',
     states: [
-      { face: '🐇', mood: 'Shy Bunny', msg: 'Nose wiggle...' },
       { face: '🐰', mood: 'Hoppy Bunny', msg: 'Hop hop!' },
       { face: '🐾', mood: 'Bouncy Bunny!', msg: 'BOING BOING!' },
       { face: '⚡', mood: 'Turbo Bunny!', msg: 'ZOOM HOP!' },
@@ -32,8 +29,7 @@ const RANDOM_PETS = [
   {
     name: 'Panda',
     states: [
-      { face: '🐼', mood: 'Lazy Panda', msg: 'Bamboo please...' },
-      { face: '🐻', mood: 'Munchy Panda', msg: 'Nom nom nom!' },
+      { face: '🐼', mood: 'Munchy Panda', msg: 'Nom nom nom!' },
       { face: '🎋', mood: 'Happy Panda!', msg: 'Bamboo party!' },
       { face: '🥋', mood: 'Kung Fu Panda!', msg: 'HIYA!' },
       { face: '👑', mood: 'PANDA EMPEROR!', msg: 'SKADOOSH!' },
@@ -42,7 +38,6 @@ const RANDOM_PETS = [
   {
     name: 'Dragon',
     states: [
-      { face: '🥚', mood: 'Dragon Egg', msg: 'Cracking...' },
       { face: '🐉', mood: 'Baby Dragon', msg: 'Tiny roar!' },
       { face: '🔥', mood: 'Fire Breather!', msg: 'FLAME ON!' },
       { face: '🐲', mood: 'Sky Dragon!', msg: 'SOARING HIGH!' },
@@ -52,8 +47,7 @@ const RANDOM_PETS = [
   {
     name: 'Penguin',
     states: [
-      { face: '🐧', mood: 'Cold Penguin', msg: 'Brrr so cold!' },
-      { face: '🧊', mood: 'Sliding Penguin', msg: 'Wheee!' },
+      { face: '🐧', mood: 'Sliding Penguin', msg: 'Wheee!' },
       { face: '🐟', mood: 'Fish Hunter!', msg: 'Got one!' },
       { face: '❄️', mood: 'Ice Master!', msg: 'BELLY SLIDE!' },
       { face: '🏔️', mood: 'PENGUIN KING!', msg: 'TOP OF THE WORLD!' },
@@ -62,8 +56,7 @@ const RANDOM_PETS = [
   {
     name: 'Monkey',
     states: [
-      { face: '🐵', mood: 'Sleepy Monkey', msg: 'Banana dreams...' },
-      { face: '🙈', mood: 'Peek-a-boo!', msg: 'Can you see me?' },
+      { face: '🐵', mood: 'Peek-a-boo!', msg: 'Can you see me?' },
       { face: '🙉', mood: 'Silly Monkey!', msg: 'Ooh ooh ahh!' },
       { face: '🐒', mood: 'Swing King!', msg: 'TREE TO TREE!' },
       { face: '👑', mood: 'JUNGLE KING!', msg: 'KING OF THE JUNGLE!' },
@@ -72,7 +65,6 @@ const RANDOM_PETS = [
   {
     name: 'Unicorn',
     states: [
-      { face: '🐴', mood: 'Little Pony', msg: 'Neigh...' },
       { face: '🦄', mood: 'Baby Unicorn', msg: 'Sparkle sparkle!' },
       { face: '🌈', mood: 'Rainbow Rider!', msg: 'MAGICAL!' },
       { face: '💫', mood: 'Star Unicorn!', msg: 'SHOOTING STARS!' },
@@ -82,8 +74,7 @@ const RANDOM_PETS = [
   {
     name: 'Octopus',
     states: [
-      { face: '🐙', mood: 'Shy Octopus', msg: 'Hiding in ink...' },
-      { face: '🦑', mood: 'Squirty!', msg: 'Splish splash!' },
+      { face: '🐙', mood: 'Squirty!', msg: 'Splish splash!' },
       { face: '🌊', mood: 'Wave Rider!', msg: 'SURF\'S UP!' },
       { face: '🧜', mood: 'Sea Hero!', msg: 'OCEAN POWER!' },
       { face: '🔱', mood: 'SEA KING!', msg: 'RULER OF WAVES!' },
@@ -92,8 +83,7 @@ const RANDOM_PETS = [
   {
     name: 'Alien',
     states: [
-      { face: '👽', mood: 'Lost Alien', msg: 'Where am I?' },
-      { face: '🛸', mood: 'UFO Pilot!', msg: 'Beep boop!' },
+      { face: '👽', mood: 'UFO Pilot!', msg: 'Beep boop!' },
       { face: '🌍', mood: 'Earth Friend!', msg: 'I love Earth!' },
       { face: '🚀', mood: 'Space Racer!', msg: 'ZOOM TO MARS!' },
       { face: '🌟', mood: 'GALAXY BOSS!', msg: 'RULER OF SPACE!' },
@@ -102,7 +92,6 @@ const RANDOM_PETS = [
   {
     name: 'Pikachu',
     states: [
-      { face: '⚡', mood: 'Sleepy Pika', msg: 'Pika... zzz' },
       { face: '🐭', mood: 'Pika Pika!', msg: 'Pika pika!' },
       { face: '⚡', mood: 'Thundershock!', msg: 'PIKA CHUUU!' },
       { face: '🌩️', mood: 'Thunder Bolt!', msg: 'FEEL THE POWER!' },
@@ -112,7 +101,6 @@ const RANDOM_PETS = [
   {
     name: 'Charmander',
     states: [
-      { face: '🔥', mood: 'Tiny Flame', msg: 'Keep my tail lit!' },
       { face: '🦎', mood: 'Char Char!', msg: 'Getting warmer!' },
       { face: '🔥', mood: 'Charmeleon!', msg: 'FIRE SPIN!' },
       { face: '🐉', mood: 'Charizard!', msg: 'FLAMETHROWER!' },
@@ -122,8 +110,7 @@ const RANDOM_PETS = [
   {
     name: 'Squirtle',
     states: [
-      { face: '🐢', mood: 'Shy Squirtle', msg: 'Hiding in shell...' },
-      { face: '💧', mood: 'Squirtle Squad!', msg: 'Water gun!' },
+      { face: '🐢', mood: 'Squirtle Squad!', msg: 'Water gun!' },
       { face: '🌊', mood: 'Wartortle!', msg: 'HYDRO PUMP!' },
       { face: '🐚', mood: 'Blastoise!', msg: 'SURF\'S UP!' },
       { face: '💎', mood: 'MEGA BLASTOISE!', msg: 'TIDAL WAVE!' },
@@ -132,7 +119,6 @@ const RANDOM_PETS = [
   {
     name: 'Bulbasaur',
     states: [
-      { face: '🌱', mood: 'Little Seed', msg: 'Soaking up sun...' },
       { face: '🍃', mood: 'Bulba Bulba!', msg: 'Vine whip!' },
       { face: '🌿', mood: 'Ivysaur!', msg: 'RAZOR LEAF!' },
       { face: '🌸', mood: 'Venusaur!', msg: 'SOLAR BEAM!' },
@@ -142,13 +128,28 @@ const RANDOM_PETS = [
   {
     name: 'Eevee',
     states: [
-      { face: '🦊', mood: 'Cute Eevee', msg: 'Eevee!' },
-      { face: '✨', mood: 'Playful Eevee!', msg: 'Who will I be?' },
+      { face: '🦊', mood: 'Playful Eevee!', msg: 'Who will I be?' },
       { face: '🔥', mood: 'Flareon!', msg: 'FIRE BLAST!' },
       { face: '⚡', mood: 'Jolteon!', msg: 'THUNDERBOLT!' },
       { face: '🌈', mood: 'SYLVEON!', msg: 'FAIRY POWER!' },
     ],
   },
+]
+
+// Random egg styles — each egg has a unique color and pattern emoji
+const EGG_STYLES = [
+  { face: '🥚', color: '#FFD700', label: 'Golden Egg' },
+  { face: '🥚', color: '#FF6B6B', label: 'Red Egg' },
+  { face: '🥚', color: '#48DBFB', label: 'Blue Egg' },
+  { face: '🥚', color: '#FF9FF3', label: 'Pink Egg' },
+  { face: '🥚', color: '#54E346', label: 'Green Egg' },
+  { face: '🥚', color: '#A29BFE', label: 'Purple Egg' },
+  { face: '🥚', color: '#FFA502', label: 'Orange Egg' },
+  { face: '🥚', color: '#00D2D3', label: 'Teal Egg' },
+  { face: '🪺', color: '#C8A86E', label: 'Nest Egg' },
+  { face: '🥚', color: '#FF6348', label: 'Fire Egg' },
+  { face: '🥚', color: '#7BED9F', label: 'Mint Egg' },
+  { face: '🥚', color: '#E056A0', label: 'Sparkle Egg' },
 ]
 
 const BG_COLORS = ['#FFF8E1', '#F1F8E9', '#E8F5E9', '#E3F2FD', '#FFF3E0']
@@ -157,29 +158,47 @@ export function getRandomPetForWeek(themeKey) {
   const weekKey = _getWeekKey()
   const storageKey = `tracker-${themeKey}-weekPet`
   const savedWeekKey = `tracker-${themeKey}-weekPetWeek`
+  const eggStyleKey = `tracker-${themeKey}-eggStyle`
   const savedWeek = localStorage.getItem(savedWeekKey)
 
   if (savedWeek === weekKey) {
     const idx = parseInt(localStorage.getItem(storageKey), 10)
+    const eggIdx = parseInt(localStorage.getItem(eggStyleKey), 10)
     if (!isNaN(idx) && idx >= 0 && idx < RANDOM_PETS.length) {
-      return RANDOM_PETS[idx]
+      const egg = (!isNaN(eggIdx) && eggIdx >= 0) ? EGG_STYLES[eggIdx] : EGG_STYLES[0]
+      return { ...RANDOM_PETS[idx], egg }
     }
   }
 
-  // New week — pick a random pet
+  // New week — pick a random pet and egg style
   const idx = Math.floor(Math.random() * RANDOM_PETS.length)
+  const eggIdx = Math.floor(Math.random() * EGG_STYLES.length)
   localStorage.setItem(storageKey, String(idx))
+  localStorage.setItem(eggStyleKey, String(eggIdx))
   localStorage.setItem(savedWeekKey, weekKey)
-  return RANDOM_PETS[idx]
+  return { ...RANDOM_PETS[idx], egg: EGG_STYLES[eggIdx] }
 }
 
 export function getRandomPetState(score, pet) {
+  // Tier 0: egg (score 0-10)
+  // Tiers 1-4: the pet's 4 evolution states
   const thresholds = [0, 11, 21, 33, 43]
   let tier = 0
   for (let i = thresholds.length - 1; i >= 0; i--) {
     if (score >= thresholds[i]) { tier = i; break }
   }
-  const state = pet.states[tier]
+
+  if (tier === 0) {
+    return {
+      face: pet.egg.face,
+      mood: pet.egg.label,
+      msg: 'What\'s inside? Do tasks to find out!',
+      bg: BG_COLORS[0],
+      eggColor: pet.egg.color,
+    }
+  }
+
+  const state = pet.states[tier - 1]
   return { face: state.face, mood: state.mood, msg: state.msg, bg: BG_COLORS[tier] }
 }
 
