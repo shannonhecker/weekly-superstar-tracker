@@ -102,6 +102,17 @@ function TitleFields({ block, onChange }: FieldGroupProps) {
           onChange={(v) => onChange('text', v)}
         />
       </Field>
+      <Field label="Design System">
+        <Select
+          value={block.props.system}
+          onChange={(v) => onChange('system', v)}
+          options={[
+            { value: 'salt',   label: 'Salt (Open Sans)' },
+            { value: 'm3',     label: 'M3 (Roboto)' },
+            { value: 'fluent', label: 'Fluent (Segoe UI)' },
+          ]}
+        />
+      </Field>
       <Field label="Level">
         <Select
           value={block.props.level}

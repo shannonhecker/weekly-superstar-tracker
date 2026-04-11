@@ -17,6 +17,8 @@ const THEME_VARS: Record<Theme, Record<string, string>> = {
     '--dh-input-border':   '#D1D5DB',
     '--dh-accent':         '#7C3AED',
     '--dh-secondary':      '#F3F4F6',
+    '--text-primary':      '#111827',
+    '--text-secondary':    '#6B7280',
   },
   dark: {
     '--dh-bg':             '#0F172A',
@@ -28,6 +30,8 @@ const THEME_VARS: Record<Theme, Record<string, string>> = {
     '--dh-input-border':   '#475569',
     '--dh-accent':         '#A78BFA',
     '--dh-secondary':      '#334155',
+    '--text-primary':      '#F1F5F9',
+    '--text-secondary':    '#94A3B8',
   },
 }
 

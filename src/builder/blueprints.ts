@@ -11,7 +11,7 @@ export const BLUEPRINTS: Blueprint[] = [
     type: 'SimulatedTitle',
     label: 'Title / Heading',
     icon: '🔤',
-    defaultProps: { level: 'h2', text: 'New Heading' },
+    defaultProps: { system: 'salt', level: 'h2', text: 'New Heading' },
   },
   {
     type: 'SimulatedInput',

@@ -1,4 +1,5 @@
 import type { Block } from './types'
+import SimulatedTitle from './SimulatedTitle'
 
 /* ------------------------------------------------------------------ */
 /*  SimulatedButton                                                    */
@@ -42,32 +43,6 @@ function SimulatedButton({ variant, label }: { variant: string; label: string })
     >
       {label}
     </button>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  SimulatedTitle                                                     */
-/* ------------------------------------------------------------------ */
-
-const TITLE_SIZES: Record<string, string> = {
-  h1: '1.875rem',
-  h2: '1.5rem',
-  h3: '1.25rem',
-  h4: '1.125rem',
-}
-
-function SimulatedTitle({ level, text }: { level: string; text: string }) {
-  const Tag = (['h1', 'h2', 'h3', 'h4'].includes(level) ? level : 'h2') as 'h1' | 'h2' | 'h3' | 'h4'
-  return (
-    <Tag
-      style={{
-        fontSize: TITLE_SIZES[Tag] || TITLE_SIZES.h2,
-        fontWeight: 700,
-        color: 'var(--dh-text)',
-      }}
-    >
-      {text}
-    </Tag>
   )
 }
 
