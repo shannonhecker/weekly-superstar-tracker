@@ -154,29 +154,37 @@ const EGG_STYLES = [
 
 const BG_COLORS = ['#FFF8E1', '#F1F8E9', '#E8F5E9', '#E3F2FD', '#FFF3E0']
 
-export function getRandomPetForWeek(themeKey) {
+const CHILD_KEYS = ['football', 'dinosaur']
+
+function _ensurePairGenerated() {
   const weekKey = _getWeekKey()
-  const storageKey = `tracker-${themeKey}-weekPet`
-  const savedWeekKey = `tracker-${themeKey}-weekPetWeek`
-  const eggStyleKey = `tracker-${themeKey}-eggStyle`
-  const savedWeek = localStorage.getItem(savedWeekKey)
+  const pairWeekKey = 'tracker-pairWeek'
+  if (localStorage.getItem(pairWeekKey) === weekKey) return
 
-  if (savedWeek === weekKey) {
-    const idx = parseInt(localStorage.getItem(storageKey), 10)
-    const eggIdx = parseInt(localStorage.getItem(eggStyleKey), 10)
-    if (!isNaN(idx) && idx >= 0 && idx < RANDOM_PETS.length) {
-      const egg = (!isNaN(eggIdx) && eggIdx >= 0) ? EGG_STYLES[eggIdx] : EGG_STYLES[0]
-      return { ...RANDOM_PETS[idx], egg }
-    }
-  }
+  // Pick two different pets
+  const petA = Math.floor(Math.random() * RANDOM_PETS.length)
+  let petB = Math.floor(Math.random() * (RANDOM_PETS.length - 1))
+  if (petB >= petA) petB++
 
-  // New week — pick a random pet and egg style
-  const idx = Math.floor(Math.random() * RANDOM_PETS.length)
-  const eggIdx = Math.floor(Math.random() * EGG_STYLES.length)
-  localStorage.setItem(storageKey, String(idx))
-  localStorage.setItem(eggStyleKey, String(eggIdx))
-  localStorage.setItem(savedWeekKey, weekKey)
-  return { ...RANDOM_PETS[idx], egg: EGG_STYLES[eggIdx] }
+  // Pick two different egg colors
+  const eggA = Math.floor(Math.random() * EGG_STYLES.length)
+  let eggB = Math.floor(Math.random() * (EGG_STYLES.length - 1))
+  if (eggB >= eggA) eggB++
+
+  localStorage.setItem(`tracker-${CHILD_KEYS[0]}-weekPet`, String(petA))
+  localStorage.setItem(`tracker-${CHILD_KEYS[0]}-eggStyle`, String(eggA))
+  localStorage.setItem(`tracker-${CHILD_KEYS[1]}-weekPet`, String(petB))
+  localStorage.setItem(`tracker-${CHILD_KEYS[1]}-eggStyle`, String(eggB))
+  localStorage.setItem(pairWeekKey, weekKey)
+}
+
+export function getRandomPetForWeek(themeKey) {
+  _ensurePairGenerated()
+  const idx = parseInt(localStorage.getItem(`tracker-${themeKey}-weekPet`), 10)
+  const eggIdx = parseInt(localStorage.getItem(`tracker-${themeKey}-eggStyle`), 10)
+  const pet = (!isNaN(idx) && idx >= 0 && idx < RANDOM_PETS.length) ? RANDOM_PETS[idx] : RANDOM_PETS[0]
+  const egg = (!isNaN(eggIdx) && eggIdx >= 0 && eggIdx < EGG_STYLES.length) ? EGG_STYLES[eggIdx] : EGG_STYLES[0]
+  return { ...pet, egg }
 }
 
 export function getRandomPetState(score, pet) {
