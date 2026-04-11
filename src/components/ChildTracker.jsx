@@ -51,6 +51,16 @@ const ChildTracker = ({ theme, onScoreChange }) => {
 
   const getRowTotal = (actId) => DAYS.reduce((s, d) => s + (checks[`${actId}-${d}`] ? 1 : 0), 0)
 
+  // One-time: clear stale past week data
+  useEffect(() => {
+    const cleared = localStorage.getItem(`tracker-${theme.key}-historyCleared`)
+    if (!cleared) {
+      setWeekHistory([])
+      setBadges([])
+      localStorage.setItem(`tracker-${theme.key}-historyCleared`, '1')
+    }
+  }, [theme.key])
+
   // Auto-reset: when a new week starts, save last week's progress and clear
   const autoResetDone = useRef(false)
   useEffect(() => {
@@ -162,13 +172,6 @@ const ChildTracker = ({ theme, onScoreChange }) => {
         <RewardUnlock score={totalChecked} reward={reward} onSetReward={setReward} theme={theme} />
       </div>
 
-      {/* Weekly History */}
-      {weekHistory.length > 0 && (
-        <div className="mb-2.5 sm:mb-3">
-          <WeeklyHistory history={weekHistory} theme={theme} />
-        </div>
-      )}
-
       {/* Activity Table */}
       <div className="overflow-x-auto rounded-2xl -mx-1 px-1">
         <table className="w-full border-separate border-spacing-0 rounded-2xl overflow-hidden bg-white/75">
@@ -275,6 +278,13 @@ const ChildTracker = ({ theme, onScoreChange }) => {
           </tbody>
         </table>
       </div>
+
+      {/* Weekly History */}
+      {weekHistory.length > 0 && (
+        <div className="mt-2.5 sm:mt-3">
+          <WeeklyHistory history={weekHistory} theme={theme} />
+        </div>
+      )}
     </div>
   )
 }
