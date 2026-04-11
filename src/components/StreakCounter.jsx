@@ -14,7 +14,7 @@ const StreakCounter = ({ checks, theme }) => {
 
   return (
     <div
-      className="flex items-center gap-2 rounded-2xl p-3.5"
+      className="flex items-center gap-2 rounded-2xl p-3 sm:p-3.5"
       style={{
         background: streak > 0
           ? `linear-gradient(135deg, ${theme.accentLight}44, ${theme.accentLight})`
@@ -22,17 +22,17 @@ const StreakCounter = ({ checks, theme }) => {
         border: streak >= 4 ? `2px solid ${theme.accent}` : '2px solid rgba(0,0,0,0.04)',
       }}
     >
-      <span className={`text-[26px] ${streak >= 4 ? 'animate-flame-pulse' : ''}`}>
+      <span className={`text-[22px] sm:text-[26px] shrink-0 ${streak >= 4 ? 'animate-flame-pulse' : ''}`}>
         {icons}
       </span>
-      <div>
+      <div className="min-w-0">
         <div
-          className="text-sm font-extrabold"
+          className="text-xs sm:text-sm font-extrabold"
           style={{ color: streak > 0 ? theme.accentDark : '#BBB' }}
         >
           {streak > 0 ? `${streak}-day streak!` : 'No streak yet'}
         </div>
-        <div className="text-[11px] font-semibold text-gray-400">
+        <div className="text-[10px] sm:text-[11px] font-semibold text-gray-400">
           {streak >= 7 ? 'PERFECT WEEK!' : streak > 0 ? 'Keep it going!' : 'Complete all tasks in a day'}
         </div>
       </div>
