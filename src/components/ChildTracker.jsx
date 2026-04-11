@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { DAYS, DEFAULT_ACTIVITIES, MAX_TOTAL, getCurrentWeekDates, getWeekRangeLabel } from '../utils/constants'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { DAYS, DEFAULT_ACTIVITIES, MAX_TOTAL, getCurrentWeekDates, getWeekRangeLabel, getWeekKey } from '../utils/constants'
 import { getBadge, initChecks } from '../utils/helpers'
 import { useFirestoreSync } from '../firebase/useFirestoreSync'
 import ConfettiEffect from './ConfettiEffect'
@@ -51,16 +51,26 @@ const ChildTracker = ({ theme, onScoreChange }) => {
 
   const getRowTotal = (actId) => DAYS.reduce((s, d) => s + (checks[`${actId}-${d}`] ? 1 : 0), 0)
 
-  const reset = () => {
-    if (window.confirm(`Save ${childName}'s progress and start a new week?`)) {
-      const badge = getBadge(totalChecked, theme)
-      if (badge) setBadges((prev) => [...prev, badge])
-      setWeekHistory((prev) => [...prev, { score: totalChecked }])
+  // Auto-reset: when a new week starts, save last week's progress and clear
+  const autoResetDone = useRef(false)
+  useEffect(() => {
+    if (autoResetDone.current) return
+    const currentWeek = getWeekKey()
+    const savedWeek = localStorage.getItem(`tracker-${theme.key}-weekKey`)
+    if (savedWeek && savedWeek !== currentWeek) {
+      const prevTotal = Object.values(checks).filter(Boolean).length
+      if (prevTotal > 0) {
+        const badge = getBadge(prevTotal, theme)
+        if (badge) setBadges((prev) => [...prev, badge])
+        setWeekHistory((prev) => [...prev, { score: prevTotal }])
+        setShowConfetti(true)
+      }
       setChecks(initChecks(DEFAULT_ACTIVITIES, DAYS))
       setCustomLabel('')
-      setShowConfetti(true)
     }
-  }
+    localStorage.setItem(`tracker-${theme.key}-weekKey`, currentWeek)
+    autoResetDone.current = true
+  }, [theme.key])
 
   const today = new Date().getDay()
   const todayKey = DAYS[today === 0 ? 6 : today - 1]
@@ -106,13 +116,6 @@ const ChildTracker = ({ theme, onScoreChange }) => {
             </h2>
           )}
         </div>
-        <button
-          onClick={reset}
-          className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white font-bold text-xs sm:text-[13px] cursor-pointer font-body transition-all duration-200 hover:scale-105 shrink-0"
-          style={{ border: `2px solid ${theme.accentLight}`, color: theme.accent }}
-        >
-          {theme.resetLabel}
-        </button>
       </div>
 
       {/* Week date label */}

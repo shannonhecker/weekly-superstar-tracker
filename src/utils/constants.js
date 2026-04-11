@@ -36,6 +36,12 @@ export function getCurrentWeekDates() {
   })
 }
 
+export function getWeekKey() {
+  const dates = getCurrentWeekDates()
+  const mon = dates[0].full
+  return `${mon.getFullYear()}-${String(mon.getMonth() + 1).padStart(2, '0')}-${String(mon.getDate()).padStart(2, '0')}`
+}
+
 export function getWeekRangeLabel() {
   const dates = getCurrentWeekDates()
   const mon = dates[0]
