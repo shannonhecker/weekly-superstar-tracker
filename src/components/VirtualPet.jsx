@@ -1,16 +1,24 @@
 import { getPetState } from '../utils/helpers'
 
+const PET_ANIMATIONS = [
+  'animate-pet-sleep',   // tier 0: sleeping/low
+  'animate-pet-wiggle',  // tier 1: awake, wiggling
+  'animate-pet-dance',   // tier 2: happy, dancing
+  'animate-pet-jump',    // tier 3: excited, jumping
+  'animate-pet-party',   // tier 4: superstar, full party
+]
+
 const VirtualPet = ({ score, name, theme }) => {
   const pet = getPetState(score, theme)
+  const tier = theme.petStates.indexOf(pet)
+  const anim = PET_ANIMATIONS[tier] || PET_ANIMATIONS[0]
 
   return (
     <div
       className="flex items-center gap-2.5 sm:gap-3.5 rounded-2xl p-3 sm:p-3.5"
       style={{ background: pet.bg, border: `2px solid ${theme.accentLight}` }}
     >
-      <div
-        className={`text-[36px] sm:text-[44px] shrink-0 ${score > 20 ? 'animate-pet-bounce' : ''}`}
-      >
+      <div className={`text-[36px] sm:text-[44px] shrink-0 ${anim}`}>
         {pet.face}
       </div>
       <div className="flex-1 min-w-0">
