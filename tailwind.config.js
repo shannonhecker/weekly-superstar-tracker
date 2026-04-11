@@ -7,6 +7,9 @@ export default {
         display: ['Fredoka', 'sans-serif'],
         body: ['Nunito', 'sans-serif'],
       },
+      transitionDuration: {
+        '400': '400ms',
+      },
       animation: {
         'confetti-fall': 'confettiFall 2s ease-in forwards',
         'pet-bounce': 'petBounce 1.2s ease-in-out infinite',

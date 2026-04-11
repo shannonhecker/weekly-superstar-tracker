@@ -1,4 +1,5 @@
 import { getBadge } from '../utils/helpers'
+import { MAX_TOTAL } from '../utils/constants'
 
 const WeeklyHistory = ({ history, theme }) => {
   if (history.length === 0) return null
@@ -8,7 +9,7 @@ const WeeklyHistory = ({ history, theme }) => {
       <div className="text-[13px] font-extrabold text-gray-400 mb-2.5">📊 Past Weeks</div>
       <div className="flex items-end gap-1.5" style={{ height: 90, paddingBottom: 22 }}>
         {history.slice(-8).map((h, i) => {
-          const pct = h.score / 56
+          const pct = h.score / MAX_TOTAL
           const badge = getBadge(h.score, theme)
           return (
             <div key={i} className="flex flex-col items-center gap-1 flex-1">

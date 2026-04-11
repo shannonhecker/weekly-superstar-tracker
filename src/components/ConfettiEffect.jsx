@@ -1,16 +1,19 @@
 import { useMemo } from 'react'
 
+const makeParticles = () =>
+  Array.from({ length: 40 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.6,
+    color: ['#F7B731','#FC5C65','#45B7D1','#26DE81','#7C6FF7','#FD9644','#FF6348','#4ECDC4'][i % 8],
+    size: 5 + Math.random() * 10,
+    rotation: Math.random() * 360,
+    isEmoji: i % 5 === 0,
+  }))
+
 const ConfettiEffect = ({ show, theme }) => {
-  const particles = useMemo(() =>
-    Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 0.6,
-      color: ['#F7B731','#FC5C65','#45B7D1','#26DE81','#7C6FF7','#FD9644','#FF6348','#4ECDC4'][i % 8],
-      size: 5 + Math.random() * 10,
-      rotation: Math.random() * 360,
-      isEmoji: i % 5 === 0,
-    })), [])
+  // Regenerate particles each time confetti is shown for visual variety
+  const particles = useMemo(() => makeParticles(), [show])
 
   if (!show) return null
 

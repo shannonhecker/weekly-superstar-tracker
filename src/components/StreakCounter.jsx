@@ -33,7 +33,7 @@ const StreakCounter = ({ checks, theme }) => {
           {streak > 0 ? `${streak}-day streak!` : 'No streak yet'}
         </div>
         <div className="text-[11px] font-semibold text-gray-400">
-          {streak >= 7 ? 'PERFECT WEEK!' : streak > 0 ? 'Keep it going!' : 'Complete all tasks in a day'}
+          {streak >= 7 ? 'PERFECT WEEK!' : streak > 0 ? 'Keep it going!' : 'Complete all tasks starting from Mon'}
         </div>
       </div>
     </div>

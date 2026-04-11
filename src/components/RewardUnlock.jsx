@@ -89,6 +89,7 @@ const RewardUnlock = ({ score, reward, onSetReward, theme }) => {
         <button
           onClick={() => onSetReward(null)}
           className="bg-transparent border-none text-base cursor-pointer text-gray-300 px-1"
+          aria-label="Remove reward goal"
         >
           ×
         </button>
