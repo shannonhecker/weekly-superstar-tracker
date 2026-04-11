@@ -14,7 +14,7 @@ export const BLUEPRINTS: Blueprint[] = [
     defaultProps: { level: 'h2', text: 'New Heading' },
   },
   {
-    type: 'SimulatedTextInput',
+    type: 'SimulatedInput',
     label: 'Text Input',
     icon: '✏️',
     defaultProps: { placeholder: 'Enter text...', label: 'Label' },

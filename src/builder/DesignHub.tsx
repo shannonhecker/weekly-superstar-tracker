@@ -5,12 +5,16 @@ import PreviewCanvas from './PreviewCanvas'
 import PropertiesInspector from './PropertiesInspector'
 import BlockRenderer from './BlockRenderer'
 import { BLUEPRINTS } from './blueprints'
-import type { Block, Blueprint } from './types'
+import type { Block, Blueprint, GlobalSettings } from './types'
 
 export default function DesignHub() {
   const [blocks, setBlocks] = useState<Block[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [activeBlueprint, setActiveBlueprint] = useState<Blueprint | null>(null)
+  const [globalSettings, setGlobalSettings] = useState<GlobalSettings>({
+    theme: 'light',
+    density: 'comfortable',
+  })
 
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null
 
@@ -47,14 +51,20 @@ export default function DesignHub() {
     setSelectedBlockId((prev) => (prev === id ? null : prev))
   }, [])
 
+  const handleSettingsChange = useCallback((patch: Partial<GlobalSettings>) => {
+    setGlobalSettings((prev) => ({ ...prev, ...patch }))
+  }, [])
+
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex h-[calc(100vh-60px)] bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+      <div className="flex h-[calc(100vh-120px)] bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
         <ComponentLibrary />
         <PreviewCanvas
           blocks={blocks}
           selectedBlockId={selectedBlockId}
           onSelect={setSelectedBlockId}
+          globalSettings={globalSettings}
+          onSettingsChange={handleSettingsChange}
         />
         <PropertiesInspector
           block={selectedBlock}
