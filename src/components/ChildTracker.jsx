@@ -98,8 +98,8 @@ const ChildTracker = ({ theme, onScoreChange }) => {
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center mb-3">
+        <div className="flex items-center gap-2 flex-1">
           <div
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-[22px] sm:text-[26px] shrink-0"
             style={{ background: theme.headerGradient, boxShadow: `0 3px 12px ${theme.accent}44` }}
@@ -132,6 +132,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
         >
           📅 {weekLabel}
         </div>
+        <div className="flex-1" />
       </div>
 
       {/* Pet + Streak */}
