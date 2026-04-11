@@ -1,0 +1,124 @@
+/* ================================================================== */
+/*  SimulatedTitle — Design-system-specific heading styles             */
+/*                                                                     */
+/*  Prefixes:   s-  = Salt    (Open Sans)                              */
+/*              m3- = M3      (Roboto)                                 */
+/*              f-  = Fluent  (Segoe UI)                               */
+/*                                                                     */
+/*  Text color is driven by the global --text-primary CSS variable     */
+/*  set on the canvas wrapper so it reacts to light/dark theme.        */
+/* ================================================================== */
+
+/* ------------------------------------------------------------------ */
+/*  Salt Design System — Open Sans, structural & corporate             */
+/* ------------------------------------------------------------------ */
+
+.s-title {
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.s-title-h1 {
+  font-size: 2.25rem;       /* 36px */
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.s-title-h2 {
+  font-size: 1.75rem;       /* 28px */
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.s-title-h3 {
+  font-size: 1.375rem;      /* 22px */
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.s-title-h4 {
+  font-size: 1.125rem;      /* 18px */
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Material Design 3 — Roboto, softer tracking & lighter weights      */
+/* ------------------------------------------------------------------ */
+
+.m3-title {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.m3-title-h1 {
+  font-size: 2.25rem;       /* Display Medium  — 36px */
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.22;
+}
+
+.m3-title-h2 {
+  font-size: 1.75rem;       /* Headline Large  — 28px */
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.29;
+}
+
+.m3-title-h3 {
+  font-size: 1.5rem;        /* Headline Medium — 24px */
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.33;
+}
+
+.m3-title-h4 {
+  font-size: 1.125rem;      /* Headline Small  — 18px */
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.44;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Fluent Design — Segoe UI, distinct font weights                    */
+/* ------------------------------------------------------------------ */
+
+.f-title {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.f-title-h1 {
+  font-size: 2.5rem;        /* Hero — 40px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.f-title-h2 {
+  font-size: 1.75rem;       /* Title 1 — 28px */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.f-title-h3 {
+  font-size: 1.25rem;       /* Title 2 — 20px */
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.f-title-h4 {
+  font-size: 1rem;          /* Title 3 — 16px */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.375;
+}

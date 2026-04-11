@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import ChildTracker from './ChildTracker'
+import DesignHub from '../builder/DesignHub'
 import footballTheme from '../themes/football'
 import dinosaurTheme from '../themes/dinosaur'
 
@@ -8,6 +9,7 @@ const themes = [footballTheme, dinosaurTheme]
 const App = () => {
   const [scores, setScores] = useState({ football: 0, dinosaur: 0 })
   const [activeTab, setActiveTab] = useState('football')
+  const [mode, setMode] = useState('tracker')
 
   const handleScore = useCallback(
     (key) => (score) => setScores((prev) => ({ ...prev, [key]: score })),
@@ -16,7 +18,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen font-body px-3 py-4 pb-10 bg-gradient-to-b from-gray-50 to-purple-50">
-      {/* Title */}
+      {/* Title + Mode Switch */}
       <div className="text-center mb-5 pt-2">
         <h1 className="text-3xl font-black font-display m-0 bg-gradient-to-br from-green-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent">
           ⭐ Weekly Superstar Tracker ⭐
@@ -24,8 +26,39 @@ const App = () => {
         <p className="text-gray-400 text-[13px] mt-1 font-semibold">
           Collect stickers every day — how many can you get?
         </p>
+        <div className="flex gap-2 justify-center mt-3">
+          <button
+            onClick={() => setMode('tracker')}
+            className="px-4 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all"
+            style={{
+              background: mode === 'tracker' ? '#7C3AED' : 'transparent',
+              color: mode === 'tracker' ? 'white' : '#999',
+              border: mode === 'tracker' ? '2px solid #7C3AED' : '2px solid #E5E7EB',
+            }}
+          >
+            Tracker
+          </button>
+          <button
+            onClick={() => setMode('design-hub')}
+            className="px-4 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all"
+            style={{
+              background: mode === 'design-hub' ? '#7C3AED' : 'transparent',
+              color: mode === 'design-hub' ? 'white' : '#999',
+              border: mode === 'design-hub' ? '2px solid #7C3AED' : '2px solid #E5E7EB',
+            }}
+          >
+            Design Hub
+          </button>
+        </div>
       </div>
 
+      {mode === 'design-hub' && (
+        <div className="max-w-6xl mx-auto mb-6">
+          <DesignHub />
+        </div>
+      )}
+
+      {mode === 'tracker' && <>
       {/* Tab switcher */}
       <div className="flex gap-2 justify-center mb-5" role="tablist" aria-label="Child tracker tabs">
         {themes.map((t) => (
@@ -73,6 +106,7 @@ const App = () => {
       <p className="text-center text-gray-300 text-[11px] mt-6 font-semibold">
         💡 Tap names to rename · Tap "Special!" to customise · Set a reward goal · Hit reset to save & start fresh
       </p>
+      </>}
     </div>
   )
 }
