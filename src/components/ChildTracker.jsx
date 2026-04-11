@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DAYS, DEFAULT_ACTIVITIES, MAX_TOTAL } from '../utils/constants'
 import { getBadge, initChecks, loadFromStorage, saveToStorage } from '../utils/helpers'
 import ConfettiEffect from './ConfettiEffect'
@@ -10,7 +10,7 @@ import RewardUnlock from './RewardUnlock'
 import WeeklyHistory from './WeeklyHistory'
 
 const ChildTracker = ({ theme, onScoreChange }) => {
-  const storageKey = (k) => `tracker-${theme.key}-${k}`
+  const storageKey = useCallback((k) => `tracker-${theme.key}-${k}`, [theme.key])
 
   const [checks, setChecks] = useState(() => loadFromStorage(storageKey('checks'), initChecks(DEFAULT_ACTIVITIES, DAYS)))
   const [customLabel, setCustomLabel] = useState(() => loadFromStorage(storageKey('customLabel'), ''))
@@ -26,12 +26,12 @@ const ChildTracker = ({ theme, onScoreChange }) => {
   const currentBadge = getBadge(totalChecked, theme)
 
   // Persist to localStorage
-  useEffect(() => { saveToStorage(storageKey('checks'), checks) }, [checks])
-  useEffect(() => { saveToStorage(storageKey('customLabel'), customLabel) }, [customLabel])
-  useEffect(() => { saveToStorage(storageKey('name'), childName) }, [childName])
-  useEffect(() => { saveToStorage(storageKey('badges'), badges) }, [badges])
-  useEffect(() => { saveToStorage(storageKey('history'), weekHistory) }, [weekHistory])
-  useEffect(() => { saveToStorage(storageKey('reward'), reward) }, [reward])
+  useEffect(() => { saveToStorage(storageKey('checks'), checks) }, [storageKey, checks])
+  useEffect(() => { saveToStorage(storageKey('customLabel'), customLabel) }, [storageKey, customLabel])
+  useEffect(() => { saveToStorage(storageKey('name'), childName) }, [storageKey, childName])
+  useEffect(() => { saveToStorage(storageKey('badges'), badges) }, [storageKey, badges])
+  useEffect(() => { saveToStorage(storageKey('history'), weekHistory) }, [storageKey, weekHistory])
+  useEffect(() => { saveToStorage(storageKey('reward'), reward) }, [storageKey, reward])
 
   useEffect(() => { onScoreChange(totalChecked) }, [totalChecked, onScoreChange])
 
@@ -58,10 +58,10 @@ const ChildTracker = ({ theme, onScoreChange }) => {
     if (window.confirm(`Save ${childName}'s progress and start a new week?`)) {
       const badge = getBadge(totalChecked, theme)
       if (badge) setBadges((prev) => [...prev, badge])
-      setWeekHistory((prev) => [...prev, { score: totalChecked }])
+      setWeekHistory((prev) => [...prev, { score: totalChecked, date: new Date().toISOString() }])
       setChecks(initChecks(DEFAULT_ACTIVITIES, DAYS))
       setCustomLabel('')
-      setShowConfetti(true)
+      if (totalChecked > 0) setShowConfetti(true)
     }
   }
 
@@ -95,12 +95,17 @@ const ChildTracker = ({ theme, onScoreChange }) => {
               onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
               className="text-[22px] font-extrabold border-none bg-transparent outline-none w-36 font-body text-gray-800"
               style={{ borderBottom: `2px dashed ${theme.accent}` }}
+              aria-label="Edit child name"
             />
           ) : (
             <h2
+              role="button"
+              tabIndex={0}
               onClick={() => setEditingName(true)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setEditingName(true)}
               className="text-[22px] font-extrabold text-gray-800 m-0 cursor-pointer"
               title="Click to rename"
+              aria-label={`Edit name: ${childName}`}
             >
               {childName}
             </h2>
@@ -211,12 +216,16 @@ const ChildTracker = ({ theme, onScoreChange }) => {
                         />
                       ) : (
                         <span
+                          role={act.isCustom ? 'button' : undefined}
+                          tabIndex={act.isCustom ? 0 : undefined}
                           onClick={act.isCustom ? () => setEditingCustom(true) : undefined}
+                          onKeyDown={act.isCustom ? (e) => (e.key === 'Enter' || e.key === ' ') && setEditingCustom(true) : undefined}
                           className="text-sm font-semibold text-gray-700"
                           style={{
                             cursor: act.isCustom ? 'pointer' : 'default',
                             borderBottom: act.isCustom ? `2px dashed ${act.color}44` : 'none',
                           }}
+                          aria-label={act.isCustom ? 'Click to customise activity' : undefined}
                         >
                           {act.isCustom && customLabel ? customLabel : act.label}
                         </span>

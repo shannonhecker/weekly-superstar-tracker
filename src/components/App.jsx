@@ -27,10 +27,13 @@ const App = () => {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-2 justify-center mb-5">
+      <div className="flex gap-2 justify-center mb-5" role="tablist" aria-label="Child tracker tabs">
         {themes.map((t) => (
           <button
             key={t.key}
+            role="tab"
+            aria-selected={activeTab === t.key}
+            aria-controls={`panel-${t.key}`}
             onClick={() => setActiveTab(t.key)}
             className="px-5 py-2.5 rounded-xl font-extrabold text-[15px] cursor-pointer flex items-center gap-2 font-body transition-all duration-200"
             style={{
@@ -56,6 +59,9 @@ const App = () => {
       {themes.map((t) => (
         <div
           key={t.key}
+          id={`panel-${t.key}`}
+          role="tabpanel"
+          aria-label={`${t.name}'s tracker`}
           className="max-w-[860px] mx-auto"
           style={{ display: activeTab === t.key ? 'block' : 'none' }}
         >

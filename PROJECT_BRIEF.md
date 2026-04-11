@@ -138,9 +138,8 @@ Each child has a tab at the top. Switching tabs shows that child's independent t
 
 ---
 
-## Data Persistence (Future Enhancement)
-Currently all state is in-memory (resets on page refresh). Future options:
-- `localStorage` for offline persistence
+## Data Persistence
+All state is persisted to `localStorage` so progress survives page refreshes. Future options:
 - Firebase/Supabase for cross-device sync
 - User authentication for family accounts
 

@@ -14,7 +14,7 @@ const StickerCheck = ({ checked, onClick, color, stickers }) => {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center justify-center rounded-full p-0 cursor-pointer"
+      className="flex items-center justify-center rounded-full p-0 cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-purple-400"
       style={{
         width: 44,
         height: 44,
