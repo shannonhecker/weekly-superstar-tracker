@@ -126,14 +126,12 @@ const ChildTracker = ({ theme, onScoreChange }) => {
             </h2>
           )}
         </div>
-      </div>
-
-      {/* Week date label */}
-      <div
-        className="text-center text-xs sm:text-sm font-bold mb-2.5 py-1.5 rounded-lg"
-        style={{ color: theme.accent, background: `${theme.accentLight}33` }}
-      >
-        📅 Week of {weekLabel}
+        <div
+          className="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg shrink-0"
+          style={{ color: theme.accent, background: `${theme.accentLight}33` }}
+        >
+          📅 {weekLabel}
+        </div>
       </div>
 
       {/* Pet + Streak */}
