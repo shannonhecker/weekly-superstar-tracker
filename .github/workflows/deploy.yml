@@ -1,24 +1,12 @@
-name: Deploy to GitHub Pages
+name: Deploy to Firebase Hosting
 
 on:
   push:
     branches: [main, claude/build-kids-tracker-60KYv]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,9 +15,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
+        env:
+          VITE_FIREBASE_API_KEY: AIzaSyCF3_yUywAlGqboYzZEg7a51r1t6ajqPU4
+          VITE_FIREBASE_AUTH_DOMAIN: weekly-superstar-tracker.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: weekly-superstar-tracker
+          VITE_FIREBASE_STORAGE_BUCKET: weekly-superstar-tracker.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: 435999630313
+          VITE_FIREBASE_APP_ID: "1:435999630313:web:a46a59fa3b91ee7c54e178"
+      - uses: w9jds/firebase-action@master
         with:
-          path: dist
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          args: deploy --only hosting
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
