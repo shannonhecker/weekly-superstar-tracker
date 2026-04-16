@@ -3,6 +3,7 @@ name: Deploy to Firebase Hosting
 on:
   push:
     branches: [main, claude/build-kids-tracker-60KYv]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -22,8 +23,11 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: weekly-superstar-tracker.firebasestorage.app
           VITE_FIREBASE_MESSAGING_SENDER_ID: 435999630313
           VITE_FIREBASE_APP_ID: "1:435999630313:web:a46a59fa3b91ee7c54e178"
-      - uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only hosting
+      - name: Write service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/sa-key.json
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_APPLICATION_CREDENTIALS: /home/runner/sa-key.json
+        run: firebase deploy --only hosting --project weekly-superstar-tracker --non-interactive
