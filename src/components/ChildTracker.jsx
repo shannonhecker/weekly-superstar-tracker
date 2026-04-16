@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { DAYS, DEFAULT_ACTIVITIES, MAX_TOTAL, getCurrentWeekDates, getWeekRangeLabel, getWeekKey } from '../utils/constants'
-import { getBadge, initChecks } from '../utils/helpers'
-import { useFirestoreSync } from '../firebase/useFirestoreSync'
+import { DAYS, getCurrentWeekDates, getWeekRangeLabel, getWeekKey } from '../utils/constants'
+import { getBadge } from '../utils/helpers'
+import { useKidSync } from '../firebase/useFirestoreSync'
+import { updateKid, deleteKid } from '../firebase/kids'
+import { pickRandomPetIndex, pickRandomEggIndex } from '../utils/randomPets'
 import ConfettiEffect from './ConfettiEffect'
 import StickerCheck from './StickerCheck'
 import VirtualPet from './VirtualPet'
@@ -10,19 +12,22 @@ import BadgeShelf from './BadgeShelf'
 import RewardUnlock from './RewardUnlock'
 import WeeklyHistory from './WeeklyHistory'
 
-const ChildTracker = ({ theme, onScoreChange }) => {
-  const {
-    checks, setChecks,
-    customLabel, setCustomLabel,
-    childName, setChildName,
-    badges, setBadges,
-    weekHistory, setWeekHistory,
-    reward, setReward,
-  } = useFirestoreSync(theme.key, theme.name)
+const ChildTracker = ({ boardId, kid, theme }) => {
+  const { kid: liveKid, update } = useKidSync(boardId, kid.id)
+  const activeKid = liveKid || kid
+
+  const activities = activeKid.activities || []
+  const MAX_TOTAL = activities.length * DAYS.length
+  const checks = activeKid.checks || {}
+  const customLabel = activeKid.customLabel || ''
+  const badges = activeKid.badges || []
+  const weekHistory = activeKid.weekHistory || []
+  const reward = activeKid.reward || null
+  const childName = activeKid.name || 'Kid'
 
   const [editingCustom, setEditingCustom] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [editingName, setEditingName] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
 
   const weekDates = useMemo(() => getCurrentWeekDates(), [])
   const weekLabel = useMemo(() => getWeekRangeLabel(), [])
@@ -30,16 +35,12 @@ const ChildTracker = ({ theme, onScoreChange }) => {
   const totalChecked = Object.values(checks).filter(Boolean).length
   const currentBadge = getBadge(totalChecked, theme)
 
-  useEffect(() => { onScoreChange(totalChecked) }, [totalChecked, onScoreChange])
-
   const toggle = (key) => {
-    setChecks((prev) => {
-      const next = { ...prev, [key]: !prev[key] }
-      if (!prev[key] && Object.values(next).filter(Boolean).length === MAX_TOTAL) {
-        setShowConfetti(true)
-      }
-      return next
-    })
+    const next = { ...checks, [key]: !checks[key] }
+    update({ checks: next })
+    if (!checks[key] && Object.values(next).filter(Boolean).length === MAX_TOTAL) {
+      setShowConfetti(true)
+    }
   }
 
   useEffect(() => {
@@ -51,39 +52,53 @@ const ChildTracker = ({ theme, onScoreChange }) => {
 
   const getRowTotal = (actId) => DAYS.reduce((s, d) => s + (checks[`${actId}-${d}`] ? 1 : 0), 0)
 
-  // One-time: clear stale past week data
-  useEffect(() => {
-    const cleared = localStorage.getItem(`tracker-${theme.key}-historyCleared`)
-    if (!cleared) {
-      setWeekHistory([])
-      setBadges([])
-      localStorage.setItem(`tracker-${theme.key}-historyCleared`, '1')
-    }
-  }, [theme.key])
-
-  // Auto-reset: when a new week starts, save last week's progress and clear
+  // Auto-reset + random-pet generation per week
   const autoResetDone = useRef(false)
   useEffect(() => {
-    if (autoResetDone.current) return
+    if (autoResetDone.current || !activeKid.id) return
     const currentWeek = getWeekKey()
-    const savedWeek = localStorage.getItem(`tracker-${theme.key}-weekKey`)
-    if (savedWeek && savedWeek !== currentWeek) {
+    const savedWeek = activeKid.weekKey
+
+    const updates = {}
+    if (!savedWeek) {
+      // First-time setup
+      updates.weekKey = currentWeek
+      updates.petIdx = pickRandomPetIndex()
+      updates.eggIdx = pickRandomEggIndex()
+    } else if (savedWeek !== currentWeek) {
+      // New week
       const prevTotal = Object.values(checks).filter(Boolean).length
+      const newHistory = [...weekHistory]
+      const newBadges = [...badges]
       if (prevTotal > 0) {
         const badge = getBadge(prevTotal, theme)
-        if (badge) setBadges((prev) => [...prev, badge])
-        setWeekHistory((prev) => [...prev, { score: prevTotal }])
-        setShowConfetti(true)
+        if (badge) newBadges.push(badge)
+        newHistory.push({ score: prevTotal, weekKey: savedWeek })
       }
-      setChecks(initChecks(DEFAULT_ACTIVITIES, DAYS))
-      setCustomLabel('')
+      updates.weekKey = currentWeek
+      updates.checks = {}
+      updates.customLabel = ''
+      updates.weekHistory = newHistory
+      updates.badges = newBadges
+      updates.petIdx = pickRandomPetIndex()
+      updates.eggIdx = pickRandomEggIndex()
     }
-    localStorage.setItem(`tracker-${theme.key}-weekKey`, currentWeek)
+    if (Object.keys(updates).length > 0) {
+      update(updates)
+      if (savedWeek && savedWeek !== currentWeek) setShowConfetti(true)
+    }
     autoResetDone.current = true
-  }, [theme.key])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKid.id])
 
   const today = new Date().getDay()
   const todayKey = DAYS[today === 0 ? 6 : today - 1]
+
+  const handleDelete = () => {
+    if (window.confirm(`Remove ${childName} from the board? This deletes all their data.`)) {
+      deleteKid(boardId, kid.id)
+    }
+  }
 
   return (
     <div
@@ -92,7 +107,6 @@ const ChildTracker = ({ theme, onScoreChange }) => {
     >
       <ConfettiEffect show={showConfetti} theme={theme} />
 
-      {/* Floating decoration */}
       <div className="absolute top-3 right-4 text-[40px] opacity-[0.08] pointer-events-none select-none hidden sm:block">
         {theme.decorEmojis.join(' ')}
       </div>
@@ -101,30 +115,16 @@ const ChildTracker = ({ theme, onScoreChange }) => {
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-2 flex-1">
           <div
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-[22px] sm:text-[26px] shrink-0"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-[22px] sm:text-[26px] shrink-0 overflow-hidden"
             style={{ background: theme.headerGradient, boxShadow: `0 3px 12px ${theme.accent}44` }}
           >
-            {theme.avatar}
+            {activeKid.photoUrl ? (
+              <img src={activeKid.photoUrl} alt={childName} className="w-full h-full object-cover" />
+            ) : (
+              theme.avatar
+            )}
           </div>
-          {editingName ? (
-            <input
-              autoFocus
-              value={childName}
-              onChange={(e) => setChildName(e.target.value)}
-              onBlur={() => setEditingName(false)}
-              onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
-              className="text-lg sm:text-[22px] font-extrabold border-none bg-transparent outline-none w-28 sm:w-36 font-body text-gray-800"
-              style={{ borderBottom: `2px dashed ${theme.accent}` }}
-            />
-          ) : (
-            <h2
-              onClick={() => setEditingName(true)}
-              className="text-lg sm:text-[22px] font-extrabold text-gray-800 m-0 cursor-pointer"
-              title="Click to rename"
-            >
-              {childName}
-            </h2>
-          )}
+          <h2 className="text-lg sm:text-[22px] font-extrabold text-gray-800 m-0">{childName}</h2>
         </div>
         <div
           className="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg shrink-0"
@@ -132,13 +132,36 @@ const ChildTracker = ({ theme, onScoreChange }) => {
         >
           📅 {weekLabel}
         </div>
-        <div className="flex-1" />
+        <div className="flex-1 flex justify-end">
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="w-8 h-8 rounded-full bg-white/70 text-gray-500 font-black"
+              aria-label="Menu"
+            >
+              ⋯
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg py-1 min-w-[140px] border border-gray-100">
+                  <button
+                    onClick={() => { handleDelete(); setShowMenu(false) }}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50"
+                  >
+                    🗑 Remove kid
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Pet + Streak */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-        <VirtualPet score={totalChecked} name={childName} theme={theme} />
-        <StreakCounter checks={checks} theme={theme} />
+        <VirtualPet score={totalChecked} name={childName} theme={theme} petIdx={activeKid.petIdx} eggIdx={activeKid.eggIdx} />
+        <StreakCounter checks={checks} activities={activities} theme={theme} />
       </div>
 
       {/* Score bar */}
@@ -152,7 +175,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
                 background: totalChecked === MAX_TOTAL
                   ? `linear-gradient(90deg, ${theme.accent}, #F7B731, #FC5C65, ${theme.accent})`
                   : `linear-gradient(90deg, ${theme.accent}, ${theme.accentLight})`,
-                width: `${(totalChecked / MAX_TOTAL) * 100}%`,
+                width: `${MAX_TOTAL ? (totalChecked / MAX_TOTAL) * 100 : 0}%`,
               }}
             />
           </div>
@@ -168,7 +191,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
           <div className="text-xs font-extrabold mb-2" style={{ color: theme.accent }}>🏅 Badge Shelf</div>
           <BadgeShelf badges={badges} currentBadge={currentBadge} />
         </div>
-        <RewardUnlock score={totalChecked} reward={reward} onSetReward={setReward} theme={theme} />
+        <RewardUnlock score={totalChecked} reward={reward} onSetReward={(r) => update({ reward: r })} theme={theme} />
       </div>
 
       {/* Activity Table */}
@@ -212,7 +235,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
             </tr>
           </thead>
           <tbody>
-            {DEFAULT_ACTIVITIES.map((act, ri) => {
+            {activities.map((act, ri) => {
               const rowTotal = getRowTotal(act.id)
               const isComplete = rowTotal === 7
               return (
@@ -228,7 +251,7 @@ const ChildTracker = ({ theme, onScoreChange }) => {
                           autoFocus
                           value={customLabel}
                           placeholder="Type here..."
-                          onChange={(e) => setCustomLabel(e.target.value)}
+                          onChange={(e) => update({ customLabel: e.target.value })}
                           onBlur={() => setEditingCustom(false)}
                           onKeyDown={(e) => e.key === 'Enter' && setEditingCustom(false)}
                           className="text-xs sm:text-sm font-semibold border-none bg-transparent outline-none w-[70px] sm:w-[90px] font-body text-gray-800"

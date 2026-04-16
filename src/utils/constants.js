@@ -1,20 +1,5 @@
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-export const DEFAULT_ACTIVITIES = [
-  { id: 'sleep', emoji: '😴', label: 'Sleep', color: '#7C6FF7' },
-  { id: 'bath', emoji: '🛁', label: 'Bath', color: '#4ECDC4' },
-  { id: 'teeth', emoji: '🪥', label: 'Teeth', color: '#45B7D1' },
-  { id: 'breakfast', emoji: '🍳', label: 'Brekkie', color: '#FF9F43' },
-  { id: 'shoes', emoji: '👟', label: 'Shoes', color: '#EE5A24' },
-  { id: 'school-book', emoji: '📖', label: 'School', color: '#F7B731' },
-  { id: 'fun-book', emoji: '📚', label: 'Reading', color: '#FC5C65' },
-  { id: 'mandarin', emoji: '🀄', label: 'Mandarin', color: '#FF6348' },
-  { id: 'walk', emoji: '🚶', label: 'Walk', color: '#26DE81' },
-  { id: 'custom', emoji: '⭐', label: 'Special!', color: '#FD9644', isCustom: true },
-]
-
-export const MAX_TOTAL = DEFAULT_ACTIVITIES.length * DAYS.length // 56
-
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export function getCurrentWeekDates() {

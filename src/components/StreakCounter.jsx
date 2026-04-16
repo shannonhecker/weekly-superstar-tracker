@@ -1,9 +1,10 @@
-import { DAYS, DEFAULT_ACTIVITIES } from '../utils/constants'
+import { DAYS } from '../utils/constants'
 
-const StreakCounter = ({ checks, theme }) => {
+const StreakCounter = ({ checks, activities, theme }) => {
+  const acts = activities || []
   let streak = 0
   for (let di = 0; di < DAYS.length; di++) {
-    if (DEFAULT_ACTIVITIES.every((a) => checks[`${a.id}-${DAYS[di]}`])) streak++
+    if (acts.length && acts.every((a) => checks[`${a.id}-${DAYS[di]}`])) streak++
     else break
   }
 

@@ -1,73 +1,35 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from './config'
-import { loadFromStorage, saveToStorage, initChecks } from '../utils/helpers'
-import { DEFAULT_ACTIVITIES, DAYS } from '../utils/constants'
 
-export function useFirestoreSync(themeKey, defaultName) {
-  const storageKey = (k) => `tracker-${themeKey}-${k}`
+// Live sync hook for a single kid document. Returns current kid data + update fn.
+export function useKidSync(boardId, kidId) {
+  const [kid, setKid] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const lastLocalWrite = useRef(0)
 
-  const [checks, setChecks] = useState(() => loadFromStorage(storageKey('checks'), initChecks(DEFAULT_ACTIVITIES, DAYS)))
-  const [customLabel, setCustomLabel] = useState(() => loadFromStorage(storageKey('customLabel'), ''))
-  const [childName, setChildName] = useState(() => loadFromStorage(storageKey('name'), defaultName))
-  const [badges, setBadges] = useState(() => loadFromStorage(storageKey('badges'), []))
-  const [weekHistory, setWeekHistory] = useState(() => loadFromStorage(storageKey('history'), []))
-  const [reward, setReward] = useState(() => loadFromStorage(storageKey('reward'), null))
-
-  const isLocalChange = useRef(false)
-  const initialized = useRef(false)
-
-  // Subscribe to Firestore real-time updates
   useEffect(() => {
-    if (!db) return
-
-    const docRef = doc(db, 'children', themeKey)
-    const unsubscribe = onSnapshot(
-      docRef,
-      (snapshot) => {
-        if (snapshot.exists() && !isLocalChange.current) {
-          const data = snapshot.data()
-          if (data.checks) setChecks(data.checks)
-          if (data.customLabel !== undefined) setCustomLabel(data.customLabel)
-          if (data.name !== undefined) setChildName(data.name)
-          if (data.badges) setBadges(data.badges)
-          if (data.weekHistory) setWeekHistory(data.weekHistory)
-          if (data.reward !== undefined) setReward(data.reward)
-        }
-        isLocalChange.current = false
-        initialized.current = true
-      },
-      (error) => {
-        console.warn('Firestore listener error:', error)
-      }
-    )
-    return unsubscribe
-  }, [themeKey])
-
-  // Persist to both Firestore and localStorage on changes
-  useEffect(() => {
-    saveToStorage(storageKey('checks'), checks)
-    saveToStorage(storageKey('customLabel'), customLabel)
-    saveToStorage(storageKey('name'), childName)
-    saveToStorage(storageKey('badges'), badges)
-    saveToStorage(storageKey('history'), weekHistory)
-    saveToStorage(storageKey('reward'), reward)
-
-    if (!db || !initialized.current) return
-
-    isLocalChange.current = true
-    const data = { checks, customLabel, name: childName, badges, weekHistory, reward }
-    setDoc(doc(db, 'children', themeKey), data, { merge: true }).catch((err) => {
-      console.warn('Firestore write failed:', err)
+    if (!boardId || !kidId || !db) { setLoading(false); return }
+    const ref = doc(db, 'boards', boardId, 'kids', kidId)
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) setKid({ id: snap.id, ...snap.data() })
+      setLoading(false)
+    }, (err) => {
+      console.warn('Kid sync error:', err)
+      setLoading(false)
     })
-  }, [checks, customLabel, childName, badges, weekHistory, reward, themeKey])
+    return unsub
+  }, [boardId, kidId])
 
-  return {
-    checks, setChecks,
-    customLabel, setCustomLabel,
-    childName, setChildName,
-    badges, setBadges,
-    weekHistory, setWeekHistory,
-    reward, setReward,
-  }
+  const update = useCallback(async (updates) => {
+    if (!boardId || !kidId || !db) return
+    lastLocalWrite.current = Date.now()
+    try {
+      await updateDoc(doc(db, 'boards', boardId, 'kids', kidId), updates)
+    } catch (err) {
+      console.warn('Kid update failed:', err)
+    }
+  }, [boardId, kidId])
+
+  return { kid, loading, update }
 }
