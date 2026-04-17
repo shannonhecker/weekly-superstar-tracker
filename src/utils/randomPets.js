@@ -124,31 +124,69 @@ export function pickRandomEggIndex() {
   return Math.floor(Math.random() * EGG_STYLES.length)
 }
 
-export function getPetTier(score) {
-  const thresholds = [0, 11, 21, 33, 43]
-  let tier = 0
-  for (let i = thresholds.length - 1; i >= 0; i--) {
-    if (score >= thresholds[i]) { tier = i; break }
+// Proportional tier thresholds: egg, hatchling, growing, teen, adult
+const TIER_RATIOS = [0, 0.2, 0.4, 0.6, 0.8]
+const STAGE_LABELS = ['Egg', 'Hatchling', 'Growing', 'Teen', 'Adult']
+
+export function getTierThreshold(tier, maxTotal) {
+  if (!maxTotal || maxTotal <= 0) {
+    // Legacy fixed thresholds for backward compat
+    return [0, 11, 21, 33, 43][tier] ?? 0
   }
-  return tier
+  return Math.ceil((TIER_RATIOS[tier] ?? 0) * maxTotal)
 }
 
-export function getPetStateByTier(tier, petIdx, eggIdx) {
+export function getPetTier(score, maxTotal) {
+  for (let i = 4; i >= 0; i--) {
+    if (score >= getTierThreshold(i, maxTotal)) return i
+  }
+  return 0
+}
+
+export function getStarsToNextStage(score, maxTotal) {
+  const tier = getPetTier(score, maxTotal)
+  if (tier >= 4) return 0
+  return Math.max(0, getTierThreshold(tier + 1, maxTotal) - score)
+}
+
+export function getStageLabel(tier) {
+  return STAGE_LABELS[tier] || STAGE_LABELS[0]
+}
+
+export function getPetStateByTier(tier, petIdx, eggIdx, opts = {}) {
   const pet = getPetByIndex(petIdx)
   const egg = getEggByIndex(eggIdx)
+  const { score = 0, maxTotal = 0 } = opts
+  const starsToNext = getStarsToNextStage(score, maxTotal)
+  const hatchThreshold = getTierThreshold(1, maxTotal) || 1
+  const hatchProgress = Math.min(1, Math.max(0, score / hatchThreshold))
+
   if (tier === 0) {
     return {
       face: '?',
       mood: egg.label,
-      msg: 'What\'s inside? Do tasks to find out!',
+      msg: starsToNext > 0
+        ? `${starsToNext} star${starsToNext === 1 ? '' : 's'} to hatch!`
+        : 'Ready to hatch!',
       bg: BG_COLORS[0],
       eggColor: egg.color,
       isEgg: true,
+      hatchProgress,
       petName: pet.name,
+      stageLabel: STAGE_LABELS[0],
     }
   }
   const s = pet.states[tier - 1]
-  return { face: s.face, mood: s.mood, msg: s.msg, bg: BG_COLORS[tier], isEgg: false, petName: pet.name }
+  return {
+    face: s.face,
+    mood: s.mood,
+    msg: s.msg,
+    bg: BG_COLORS[tier],
+    isEgg: false,
+    petName: pet.name,
+    stageLabel: STAGE_LABELS[tier],
+    starsToNext,
+  }
 }
 
 export { RANDOM_PETS, EGG_STYLES }

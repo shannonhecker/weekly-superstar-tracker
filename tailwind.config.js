@@ -19,6 +19,9 @@ export default {
         'badge-pulse': 'badgePulse 1.5s ease-in-out infinite',
         'reward-wiggle': 'rewardWiggle 1s ease-in-out infinite',
         'sticker-pop': 'stickerPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'egg-shake': 'eggShake 0.55s ease-in-out infinite',
+        'hatch-pop': 'hatchPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'sparkle-float': 'sparkleFloat 1.1s ease-out forwards',
       },
       keyframes: {
         confettiFall: {
@@ -78,6 +81,24 @@ export default {
           '0%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.35)' },
           '100%': { transform: 'scale(1.1)' },
+        },
+        eggShake: {
+          '0%, 100%': { transform: 'translateX(0) rotate(0deg)' },
+          '15%': { transform: 'translateX(-2px) rotate(-6deg)' },
+          '30%': { transform: 'translateX(2px) rotate(5deg)' },
+          '45%': { transform: 'translateX(-2px) rotate(-4deg)' },
+          '60%': { transform: 'translateX(2px) rotate(4deg)' },
+          '80%': { transform: 'translateX(-1px) rotate(-2deg)' },
+        },
+        hatchPop: {
+          '0%': { transform: 'scale(0.2)', opacity: '0' },
+          '55%': { transform: 'scale(1.3)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        sparkleFloat: {
+          '0%': { transform: 'translateY(0) scale(0.6)', opacity: '0' },
+          '25%': { opacity: '1' },
+          '100%': { transform: 'translateY(-26px) scale(1.2)', opacity: '0' },
         },
       },
     },

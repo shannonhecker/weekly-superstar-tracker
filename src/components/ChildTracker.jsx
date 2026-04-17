@@ -160,7 +160,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
 
       {/* Pet + Streak */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-        <VirtualPet score={totalChecked} name={childName} theme={theme} petIdx={activeKid.petIdx} eggIdx={activeKid.eggIdx} />
+        <VirtualPet score={totalChecked} name={childName} theme={theme} petIdx={activeKid.petIdx} eggIdx={activeKid.eggIdx} maxTotal={MAX_TOTAL} />
         <StreakCounter checks={checks} activities={activities} theme={theme} />
       </div>
 
