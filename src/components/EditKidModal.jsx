@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { updateKid } from '../firebase/kids'
 import { uploadKidPhoto } from '../firebase/storage'
+import { resizeImage } from '../utils/resizeImage'
 import { pickRandomPetIndex, pickRandomEggIndex } from '../utils/randomPets'
 import ThemePicker from './ThemePicker'
 import ActivityEditor from './ActivityEditor'
@@ -62,7 +63,8 @@ const EditKidModal = ({ boardId, kid, onClose }) => {
         updates.photoUrl = null
       } else if (photoFile) {
         try {
-          const url = await uploadKidPhoto(boardId, kid.id, photoFile)
+          const resized = await resizeImage(photoFile)
+          const url = await uploadKidPhoto(boardId, kid.id, resized)
           updates.photoUrl = url
         } catch (e) {
           setError(`Photo upload failed: ${e.message || 'try again later'}`)

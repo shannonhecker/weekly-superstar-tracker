@@ -124,11 +124,12 @@ export function pickRandomEggIndex() {
   return Math.floor(Math.random() * EGG_STYLES.length)
 }
 
-// Proportional tier thresholds: egg, hatchling, growing, teen, adult
-// Pet progression caps at PET_MAX regardless of MAX_TOTAL, because kids
-// rarely hit every cell in a week and we still want the adult form reachable.
+import { PET_MAX } from './constants'
+
+// Proportional tier thresholds: egg, hatchling, growing, teen, adult.
+// PET_MAX (from constants.js) caps the effective max so the adult form
+// is reachable even when a kid's MAX_TOTAL is higher than they'd ever hit.
 const TIER_RATIOS = [0, 0.2, 0.4, 0.6, 0.8]
-const PET_MAX = 50
 const STAGE_LABELS = ['Egg', 'Hatchling', 'Growing', 'Teen', 'Adult']
 
 function effectiveMax(maxTotal) {

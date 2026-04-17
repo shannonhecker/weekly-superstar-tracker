@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createKid, updateKid, DEFAULT_ACTIVITIES } from '../firebase/kids'
 import { uploadKidPhoto } from '../firebase/storage'
+import { resizeImage } from '../utils/resizeImage'
 import ThemePicker from './ThemePicker'
 import ActivityEditor from './ActivityEditor'
 
@@ -37,7 +38,8 @@ const AddKidWizard = ({ boardId, existingCount, onClose, onCreated }) => {
       setCreatedKidId(kidId)
       if (photoFile) {
         try {
-          const url = await uploadKidPhoto(boardId, kidId, photoFile)
+          const resized = await resizeImage(photoFile)
+          const url = await uploadKidPhoto(boardId, kidId, resized)
           await updateKid(boardId, kidId, { photoUrl: url })
         } catch (e) {
           setPhotoWarning(
