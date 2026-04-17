@@ -55,12 +55,13 @@ const Board = () => {
         </div>
         <div className="flex gap-2 items-center">
           <ShareButton board={board} />
-          {isAdmin && (
+          {user && (
             <button
               onClick={() => { signOut(); navigate('/') }}
               className="px-3 py-1.5 rounded-xl bg-white border-2 border-gray-200 text-xs font-bold text-gray-500"
+              aria-label={isAdmin ? 'Sign out of your account' : 'Leave guest session'}
             >
-              Sign out
+              {isAdmin ? 'Sign out' : 'Leave'}
             </button>
           )}
         </div>

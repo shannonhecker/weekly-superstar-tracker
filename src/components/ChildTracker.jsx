@@ -13,6 +13,8 @@ import RewardUnlock from './RewardUnlock'
 import WeeklyHistory from './WeeklyHistory'
 import UndoToast from './UndoToast'
 import ConfirmModal from './ConfirmModal'
+import EditKidModal from './EditKidModal'
+import { exportKidJson, exportKidCsv } from '../utils/export'
 
 const ChildTracker = ({ boardId, kid, theme }) => {
   const { kid: liveKid, update } = useKidSync(boardId, kid.id)
@@ -33,6 +35,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
   const [undoTarget, setUndoTarget] = useState(null) // { key, wasChecked }
   const [confirmRemoval, setConfirmRemoval] = useState(false)
   const [removalToast, setRemovalToast] = useState('')
+  const [showEdit, setShowEdit] = useState(false)
 
   const weekDates = useMemo(() => getCurrentWeekDates(), [])
   const weekLabel = useMemo(() => getWeekRangeLabel(), [])
@@ -183,8 +186,33 @@ const ChildTracker = ({ boardId, kid, theme }) => {
                   role="menu"
                   aria-label="Kid actions"
                   onKeyDown={(e) => { if (e.key === 'Escape') setShowMenu(false) }}
-                  className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg py-1 min-w-[140px] border border-gray-100"
+                  className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg py-1 min-w-[180px] border border-gray-100"
                 >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { setShowEdit(true); setShowMenu(false) }}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-purple-50 focus:outline-none focus:bg-purple-50"
+                  >
+                    ✏️ Edit kid
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { exportKidJson(activeKid); setShowMenu(false) }}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-purple-50 focus:outline-none focus:bg-purple-50"
+                  >
+                    💾 Export JSON
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { exportKidCsv(activeKid); setShowMenu(false) }}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-purple-50 focus:outline-none focus:bg-purple-50"
+                  >
+                    📊 Export history CSV
+                  </button>
+                  <div role="separator" className="my-1 border-t border-gray-100" />
                   <button
                     type="button"
                     role="menuitem"
@@ -237,7 +265,12 @@ const ChildTracker = ({ boardId, kid, theme }) => {
           style={{ background: `${theme.accentLight}30`, border: `2px solid ${theme.accentLight}` }}
         >
           <div className="text-xs font-extrabold mb-2" style={{ color: theme.accent }}>🏅 Badge Shelf</div>
-          <BadgeShelf badges={badges} currentBadge={currentBadge} />
+          <BadgeShelf
+            badges={badges}
+            currentBadge={currentBadge}
+            hiddenIndexes={activeKid.hiddenBadgeIndexes || []}
+            onToggleHidden={(next) => update({ hiddenBadgeIndexes: next })}
+          />
         </div>
         <RewardUnlock score={totalChecked} reward={reward} onSetReward={(r) => update({ reward: r })} theme={theme} />
       </div>
@@ -392,6 +425,14 @@ const ChildTracker = ({ boardId, kid, theme }) => {
         onDismiss={() => setRemovalToast('')}
         duration={4000}
       />
+
+      {showEdit && (
+        <EditKidModal
+          boardId={boardId}
+          kid={activeKid}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
     </div>
   )
 }
