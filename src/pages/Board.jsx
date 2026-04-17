@@ -141,6 +141,7 @@ const Board = () => {
       {activeKid ? (
         <div className="max-w-[860px] mx-auto">
           <ChildTracker
+            key={activeKid.id}
             boardId={boardId}
             kid={activeKid}
             theme={theme}
