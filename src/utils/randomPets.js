@@ -1,19 +1,19 @@
 const RANDOM_PETS = [
   { name: 'Kitty', states: [
     { face: '🐱', mood: 'Curious Kitty', msg: 'What\'s that?!' },
-    { face: '😺', mood: 'Happy Kitty', msg: 'Purrrr!' },
-    { face: '😸', mood: 'Super Kitty!', msg: 'ZOOM ZOOM!' },
-    { face: '🦁', mood: 'LION MODE!', msg: 'I AM THE KING!' },
+    { face: '🐈', mood: 'Happy Cat', msg: 'Purrrr!' },
+    { face: '🐅', mood: 'Tiger Mode!', msg: 'GRRROWL!' },
+    { face: '🦁', mood: 'LION KING!', msg: 'I AM THE KING!' },
   ]},
   { name: 'Puppy', states: [
     { face: '🐶', mood: 'Waggy Pup', msg: 'Wag wag wag!' },
-    { face: '🦮', mood: 'Good Boy!', msg: 'FETCH! FETCH!' },
-    { face: '🐺', mood: 'Super Dog!', msg: 'AWOOOO!' },
-    { face: '🌟', mood: 'LEGENDARY DOG!', msg: 'BEST BOY EVER!' },
+    { face: '🐕', mood: 'Good Dog!', msg: 'FETCH! FETCH!' },
+    { face: '🦮', mood: 'Guide Dog!', msg: 'Follow me!' },
+    { face: '🐺', mood: 'ALPHA WOLF!', msg: 'AWOOOO!' },
   ]},
   { name: 'Bunny', states: [
     { face: '🐰', mood: 'Hoppy Bunny', msg: 'Hop hop!' },
-    { face: '🐾', mood: 'Bouncy Bunny!', msg: 'BOING BOING!' },
+    { face: '🐇', mood: 'Bouncy Bunny!', msg: 'BOING BOING!' },
     { face: '⚡', mood: 'Turbo Bunny!', msg: 'ZOOM HOP!' },
     { face: '🌈', mood: 'MAGIC BUNNY!', msg: 'RAINBOW POWER!' },
   ]},
@@ -24,10 +24,10 @@ const RANDOM_PETS = [
     { face: '👑', mood: 'PANDA EMPEROR!', msg: 'SKADOOSH!' },
   ]},
   { name: 'Dragon', states: [
-    { face: '🐉', mood: 'Baby Dragon', msg: 'Tiny roar!' },
+    { face: '🐲', mood: 'Baby Dragon', msg: 'Tiny roar!' },
     { face: '🔥', mood: 'Fire Breather!', msg: 'FLAME ON!' },
-    { face: '🐲', mood: 'Sky Dragon!', msg: 'SOARING HIGH!' },
-    { face: '⭐', mood: 'DRAGON LORD!', msg: 'BOW BEFORE ME!' },
+    { face: '🐉', mood: 'Sky Dragon!', msg: 'SOARING HIGH!' },
+    { face: '👑', mood: 'DRAGON KING!', msg: 'BOW BEFORE ME!' },
   ]},
   { name: 'Penguin', states: [
     { face: '🐧', mood: 'Sliding Penguin', msg: 'Wheee!' },
@@ -37,9 +37,9 @@ const RANDOM_PETS = [
   ]},
   { name: 'Monkey', states: [
     { face: '🐵', mood: 'Peek-a-boo!', msg: 'Can you see me?' },
-    { face: '🙉', mood: 'Silly Monkey!', msg: 'Ooh ooh ahh!' },
-    { face: '🐒', mood: 'Swing King!', msg: 'TREE TO TREE!' },
-    { face: '👑', mood: 'JUNGLE KING!', msg: 'KING OF THE JUNGLE!' },
+    { face: '🐒', mood: 'Swinging Monkey!', msg: 'Ooh ooh ahh!' },
+    { face: '🦧', mood: 'Orangutan!', msg: 'TREE TO TREE!' },
+    { face: '🦍', mood: 'MIGHTY GORILLA!', msg: 'KING OF THE JUNGLE!' },
   ]},
   { name: 'Unicorn', states: [
     { face: '🦄', mood: 'Baby Unicorn', msg: 'Sparkle sparkle!' },
@@ -49,15 +49,15 @@ const RANDOM_PETS = [
   ]},
   { name: 'Octopus', states: [
     { face: '🐙', mood: 'Squirty!', msg: 'Splish splash!' },
-    { face: '🌊', mood: 'Wave Rider!', msg: 'SURF\'S UP!' },
+    { face: '🦑', mood: 'Squid Rider!', msg: 'SQUIRT AHOY!' },
     { face: '🧜', mood: 'Sea Hero!', msg: 'OCEAN POWER!' },
-    { face: '🔱', mood: 'SEA KING!', msg: 'RULER OF WAVES!' },
+    { face: '🐳', mood: 'WHALE KING!', msg: 'KING OF THE SEA!' },
   ]},
   { name: 'Alien', states: [
     { face: '👽', mood: 'UFO Pilot!', msg: 'Beep boop!' },
-    { face: '🌍', mood: 'Earth Friend!', msg: 'I love Earth!' },
-    { face: '🚀', mood: 'Space Racer!', msg: 'ZOOM TO MARS!' },
-    { face: '🌟', mood: 'GALAXY BOSS!', msg: 'RULER OF SPACE!' },
+    { face: '👾', mood: 'Space Invader!', msg: 'PIXEL POWER!' },
+    { face: '🛸', mood: 'Starship!', msg: 'ZOOM TO MARS!' },
+    { face: '🌌', mood: 'GALAXY BOSS!', msg: 'RULER OF SPACE!' },
   ]},
   { name: 'Pikachu', states: [
     { face: '🐭', mood: 'Pika Pika!', msg: 'Pika pika!' },
@@ -68,8 +68,8 @@ const RANDOM_PETS = [
   { name: 'Charmander', states: [
     { face: '🦎', mood: 'Char Char!', msg: 'Getting warmer!' },
     { face: '🔥', mood: 'Charmeleon!', msg: 'FIRE SPIN!' },
-    { face: '🐉', mood: 'Charizard!', msg: 'FLAMETHROWER!' },
-    { face: '🌋', mood: 'MEGA CHARIZARD!', msg: 'BLAST BURN!' },
+    { face: '🐲', mood: 'Charizard!', msg: 'FLAMETHROWER!' },
+    { face: '🐉', mood: 'MEGA CHARIZARD!', msg: 'BLAST BURN!' },
   ]},
   { name: 'Squirtle', states: [
     { face: '🐢', mood: 'Squirtle Squad!', msg: 'Water gun!' },
@@ -78,7 +78,7 @@ const RANDOM_PETS = [
     { face: '💎', mood: 'MEGA BLASTOISE!', msg: 'TIDAL WAVE!' },
   ]},
   { name: 'Bulbasaur', states: [
-    { face: '🍃', mood: 'Bulba Bulba!', msg: 'Vine whip!' },
+    { face: '🌱', mood: 'Bulba Bulba!', msg: 'Sprouting!' },
     { face: '🌿', mood: 'Ivysaur!', msg: 'RAZOR LEAF!' },
     { face: '🌸', mood: 'Venusaur!', msg: 'SOLAR BEAM!' },
     { face: '🌺', mood: 'MEGA VENUSAUR!', msg: 'NATURE POWER!' },
