@@ -125,15 +125,19 @@ export function pickRandomEggIndex() {
 }
 
 // Proportional tier thresholds: egg, hatchling, growing, teen, adult
+// Pet progression caps at PET_MAX regardless of MAX_TOTAL, because kids
+// rarely hit every cell in a week and we still want the adult form reachable.
 const TIER_RATIOS = [0, 0.2, 0.4, 0.6, 0.8]
+const PET_MAX = 50
 const STAGE_LABELS = ['Egg', 'Hatchling', 'Growing', 'Teen', 'Adult']
 
+function effectiveMax(maxTotal) {
+  if (!maxTotal || maxTotal <= 0) return PET_MAX
+  return Math.min(maxTotal, PET_MAX)
+}
+
 export function getTierThreshold(tier, maxTotal) {
-  if (!maxTotal || maxTotal <= 0) {
-    // Legacy fixed thresholds for backward compat
-    return [0, 11, 21, 33, 43][tier] ?? 0
-  }
-  return Math.ceil((TIER_RATIOS[tier] ?? 0) * maxTotal)
+  return Math.ceil((TIER_RATIOS[tier] ?? 0) * effectiveMax(maxTotal))
 }
 
 export function getPetTier(score, maxTotal) {
@@ -155,21 +159,27 @@ export function getStageLabel(tier) {
 
 export function getPetStateByTier(tier, petIdx, eggIdx, opts = {}) {
   const pet = getPetByIndex(petIdx)
-  const egg = getEggByIndex(eggIdx)
-  const { score = 0, maxTotal = 0 } = opts
+  const { score = 0, maxTotal = 0, theme = null } = opts
   const starsToNext = getStarsToNextStage(score, maxTotal)
   const hatchThreshold = getTierThreshold(1, maxTotal) || 1
   const hatchProgress = Math.min(1, Math.max(0, score / hatchThreshold))
 
   if (tier === 0) {
+    // Prefer theme-provided egg identity; fall back to random pool for backward compat.
+    const themeEgg = theme && theme.egg ? theme.egg : null
+    const fallback = getEggByIndex(eggIdx)
+    const egg = themeEgg || { name: fallback.label, color: fallback.color, motif: '•', motifColor: '#FFFFFF', motifCount: 0 }
     return {
-      face: '?',
-      mood: egg.label,
+      face: '',
+      mood: egg.name,
       msg: starsToNext > 0
-        ? `${starsToNext} star${starsToNext === 1 ? '' : 's'} to hatch!`
+        ? `${starsToNext} star${starsToNext === 1 ? '' : 's'} to hatch`
         : 'Ready to hatch!',
       bg: BG_COLORS[0],
       eggColor: egg.color,
+      eggMotif: egg.motif,
+      eggMotifColor: egg.motifColor,
+      eggMotifCount: egg.motifCount ?? 0,
       isEgg: true,
       hatchProgress,
       petName: pet.name,

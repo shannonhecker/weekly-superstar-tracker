@@ -11,9 +11,21 @@ const PET_ANIMATIONS = [
 
 const SPARKLES = ['✨', '💫', '⭐', '🌟']
 
+// Fixed pseudo-random motif positions inside the egg oval (percentages).
+const MOTIF_POSITIONS = [
+  { top: '18%', left: '28%' },
+  { top: '36%', left: '66%' },
+  { top: '58%', left: '26%' },
+  { top: '72%', left: '58%' },
+]
+
 const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
   const tier = getPetTier(score, maxTotal)
-  const pet = getPetStateByTier(tier, petIdx ?? 0, eggIdx ?? 0, { score, maxTotal })
+  const pet = getPetStateByTier(tier, petIdx ?? 0, eggIdx ?? 0, {
+    score,
+    maxTotal,
+    theme,
+  })
   const anim = PET_ANIMATIONS[tier]
 
   const prevTierRef = useRef(tier)
@@ -35,7 +47,6 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
     }
   }, [tier])
 
-  // Egg wiggles more the closer it is to hatching
   const eggAnim = pet.isEgg
     ? pet.hatchProgress >= 0.75
       ? 'animate-egg-shake'
@@ -44,10 +55,22 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
   const showCrack = pet.isEgg && pet.hatchProgress >= 0.5
   const faceAnim = justAdvanced ? 'animate-hatch-pop' : anim
 
+  const motifs = pet.isEgg
+    ? Array.from({ length: Math.min(pet.eggMotifCount || 0, MOTIF_POSITIONS.length) })
+    : []
+
+  // Theme-tinted card background
+  const cardBg = theme?.accentLight
+    ? `${theme.accentLight}55`
+    : pet.bg
+  const cardBorder = theme?.accentLight
+    ? `2px solid ${theme.accentLight}`
+    : `2px solid ${theme?.accentLight || '#E5E7EB'}`
+
   return (
     <div
       className="flex items-center gap-2.5 sm:gap-3.5 rounded-2xl p-3 sm:p-3.5"
-      style={{ background: pet.bg, border: `2px solid ${theme.accentLight}` }}
+      style={{ background: cardBg, border: cardBorder }}
     >
       <div className="relative shrink-0">
         {pet.isEgg ? (
@@ -56,16 +79,28 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
             style={{
               width: 56,
               height: 66,
-              background: `radial-gradient(ellipse at 35% 25%, white, ${pet.eggColor}88 40%, ${pet.eggColor})`,
+              background: `radial-gradient(ellipse at 35% 25%, white, ${pet.eggColor}AA 45%, ${pet.eggColor})`,
               borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
               boxShadow: `0 4px 16px ${pet.eggColor}55, inset 0 -8px 16px ${pet.eggColor}33`,
-              fontSize: 24,
-              fontWeight: 900,
-              color: 'white',
-              textShadow: `0 2px 4px ${pet.eggColor}`,
             }}
           >
-            ?
+            {motifs.map((_, i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                className="absolute pointer-events-none select-none"
+                style={{
+                  ...MOTIF_POSITIONS[i],
+                  color: pet.eggMotifColor,
+                  fontSize: pet.eggMotif && pet.eggMotif.length > 1 ? 10 : 12,
+                  fontWeight: 900,
+                  opacity: 0.9,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                {pet.eggMotif}
+              </span>
+            ))}
             {showCrack && (
               <svg
                 viewBox="0 0 56 66"
@@ -115,9 +150,14 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
         >
           {name}'s {pet.isEgg ? 'Mystery Pet' : pet.petName}
         </div>
-        <div className="text-[13px] sm:text-[15px] font-bold text-gray-800">{pet.mood}</div>
-        <div className="text-[10px] sm:text-xs font-semibold italic text-gray-400 truncate">
-          "{pet.msg}"
+        <div className="text-[15px] sm:text-[17px] font-extrabold text-gray-800 leading-tight">
+          {pet.mood}
+        </div>
+        <div
+          className="text-[11px] sm:text-xs font-semibold italic truncate"
+          style={{ color: theme.accent, opacity: 0.75 }}
+        >
+          {pet.isEgg ? pet.msg : `"${pet.msg}"`}
         </div>
       </div>
     </div>

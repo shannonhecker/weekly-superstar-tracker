@@ -12,6 +12,7 @@ const THEMES = {
     badgeIcons: { diamond: '🏆', gold: '🥇', silver: '🥈', bronze: '🥉' },
     decorEmojis: ['⚽', '🥅', '👟'],
     streakIcon: '⚽',
+    egg: { name: 'Pitch Egg', color: '#C8E6C9', motif: '○', motifColor: '#FFFFFF', motifCount: 4 },
   },
   dinosaur: {
     key: 'dinosaur',
@@ -26,6 +27,7 @@ const THEMES = {
     badgeIcons: { diamond: '👑', gold: '🦖', silver: '🦕', bronze: '🥚' },
     decorEmojis: ['🦕', '🌋', '🦴'],
     streakIcon: '🦖',
+    egg: { name: 'Mint Egg', color: '#B2DFDB', motif: '•', motifColor: '#00897B', motifCount: 4 },
   },
   space: {
     key: 'space',
@@ -40,6 +42,7 @@ const THEMES = {
     badgeIcons: { diamond: '🌌', gold: '🚀', silver: '🪐', bronze: '⭐' },
     decorEmojis: ['🚀', '🪐', '⭐'],
     streakIcon: '🚀',
+    egg: { name: 'Cosmic Egg', color: '#C5CAE9', motif: '✦', motifColor: '#FFFFFF', motifCount: 4 },
   },
   unicorn: {
     key: 'unicorn',
@@ -54,6 +57,7 @@ const THEMES = {
     badgeIcons: { diamond: '👑', gold: '🦄', silver: '🌈', bronze: '🌸' },
     decorEmojis: ['🦄', '🌈', '✨'],
     streakIcon: '🦄',
+    egg: { name: 'Rainbow Egg', color: '#E1BEE7', motif: '✦', motifColor: '#FFFFFF', motifCount: 4 },
   },
   mermaid: {
     key: 'mermaid',
@@ -68,6 +72,7 @@ const THEMES = {
     badgeIcons: { diamond: '👑', gold: '🧜‍♀️', silver: '🐚', bronze: '🐟' },
     decorEmojis: ['🧜‍♀️', '🐚', '🌊'],
     streakIcon: '🌊',
+    egg: { name: 'Bubble Egg', color: '#B2EBF2', motif: '○', motifColor: '#FFFFFF', motifCount: 4 },
   },
   robot: {
     key: 'robot',
@@ -82,6 +87,7 @@ const THEMES = {
     badgeIcons: { diamond: '🏆', gold: '🤖', silver: '⚙️', bronze: '🔋' },
     decorEmojis: ['🤖', '⚙️', '⚡'],
     streakIcon: '⚡',
+    egg: { name: 'Circuit Egg', color: '#CFD8DC', motif: '◆', motifColor: '#455A64', motifCount: 4 },
   },
   superhero: {
     key: 'superhero',
@@ -96,6 +102,7 @@ const THEMES = {
     badgeIcons: { diamond: '🏆', gold: '🦸', silver: '💪', bronze: '🛡️' },
     decorEmojis: ['🦸', '💥', '⚡'],
     streakIcon: '💥',
+    egg: { name: 'Hero Egg', color: '#FFCDD2', motif: '★', motifColor: '#FFFFFF', motifCount: 4 },
   },
   artist: {
     key: 'artist',
@@ -110,6 +117,7 @@ const THEMES = {
     badgeIcons: { diamond: '🏆', gold: '🎨', silver: '🖌️', bronze: '🖍️' },
     decorEmojis: ['🎨', '🖌️', '🌈'],
     streakIcon: '🎨',
+    egg: { name: 'Paint Egg', color: '#FFCCBC', motif: '✦', motifColor: '#FFFFFF', motifCount: 4 },
   },
   animals: {
     key: 'animals',
@@ -124,6 +132,7 @@ const THEMES = {
     badgeIcons: { diamond: '🏆', gold: '🦁', silver: '🐻', bronze: '🐾' },
     decorEmojis: ['🐾', '🐱', '🐶'],
     streakIcon: '🐾',
+    egg: { name: 'Cozy Egg', color: '#FFE0B2', motif: '🐾', motifColor: '#6D4C41', motifCount: 4 },
   },
 }
 
