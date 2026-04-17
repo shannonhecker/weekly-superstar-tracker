@@ -77,7 +77,7 @@ const RewardUnlock = ({ score, reward, onSetReward, theme }) => {
       style={{
         background: unlocked
           ? 'linear-gradient(135deg, #E8F5E9, #F1F8E9)'
-          : `${theme.accentLight}55`,
+          : `${theme.accentLight}30`,
         border: unlocked
           ? '2px solid #66BB6A'
           : `2px solid ${theme.accentLight}`,

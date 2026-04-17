@@ -167,7 +167,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
       {/* Score bar */}
       <div
         className="rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 mb-2 sm:mb-2.5 flex items-center gap-2 sm:gap-3 shadow-sm"
-        style={{ background: `${theme.accentLight}55`, border: `2px solid ${theme.accentLight}` }}
+        style={{ background: `${theme.accentLight}30`, border: `2px solid ${theme.accentLight}` }}
       >
         <span className="text-lg sm:text-xl">{theme.avatar}</span>
         <div className="flex-1">
@@ -192,7 +192,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
         <div
           className="rounded-2xl p-3"
-          style={{ background: `${theme.accentLight}55`, border: `2px solid ${theme.accentLight}` }}
+          style={{ background: `${theme.accentLight}30`, border: `2px solid ${theme.accentLight}` }}
         >
           <div className="text-xs font-extrabold mb-2" style={{ color: theme.accent }}>🏅 Badge Shelf</div>
           <BadgeShelf badges={badges} currentBadge={currentBadge} />

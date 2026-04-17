@@ -62,7 +62,7 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
 
   // Theme-tinted card background
   const cardBg = theme?.accentLight
-    ? `${theme.accentLight}55`
+    ? `${theme.accentLight}30`
     : pet.bg
   const cardBorder = theme?.accentLight
     ? `2px solid ${theme.accentLight}`

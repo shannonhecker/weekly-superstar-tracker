@@ -19,7 +19,7 @@ const StreakCounter = ({ checks, activities, theme }) => {
       style={{
         background: streak > 0
           ? `linear-gradient(135deg, ${theme.accentLight}44, ${theme.accentLight})`
-          : `${theme.accentLight}55`,
+          : `${theme.accentLight}30`,
         border: streak >= 4
           ? `2px solid ${theme.accent}`
           : `2px solid ${theme.accentLight}`,
