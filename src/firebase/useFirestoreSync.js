@@ -30,6 +30,7 @@ export function useKidSync(boardId, kidId) {
 
   const update = useCallback(async (updates) => {
     if (!boardId || !kidId || !db) return
+    console.log('[useKidSync] update on kidId=', kidId.slice(0, 6), 'updates=', Object.keys(updates).join(','))
     lastLocalWrite.current = Date.now()
     try {
       await updateDoc(doc(db, 'boards', boardId, 'kids', kidId), updates)

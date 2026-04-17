@@ -53,6 +53,7 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
   const currentBadge = getBadge(totalChecked, theme)
 
   const toggle = (key) => {
+    console.log('[ChildTracker] toggle:', key, 'on kid=', kid.id.slice(0, 6), kid.name, 'activeKid=', activeKid?.id?.slice(0, 6), activeKid?.name)
     const wasChecked = !!checks[key]
     // When parent mode is locked, kids can only add stars, never remove.
     // Removing attempts prompt for the PIN so a parent can correct a

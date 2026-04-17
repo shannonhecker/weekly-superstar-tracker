@@ -9,7 +9,10 @@ const KidGrid = ({ kids, activeKidId, onSelect, onAddKid }) => {
         return (
           <button
             key={kid.id}
-            onClick={() => onSelect(kid.id)}
+            onClick={() => {
+              console.log('[KidGrid] onSelect:', kid.id.slice(0, 6), kid.name)
+              onSelect(kid.id)
+            }}
             className="flex flex-col items-center gap-1 shrink-0 px-2 py-1.5 rounded-2xl transition-all"
             style={{
               background: active ? 'white' : 'transparent',

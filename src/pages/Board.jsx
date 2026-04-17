@@ -34,19 +34,36 @@ const Board = () => {
     if (!boardId) return
     const unsubBoard = subscribeBoard(boardId, setBoard)
     const unsubKids = subscribeKids(boardId, (list) => {
+      console.log('[Board] subscribeKids fired:', list.length, 'kids:', list.map((k) => `${k.id.slice(0, 6)}:${k.name}`))
       setKids(list)
       setLoading(false)
-      // Functional update so we see the current activeKidId, not the
-      // stale value captured when this effect first ran. Without this
-      // every sticker toggle on a non-first kid fires a kids update
-      // that bounces the view back to kids[0].
-      setActiveKidId((cur) => {
-        if (cur && list.some((k) => k.id === cur)) return cur
-        return list[0]?.id ?? null
-      })
     })
     return () => { unsubBoard(); unsubKids() }
   }, [boardId])
+
+  // Auto-assign activeKidId. Kept deliberately separate from the
+  // Firestore subscription so that every sticker write doesn't even
+  // enter this code path. Runs only when `kids` or `activeKidId` change.
+  useEffect(() => {
+    if (kids.length === 0) {
+      if (activeKidId !== null) {
+        console.log('[Board] assignActiveKid: no kids, clearing to null')
+        setActiveKidId(null)
+      }
+      return
+    }
+    if (!activeKidId) {
+      console.log('[Board] assignActiveKid: no current, defaulting to first:', kids[0].id.slice(0, 6), kids[0].name)
+      setActiveKidId(kids[0].id)
+      return
+    }
+    if (!kids.some((k) => k.id === activeKidId)) {
+      console.log('[Board] assignActiveKid: current', activeKidId.slice(0, 6), 'not in kids, falling back to first:', kids[0].id.slice(0, 6), kids[0].name)
+      setActiveKidId(kids[0].id)
+      return
+    }
+    // Current selection is valid — do nothing.
+  }, [kids, activeKidId])
 
   // First-time onboarding: brand new admin with no kids auto-opens the
   // AddKidWizard so they have a clear first step instead of an empty page.
@@ -85,6 +102,7 @@ const Board = () => {
 
   const activeKid = kids.find((k) => k.id === activeKidId)
   const theme = activeKid ? getTheme(activeKid.theme) : getTheme('football')
+  console.log('[Board] render: activeKidId=', activeKidId?.slice(0, 6), 'activeKid=', activeKid ? `${activeKid.id.slice(0, 6)}:${activeKid.name}` : 'null')
 
   return (
     <div className="min-h-screen font-body px-2 sm:px-3 py-3 sm:py-4 pb-8 bg-gradient-to-b from-gray-50 to-purple-50">
