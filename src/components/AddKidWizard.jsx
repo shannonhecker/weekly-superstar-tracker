@@ -13,6 +13,8 @@ const AddKidWizard = ({ boardId, existingCount, onClose, onCreated }) => {
   const [activities, setActivities] = useState(DEFAULT_ACTIVITIES)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [photoWarning, setPhotoWarning] = useState('')
+  const [createdKidId, setCreatedKidId] = useState(null)
 
   const handlePhoto = (e) => {
     const file = e.target.files?.[0]
@@ -24,6 +26,7 @@ const AddKidWizard = ({ boardId, existingCount, onClose, onCreated }) => {
   const save = async () => {
     setSaving(true)
     setError('')
+    setPhotoWarning('')
     try {
       const kidId = await createKid(boardId, {
         name: name.trim(),
@@ -31,18 +34,22 @@ const AddKidWizard = ({ boardId, existingCount, onClose, onCreated }) => {
         activities,
         order: existingCount,
       })
+      setCreatedKidId(kidId)
       if (photoFile) {
         try {
           const url = await uploadKidPhoto(boardId, kidId, photoFile)
           await updateKid(boardId, kidId, { photoUrl: url })
         } catch (e) {
-          console.warn('Photo upload failed, continuing without:', e)
+          setPhotoWarning(
+            `${name.trim()} was saved, but the photo didn't upload: ${e.message || 'please try again later from the kid menu'}.`
+          )
+          setSaving(false)
+          return
         }
       }
       onCreated(kidId)
     } catch (err) {
       setError(err.message)
-    } finally {
       setSaving(false)
     }
   }
@@ -110,33 +117,50 @@ const AddKidWizard = ({ boardId, existingCount, onClose, onCreated }) => {
             <ActivityEditor activities={activities} onChange={setActivities} />
           )}
 
-          {error && <div className="text-red-500 text-xs font-bold mt-3">{error}</div>}
+          {error && <div className="text-red-500 text-xs font-bold mt-3" role="alert">{error}</div>}
+
+          {photoWarning && (
+            <div className="mt-3 p-3 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-800 text-xs font-semibold" role="alert">
+              ⚠️ {photoWarning}
+            </div>
+          )}
 
           <div className="flex gap-2 mt-5">
-            {step > 1 && (
+            {photoWarning ? (
               <button
-                onClick={() => setStep(step - 1)}
-                className="flex-1 py-3 rounded-xl border-2 border-gray-200 bg-white font-extrabold text-sm text-gray-500"
+                onClick={() => createdKidId && onCreated(createdKidId)}
+                className="flex-1 py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-green-500 to-purple-500"
               >
-                Back
-              </button>
-            )}
-            {step < 4 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                disabled={step === 1 && !name.trim()}
-                className="flex-1 py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-green-500 to-purple-500 disabled:opacity-50"
-              >
-                Next
+                Continue without photo
               </button>
             ) : (
-              <button
-                onClick={save}
-                disabled={saving}
-                className="flex-1 py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-green-500 to-purple-500 disabled:opacity-50"
-              >
-                {saving ? 'Creating...' : 'Create kid 🎉'}
-              </button>
+              <>
+                {step > 1 && (
+                  <button
+                    onClick={() => setStep(step - 1)}
+                    className="flex-1 py-3 rounded-xl border-2 border-gray-200 bg-white font-extrabold text-sm text-gray-500"
+                  >
+                    Back
+                  </button>
+                )}
+                {step < 4 ? (
+                  <button
+                    onClick={() => setStep(step + 1)}
+                    disabled={step === 1 && !name.trim()}
+                    className="flex-1 py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-green-500 to-purple-500 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    onClick={save}
+                    disabled={saving}
+                    className="flex-1 py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-green-500 to-purple-500 disabled:opacity-50"
+                  >
+                    {saving ? 'Creating...' : 'Create kid 🎉'}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

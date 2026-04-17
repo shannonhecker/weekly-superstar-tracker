@@ -52,44 +52,54 @@ const ChildTracker = ({ boardId, kid, theme }) => {
 
   const getRowTotal = (actId) => DAYS.reduce((s, d) => s + (checks[`${actId}-${d}`] ? 1 : 0), 0)
 
-  // Auto-reset + random-pet generation per week
-  const autoResetDone = useRef(false)
+  // Auto-reset + random-pet generation per week.
+  //
+  // The auto-reset observes Firestore state directly (weekKey) rather than a
+  // client ref flag, so it survives unmounts and re-runs only when the saved
+  // week actually differs from the current one. A small jitter de-syncs two
+  // devices opening the same kid at the week boundary so the second one sees
+  // the first one's write before attempting its own.
+  const latestStateRef = useRef({ checks, weekHistory, badges })
   useEffect(() => {
-    if (autoResetDone.current || !activeKid.id) return
+    latestStateRef.current = { checks, weekHistory, badges }
+  }, [checks, weekHistory, badges])
+
+  useEffect(() => {
+    if (!activeKid.id) return
     const currentWeek = getWeekKey()
     const savedWeek = activeKid.weekKey
+    if (savedWeek === currentWeek) return
 
-    const updates = {}
-    if (!savedWeek) {
-      // First-time setup
-      updates.weekKey = currentWeek
-      updates.petIdx = pickRandomPetIndex()
-      updates.eggIdx = pickRandomEggIndex()
-    } else if (savedWeek !== currentWeek) {
-      // New week
-      const prevTotal = Object.values(checks).filter(Boolean).length
-      const newHistory = [...weekHistory]
-      const newBadges = [...badges]
-      if (prevTotal > 0) {
-        const badge = getBadge(prevTotal, theme)
-        if (badge) newBadges.push(badge)
-        newHistory.push({ score: prevTotal, weekKey: savedWeek })
+    const delay = 200 + Math.random() * 500
+    const timer = setTimeout(() => {
+      const { checks: c, weekHistory: wh, badges: b } = latestStateRef.current
+      const updates = {}
+      if (!savedWeek) {
+        updates.weekKey = currentWeek
+        updates.petIdx = pickRandomPetIndex()
+        updates.eggIdx = pickRandomEggIndex()
+      } else {
+        const prevTotal = Object.values(c).filter(Boolean).length
+        const newHistory = [...wh]
+        const newBadges = [...b]
+        if (prevTotal > 0) {
+          const badge = getBadge(prevTotal, theme)
+          if (badge) newBadges.push(badge)
+          newHistory.push({ score: prevTotal, weekKey: savedWeek })
+        }
+        updates.weekKey = currentWeek
+        updates.checks = {}
+        updates.customLabel = ''
+        updates.weekHistory = newHistory
+        updates.badges = newBadges
+        updates.petIdx = pickRandomPetIndex()
+        updates.eggIdx = pickRandomEggIndex()
+        if (prevTotal > 0) setShowConfetti(true)
       }
-      updates.weekKey = currentWeek
-      updates.checks = {}
-      updates.customLabel = ''
-      updates.weekHistory = newHistory
-      updates.badges = newBadges
-      updates.petIdx = pickRandomPetIndex()
-      updates.eggIdx = pickRandomEggIndex()
-    }
-    if (Object.keys(updates).length > 0) {
       update(updates)
-      if (savedWeek && savedWeek !== currentWeek) setShowConfetti(true)
-    }
-    autoResetDone.current = true
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeKid.id])
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [activeKid.id, activeKid.weekKey, theme, update])
 
   const today = new Date().getDay()
   const todayKey = DAYS[today === 0 ? 6 : today - 1]

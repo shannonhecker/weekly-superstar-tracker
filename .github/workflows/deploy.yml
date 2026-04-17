@@ -30,4 +30,4 @@ jobs:
       - name: Deploy
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /home/runner/sa-key.json
-        run: firebase deploy --only hosting --project weekly-superstar-tracker --non-interactive
+        run: firebase deploy --only hosting,firestore:rules,storage --project weekly-superstar-tracker --non-interactive

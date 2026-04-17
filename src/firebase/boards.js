@@ -1,6 +1,6 @@
 import {
   collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc,
-  query, where, onSnapshot, serverTimestamp, arrayUnion,
+  query, where, limit, onSnapshot, serverTimestamp, arrayUnion,
 } from 'firebase/firestore'
 import { db } from './config'
 
@@ -27,7 +27,11 @@ export async function createBoard(userId, boardName = 'Family Board') {
 }
 
 export async function getBoardByShareCode(shareCode) {
-  const q = query(collection(db, 'boards'), where('shareCode', '==', shareCode))
+  const q = query(
+    collection(db, 'boards'),
+    where('shareCode', '==', shareCode),
+    limit(1)
+  )
   const snap = await getDocs(q)
   if (snap.empty) return null
   const d = snap.docs[0]

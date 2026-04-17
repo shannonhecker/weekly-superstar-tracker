@@ -2,7 +2,8 @@ import {
   collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
   onSnapshot, orderBy, query, serverTimestamp,
 } from 'firebase/firestore'
-import { db } from './config'
+import { ref as sref, listAll, deleteObject } from 'firebase/storage'
+import { db, storage } from './config'
 
 export const DEFAULT_ACTIVITIES = [
   { id: 'sleep', emoji: '😴', label: 'Sleep', color: '#7C6FF7' },
@@ -46,6 +47,18 @@ export async function updateKid(boardId, kidId, updates) {
 }
 
 export async function deleteKid(boardId, kidId) {
+  // Best-effort: clean up any photos this kid uploaded. If it fails
+  // (offline, rules mismatch, etc.) we still proceed with the Firestore
+  // delete so the user's action isn't blocked.
+  if (storage) {
+    try {
+      const folder = sref(storage, `boards/${boardId}/kids/${kidId}`)
+      const listed = await listAll(folder)
+      await Promise.all(listed.items.map((item) => deleteObject(item).catch(() => {})))
+    } catch (e) {
+      console.warn('Kid photo cleanup failed', kidId, e)
+    }
+  }
   await deleteDoc(doc(db, 'boards', boardId, 'kids', kidId))
 }
 
