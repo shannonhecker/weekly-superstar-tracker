@@ -3,11 +3,12 @@ import ChildTracker from './ChildTracker'
 import DesignHub from '../builder/DesignHub'
 import footballTheme from '../themes/football'
 import dinosaurTheme from '../themes/dinosaur'
+import dragonTheme from '../themes/dragon'
 
-const themes = [footballTheme, dinosaurTheme]
+const themes = [footballTheme, dinosaurTheme, dragonTheme]
 
 const App = () => {
-  const [scores, setScores] = useState({ football: 0, dinosaur: 0 })
+  const [scores, setScores] = useState({ football: 0, dinosaur: 0, dragon: 0 })
   const [activeTab, setActiveTab] = useState('football')
   const [mode, setMode] = useState('tracker')
 

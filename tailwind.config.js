@@ -17,6 +17,9 @@ export default {
         'badge-pulse': 'badgePulse 1.5s ease-in-out infinite',
         'reward-wiggle': 'rewardWiggle 1s ease-in-out infinite',
         'sticker-pop': 'stickerPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'egg-wobble': 'eggWobble 1.6s ease-in-out infinite',
+        'stage-pop-in': 'stagePopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'sparkle-float': 'sparkleFloat 1.1s ease-out forwards',
       },
       keyframes: {
         confettiFall: {
@@ -44,6 +47,20 @@ export default {
           '0%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.35)' },
           '100%': { transform: 'scale(1.1)' },
+        },
+        eggWobble: {
+          '0%, 100%': { transform: 'rotate(-4deg)' },
+          '50%': { transform: 'rotate(4deg)' },
+        },
+        stagePopIn: {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '60%': { transform: 'scale(1.25)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        sparkleFloat: {
+          '0%': { transform: 'translateY(0) scale(0.8)', opacity: '0' },
+          '25%': { opacity: '1' },
+          '100%': { transform: 'translateY(-28px) scale(1.2)', opacity: '0' },
         },
       },
     },

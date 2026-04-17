@@ -2,6 +2,11 @@ export function getPetState(score, theme) {
   return theme.petStates.find((p) => score >= p.min && score <= p.max) || theme.petStates[0]
 }
 
+export function getPetStageIndex(score, theme) {
+  const idx = theme.petStates.findIndex((p) => score >= p.min && score <= p.max)
+  return idx === -1 ? 0 : idx
+}
+
 export function getBadge(score, theme) {
   const bi = theme.badgeIcons
   if (score >= 50) return { icon: bi.diamond, label: 'Diamond', color: '#B388FF', glow: '#B388FF55' }
