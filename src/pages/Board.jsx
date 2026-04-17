@@ -36,10 +36,16 @@ const Board = () => {
     const unsubKids = subscribeKids(boardId, (list) => {
       setKids(list)
       setLoading(false)
-      if (list.length && !activeKidId) setActiveKidId(list[0].id)
+      // Functional update so we see the current activeKidId, not the
+      // stale value captured when this effect first ran. Without this
+      // every sticker toggle on a non-first kid fires a kids update
+      // that bounces the view back to kids[0].
+      setActiveKidId((cur) => {
+        if (cur && list.some((k) => k.id === cur)) return cur
+        return list[0]?.id ?? null
+      })
     })
     return () => { unsubBoard(); unsubKids() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId])
 
   // First-time onboarding: brand new admin with no kids auto-opens the
