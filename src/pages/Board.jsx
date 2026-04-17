@@ -8,6 +8,8 @@ import KidGrid from '../components/KidGrid'
 import ChildTracker from '../components/ChildTracker'
 import AddKidWizard from '../components/AddKidWizard'
 import ShareButton from '../components/ShareButton'
+import SettingsModal from '../components/SettingsModal'
+import PinPrompt from '../components/PinPrompt'
 
 const Board = () => {
   const { boardId } = useParams()
@@ -18,6 +20,15 @@ const Board = () => {
   const [activeKidId, setActiveKidId] = useState(null)
   const [showAddKid, setShowAddKid] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showSettings, setShowSettings] = useState(false)
+  // PIN lock session state — if the board has a PIN, parent mode must be
+  // unlocked to edit/delete kids or open settings. Unlock persists only
+  // for this session (sessionStorage, per-board).
+  const [parentUnlocked, setParentUnlocked] = useState(() =>
+    typeof window !== 'undefined' && sessionStorage.getItem(`parent-unlocked-${boardId}`) === '1'
+  )
+  const [showPinPrompt, setShowPinPrompt] = useState(false)
+  const [pendingAction, setPendingAction] = useState(null)
 
   useEffect(() => {
     if (!boardId) return
@@ -31,7 +42,32 @@ const Board = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId])
 
+  // First-time onboarding: brand new admin with no kids auto-opens the
+  // AddKidWizard so they have a clear first step instead of an empty page.
+  useEffect(() => {
+    if (loading || !board || !user) return
+    if (board.adminId !== user.uid) return
+    if (kids.length > 0) return
+    const flag = `onboarded-${boardId}`
+    if (sessionStorage.getItem(flag)) return
+    sessionStorage.setItem(flag, '1')
+    setShowAddKid(true)
+  }, [loading, board, user, kids.length, boardId])
+
   const isAdmin = board && user && board.adminId === user.uid
+
+  const pinProtected = !!board?.pinHash && !parentUnlocked
+
+  const requireUnlock = (action) => {
+    if (!pinProtected) { action(); return }
+    setPendingAction(() => action)
+    setShowPinPrompt(true)
+  }
+
+  const lockParentMode = () => {
+    setParentUnlocked(false)
+    sessionStorage.removeItem(`parent-unlocked-${boardId}`)
+  }
 
   if (loading) {
     return (
@@ -54,6 +90,24 @@ const Board = () => {
           </h1>
         </div>
         <div className="flex gap-2 items-center">
+          {board?.pinHash && (
+            <button
+              onClick={() => parentUnlocked ? lockParentMode() : setShowPinPrompt(true)}
+              className="w-9 h-9 rounded-xl bg-white border-2 border-gray-200 text-sm font-bold text-gray-500 flex items-center justify-center"
+              aria-label={parentUnlocked ? 'Lock parent mode' : 'Unlock parent mode'}
+              title={parentUnlocked ? 'Parent mode unlocked — tap to lock' : 'Parent mode locked — tap to unlock'}
+            >
+              {parentUnlocked ? '🔓' : '🔒'}
+            </button>
+          )}
+          <button
+            onClick={() => requireUnlock(() => setShowSettings(true))}
+            className="w-9 h-9 rounded-xl bg-white border-2 border-gray-200 text-sm font-bold text-gray-500 flex items-center justify-center"
+            aria-label="Board settings"
+            title="Board settings"
+          >
+            ⚙️
+          </button>
           <ShareButton board={board} />
           {user && (
             <button
@@ -84,6 +138,8 @@ const Board = () => {
             boardId={boardId}
             kid={activeKid}
             theme={theme}
+            parentLocked={pinProtected}
+            onRequireUnlock={requireUnlock}
           />
         </div>
       ) : (
@@ -105,6 +161,31 @@ const Board = () => {
           existingCount={kids.length}
           onClose={() => setShowAddKid(false)}
           onCreated={(kidId) => { setActiveKidId(kidId); setShowAddKid(false) }}
+        />
+      )}
+
+      {showSettings && (
+        <SettingsModal
+          board={board}
+          user={user}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {showPinPrompt && board?.pinHash && (
+        <PinPrompt
+          board={board}
+          mode="verify"
+          onSuccess={() => {
+            setParentUnlocked(true)
+            sessionStorage.setItem(`parent-unlocked-${boardId}`, '1')
+            setShowPinPrompt(false)
+            if (pendingAction) {
+              pendingAction()
+              setPendingAction(null)
+            }
+          }}
+          onCancel={() => { setShowPinPrompt(false); setPendingAction(null) }}
         />
       )}
     </div>

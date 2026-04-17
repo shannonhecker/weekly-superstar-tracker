@@ -56,6 +56,47 @@ export async function joinBoard(boardId, userId) {
   })
 }
 
+export async function updateBoard(boardId, updates) {
+  await updateDoc(doc(db, 'boards', boardId), updates)
+}
+
+export async function regenerateShareCode(boardId) {
+  const newCode = generateShareCode()
+  await updateDoc(doc(db, 'boards', boardId), { shareCode: newCode })
+  return newCode
+}
+
+export async function removeMember(boardId, memberId) {
+  // arrayRemove equivalent via manual read + write to keep imports tight
+  const snap = await getDoc(doc(db, 'boards', boardId))
+  if (!snap.exists()) return
+  const current = snap.data().memberIds || []
+  const next = current.filter((id) => id !== memberId)
+  await updateDoc(doc(db, 'boards', boardId), { memberIds: next })
+}
+
+// Simple PIN "hashing" using SubtleCrypto. Not real cryptographic
+// security — this is a family-app speed bump to prevent a kid from
+// casually opening settings or un-ticking stickers. Using SHA-256 +
+// a static salt so the same PIN always hashes the same and we don't
+// need per-board salt storage.
+async function hashPin(pin) {
+  const bytes = new TextEncoder().encode(`kidtracker:${pin}`)
+  const buf = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+export async function setBoardPin(boardId, pin) {
+  const hash = pin ? await hashPin(pin) : null
+  await updateDoc(doc(db, 'boards', boardId), { pinHash: hash })
+}
+
+export async function verifyBoardPin(board, pin) {
+  if (!board?.pinHash) return true // no PIN set = always unlocked
+  const hash = await hashPin(pin)
+  return hash === board.pinHash
+}
+
 export function subscribeBoard(boardId, callback) {
   return onSnapshot(doc(db, 'boards', boardId), (snap) => {
     if (snap.exists()) callback({ id: snap.id, ...snap.data() })

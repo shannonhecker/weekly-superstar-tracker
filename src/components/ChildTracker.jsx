@@ -16,7 +16,7 @@ import ConfirmModal from './ConfirmModal'
 import EditKidModal from './EditKidModal'
 import { exportKidJson, exportKidCsv } from '../utils/export'
 
-const ChildTracker = ({ boardId, kid, theme }) => {
+const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlock }) => {
   const { kid: liveKid, update } = useKidSync(boardId, kid.id)
   const activeKid = liveKid || kid
 
@@ -45,12 +45,18 @@ const ChildTracker = ({ boardId, kid, theme }) => {
 
   const toggle = (key) => {
     const wasChecked = !!checks[key]
+    // When parent mode is locked, kids can only add stars, never remove.
+    // Removing attempts prompt for the PIN so a parent can correct a
+    // mis-tap without giving the kid the ability to erase progress.
+    if (wasChecked && parentLocked) {
+      if (onRequireUnlock) onRequireUnlock(() => toggle(key))
+      return
+    }
     const next = { ...checks, [key]: !wasChecked }
     update({ checks: next })
     if (!wasChecked && Object.values(next).filter(Boolean).length === MAX_TOTAL) {
       setShowConfetti(true)
     }
-    // Offer undo only when removing a star (the more costly mis-tap).
     if (wasChecked) setUndoTarget({ key, wasChecked: true })
     else setUndoTarget(null)
   }
@@ -104,7 +110,17 @@ const ChildTracker = ({ boardId, kid, theme }) => {
         if (prevTotal > 0) {
           const badge = getBadge(prevTotal, theme)
           if (badge) newBadges.push(badge)
-          newHistory.push({ score: prevTotal, weekKey: savedWeek })
+          // Snapshot the completed week so detail views + pet gallery
+          // can reconstruct what happened. petIdx preserved so the
+          // gallery knows which creature was hatched that week.
+          newHistory.push({
+            score: prevTotal,
+            weekKey: savedWeek,
+            date: new Date().toISOString(),
+            checks: c,
+            petIdx: activeKid.petIdx ?? null,
+            theme: activeKid.theme || 'football',
+          })
         }
         updates.weekKey = currentWeek
         updates.checks = {}
@@ -171,13 +187,19 @@ const ChildTracker = ({ boardId, kid, theme }) => {
           <div className="relative">
             <button
               type="button"
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={() => {
+                if (parentLocked) {
+                  onRequireUnlock?.(() => setShowMenu(true))
+                  return
+                }
+                setShowMenu(!showMenu)
+              }}
               className="w-8 h-8 rounded-full bg-white/70 text-gray-500 font-black focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
               aria-label="Kid actions menu"
               aria-haspopup="menu"
               aria-expanded={showMenu}
             >
-              ⋯
+              {parentLocked ? '🔒' : '⋯'}
             </button>
             {showMenu && (
               <>
