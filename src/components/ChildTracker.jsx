@@ -14,6 +14,8 @@ import WeeklyHistory from './WeeklyHistory'
 import UndoToast from './UndoToast'
 import ConfirmModal from './ConfirmModal'
 import EditKidModal from './EditKidModal'
+import PetGalleryModal from './PetGalleryModal'
+import PerfectWeekCelebration from './PerfectWeekCelebration'
 import { exportKidJson, exportKidCsv } from '../utils/export'
 
 const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlock }) => {
@@ -36,6 +38,8 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
   const [confirmRemoval, setConfirmRemoval] = useState(false)
   const [removalToast, setRemovalToast] = useState('')
   const [showEdit, setShowEdit] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
+  const [showPerfectWeek, setShowPerfectWeek] = useState(false)
 
   const weekDates = useMemo(() => getCurrentWeekDates(), [])
   const weekLabel = useMemo(() => getWeekRangeLabel(), [])
@@ -74,6 +78,18 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
       return () => clearTimeout(t)
     }
   }, [showConfetti])
+
+  // Perfect-week celebration: fire once per weekKey when a kid first
+  // reaches MAX_TOTAL. sessionStorage keeps us from re-firing on every
+  // render for the same week.
+  useEffect(() => {
+    if (!activeKid.id || !activeKid.weekKey) return
+    if (totalChecked !== MAX_TOTAL || MAX_TOTAL === 0) return
+    const seenKey = `perfect-seen-${activeKid.id}-${activeKid.weekKey}`
+    if (sessionStorage.getItem(seenKey)) return
+    sessionStorage.setItem(seenKey, '1')
+    setShowPerfectWeek(true)
+  }, [totalChecked, MAX_TOTAL, activeKid.id, activeKid.weekKey])
 
   const getRowTotal = (actId) => DAYS.reduce((s, d) => s + (checks[`${actId}-${d}`] ? 1 : 0), 0)
 
@@ -217,6 +233,14 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
                     className="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-purple-50 focus:outline-none focus:bg-purple-50"
                   >
                     ✏️ Edit kid
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { setShowGallery(true); setShowMenu(false) }}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-purple-50 focus:outline-none focus:bg-purple-50"
+                  >
+                    🏆 Pet collection
                   </button>
                   <button
                     type="button"
@@ -455,6 +479,22 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
           onClose={() => setShowEdit(false)}
         />
       )}
+
+      {showGallery && (
+        <PetGalleryModal
+          kid={activeKid}
+          theme={theme}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
+
+      <PerfectWeekCelebration
+        show={showPerfectWeek}
+        childName={childName}
+        weekKey={activeKid.weekKey}
+        theme={theme}
+        onClose={() => setShowPerfectWeek(false)}
+      />
     </div>
   )
 }
