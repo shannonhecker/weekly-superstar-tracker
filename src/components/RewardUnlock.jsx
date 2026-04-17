@@ -75,8 +75,12 @@ const RewardUnlock = ({ score, reward, onSetReward, theme }) => {
     <div
       className="rounded-2xl p-3.5"
       style={{
-        background: unlocked ? 'linear-gradient(135deg, #E8F5E9, #F1F8E9)' : 'white',
-        border: unlocked ? '2px solid #66BB6A' : '2px solid rgba(0,0,0,0.04)',
+        background: unlocked
+          ? 'linear-gradient(135deg, #E8F5E9, #F1F8E9)'
+          : `${theme.accentLight}55`,
+        border: unlocked
+          ? '2px solid #66BB6A'
+          : `2px solid ${theme.accentLight}`,
       }}
     >
       <div className="flex items-center justify-between mb-2">

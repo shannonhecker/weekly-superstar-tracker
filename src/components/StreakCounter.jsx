@@ -19,8 +19,10 @@ const StreakCounter = ({ checks, activities, theme }) => {
       style={{
         background: streak > 0
           ? `linear-gradient(135deg, ${theme.accentLight}44, ${theme.accentLight})`
-          : '#F5F5F5',
-        border: streak >= 4 ? `2px solid ${theme.accent}` : '2px solid rgba(0,0,0,0.04)',
+          : `${theme.accentLight}55`,
+        border: streak >= 4
+          ? `2px solid ${theme.accent}`
+          : `2px solid ${theme.accentLight}`,
       }}
     >
       <span className={`text-[22px] sm:text-[26px] shrink-0 ${streak >= 4 ? 'animate-flame-pulse' : ''}`}>
