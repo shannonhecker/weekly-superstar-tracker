@@ -11,6 +11,8 @@ import StreakCounter from './StreakCounter'
 import BadgeShelf from './BadgeShelf'
 import RewardUnlock from './RewardUnlock'
 import WeeklyHistory from './WeeklyHistory'
+import UndoToast from './UndoToast'
+import ConfirmModal from './ConfirmModal'
 
 const ChildTracker = ({ boardId, kid, theme }) => {
   const { kid: liveKid, update } = useKidSync(boardId, kid.id)
@@ -28,6 +30,9 @@ const ChildTracker = ({ boardId, kid, theme }) => {
   const [editingCustom, setEditingCustom] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [undoTarget, setUndoTarget] = useState(null) // { key, wasChecked }
+  const [confirmRemoval, setConfirmRemoval] = useState(false)
+  const [removalToast, setRemovalToast] = useState('')
 
   const weekDates = useMemo(() => getCurrentWeekDates(), [])
   const weekLabel = useMemo(() => getWeekRangeLabel(), [])
@@ -36,11 +41,22 @@ const ChildTracker = ({ boardId, kid, theme }) => {
   const currentBadge = getBadge(totalChecked, theme)
 
   const toggle = (key) => {
-    const next = { ...checks, [key]: !checks[key] }
+    const wasChecked = !!checks[key]
+    const next = { ...checks, [key]: !wasChecked }
     update({ checks: next })
-    if (!checks[key] && Object.values(next).filter(Boolean).length === MAX_TOTAL) {
+    if (!wasChecked && Object.values(next).filter(Boolean).length === MAX_TOTAL) {
       setShowConfetti(true)
     }
+    // Offer undo only when removing a star (the more costly mis-tap).
+    if (wasChecked) setUndoTarget({ key, wasChecked: true })
+    else setUndoTarget(null)
+  }
+
+  const handleUndoToggle = () => {
+    if (!undoTarget) return
+    const restored = { ...checks, [undoTarget.key]: undoTarget.wasChecked }
+    update({ checks: restored })
+    setUndoTarget(null)
   }
 
   useEffect(() => {
@@ -104,9 +120,15 @@ const ChildTracker = ({ boardId, kid, theme }) => {
   const today = new Date().getDay()
   const todayKey = DAYS[today === 0 ? 6 : today - 1]
 
-  const handleDelete = () => {
-    if (window.confirm(`Remove ${childName} from the board? This deletes all their data.`)) {
-      deleteKid(boardId, kid.id)
+  const handleDelete = () => setConfirmRemoval(true)
+
+  const performDelete = async () => {
+    setConfirmRemoval(false)
+    try {
+      await deleteKid(boardId, kid.id)
+      setRemovalToast(`${childName} was removed from the board`)
+    } catch (err) {
+      setRemovalToast(`Could not remove ${childName}: ${err.message || 'try again'}`)
     }
   }
 
@@ -145,19 +167,29 @@ const ChildTracker = ({ boardId, kid, theme }) => {
         <div className="flex-1 flex justify-end">
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="w-8 h-8 rounded-full bg-white/70 text-gray-500 font-black"
-              aria-label="Menu"
+              className="w-8 h-8 rounded-full bg-white/70 text-gray-500 font-black focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+              aria-label="Kid actions menu"
+              aria-haspopup="menu"
+              aria-expanded={showMenu}
             >
               ⋯
             </button>
             {showMenu && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg py-1 min-w-[140px] border border-gray-100">
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} aria-hidden="true" />
+                <div
+                  role="menu"
+                  aria-label="Kid actions"
+                  onKeyDown={(e) => { if (e.key === 'Escape') setShowMenu(false) }}
+                  className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg py-1 min-w-[140px] border border-gray-100"
+                >
                   <button
+                    type="button"
+                    role="menuitem"
                     onClick={() => { handleDelete(); setShowMenu(false) }}
-                    className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50"
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 focus:outline-none focus:bg-red-50"
                   >
                     🗑 Remove kid
                   </button>
@@ -216,6 +248,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
           <thead>
             <tr>
               <th
+                scope="col"
                 className="text-left px-2 sm:px-3 py-2 text-[11px] sm:text-[13px] font-bold text-gray-400 sticky left-0 z-[2] bg-white/[0.97] min-w-[80px] sm:min-w-[130px]"
                 style={{ borderBottom: `2px solid ${theme.accentLight}66` }}
               >
@@ -224,6 +257,7 @@ const ChildTracker = ({ boardId, kid, theme }) => {
               {weekDates.map((wd) => (
                 <th
                   key={wd.key}
+                  scope="col"
                   className="px-0.5 sm:px-1.5 py-1.5 sm:py-2.5 text-center min-w-[40px] sm:min-w-[50px]"
                   style={{
                     borderBottom: `2px solid ${wd.key === todayKey ? theme.accent : theme.accentLight + '66'}`,
@@ -273,16 +307,26 @@ const ChildTracker = ({ boardId, kid, theme }) => {
                           className="text-xs sm:text-sm font-semibold border-none bg-transparent outline-none w-[70px] sm:w-[90px] font-body text-gray-800"
                           style={{ borderBottom: `2px dashed ${act.color}` }}
                         />
-                      ) : (
+                      ) : act.isCustom ? (
                         <span
-                          onClick={act.isCustom ? () => setEditingCustom(true) : undefined}
-                          className="text-xs sm:text-sm font-semibold text-gray-700 leading-tight"
-                          style={{
-                            cursor: act.isCustom ? 'pointer' : 'default',
-                            borderBottom: act.isCustom ? `2px dashed ${act.color}44` : 'none',
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setEditingCustom(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              setEditingCustom(true)
+                            }
                           }}
+                          aria-label={`Edit custom activity label${customLabel ? `: ${customLabel}` : ''}`}
+                          className="text-xs sm:text-sm font-semibold text-gray-700 leading-tight cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded"
+                          style={{ borderBottom: `2px dashed ${act.color}44` }}
                         >
-                          {act.isCustom && customLabel ? customLabel : act.label}
+                          {customLabel || act.label}
+                        </span>
+                      ) : (
+                        <span className="text-xs sm:text-sm font-semibold text-gray-700 leading-tight">
+                          {act.label}
                         </span>
                       )}
                     </div>
@@ -323,6 +367,31 @@ const ChildTracker = ({ boardId, kid, theme }) => {
           <WeeklyHistory history={weekHistory} theme={theme} />
         </div>
       )}
+
+      <UndoToast
+        show={!!undoTarget}
+        message="Sticker removed"
+        onUndo={handleUndoToggle}
+        onDismiss={() => setUndoTarget(null)}
+      />
+
+      <ConfirmModal
+        show={confirmRemoval}
+        title={`Remove ${childName}?`}
+        body="This permanently deletes all their stickers, badges, history, and photo. This can't be undone."
+        confirmLabel="Yes, remove"
+        cancelLabel="Keep them"
+        danger
+        onCancel={() => setConfirmRemoval(false)}
+        onConfirm={performDelete}
+      />
+
+      <UndoToast
+        show={!!removalToast}
+        message={removalToast}
+        onDismiss={() => setRemovalToast('')}
+        duration={4000}
+      />
     </div>
   )
 }

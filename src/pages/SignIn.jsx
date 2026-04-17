@@ -33,25 +33,30 @@ const SignIn = () => {
         <h1 className="text-2xl font-black font-display mb-1 text-gray-800">Welcome back</h1>
         <p className="text-sm text-gray-400 font-semibold mb-5">Sign in to your board.</p>
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Email</label>
+        <label htmlFor="signin-email" className="block text-xs font-extrabold text-gray-500 mb-1">Email</label>
         <input
+          id="signin-email"
           type="email"
+          autoComplete="email"
+          inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-3 focus:border-purple-400"
         />
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Password</label>
+        <label htmlFor="signin-password" className="block text-xs font-extrabold text-gray-500 mb-1">Password</label>
         <input
+          id="signin-password"
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-4 focus:border-purple-400"
         />
 
-        {error && <div className="text-red-500 text-xs font-bold mb-3">{error}</div>}
+        {error && <div className="text-red-500 text-xs font-bold mb-3" role="alert">{error}</div>}
 
         <button
           type="submit"

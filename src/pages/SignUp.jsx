@@ -34,9 +34,11 @@ const SignUp = () => {
         <h1 className="text-2xl font-black font-display mb-1 text-gray-800">Create your board</h1>
         <p className="text-sm text-gray-400 font-semibold mb-5">Admin account — you can invite family after.</p>
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Your name</label>
+        <label htmlFor="signup-name" className="block text-xs font-extrabold text-gray-500 mb-1">Your name</label>
         <input
+          id="signup-name"
           type="text"
+          autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -44,27 +46,34 @@ const SignUp = () => {
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-3 focus:border-purple-400"
         />
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Board name (optional)</label>
+        <label htmlFor="signup-board" className="block text-xs font-extrabold text-gray-500 mb-1">Board name (optional)</label>
         <input
+          id="signup-board"
           type="text"
+          autoComplete="off"
           value={boardName}
           onChange={(e) => setBoardName(e.target.value)}
           placeholder="e.g. The Hecker Family"
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-3 focus:border-purple-400"
         />
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Email</label>
+        <label htmlFor="signup-email" className="block text-xs font-extrabold text-gray-500 mb-1">Email</label>
         <input
+          id="signup-email"
           type="email"
+          autoComplete="email"
+          inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-3 focus:border-purple-400"
         />
 
-        <label className="block text-xs font-extrabold text-gray-500 mb-1">Password</label>
+        <label htmlFor="signup-password" className="block text-xs font-extrabold text-gray-500 mb-1">Password</label>
         <input
+          id="signup-password"
           type="password"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -72,7 +81,7 @@ const SignUp = () => {
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold outline-none mb-4 focus:border-purple-400"
         />
 
-        {error && <div className="text-red-500 text-xs font-bold mb-3">{error}</div>}
+        {error && <div className="text-red-500 text-xs font-bold mb-3" role="alert">{error}</div>}
 
         <button
           type="submit"
