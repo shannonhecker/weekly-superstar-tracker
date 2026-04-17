@@ -9,6 +9,13 @@ export function useKidSync(boardId, kidId) {
   const lastLocalWrite = useRef(0)
 
   useEffect(() => {
+    // Drop the previous kid's data immediately on id change so the
+    // consumer (ChildTracker) doesn't briefly render stale data that
+    // belongs to a different kid. Without this, switching from Leo to
+    // Nathan causes `activeKid = liveKid || kid` to resolve to Leo for
+    // the tens-of-milliseconds window before Nathan's snapshot lands.
+    setKid(null)
+    setLoading(true)
     if (!boardId || !kidId || !db) { setLoading(false); return }
     const ref = doc(db, 'boards', boardId, 'kids', kidId)
     const unsub = onSnapshot(ref, (snap) => {
