@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getPetStateByTier, getPetTier } from '../utils/randomPets'
+import PetFace from './PetFace'
 
 const PET_ANIMATIONS = [
   'animate-pet-sleep',
@@ -127,7 +128,9 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
             )}
           </div>
         ) : (
-          <div className={`text-[52px] sm:text-[64px] ${faceAnim}`}>{pet.face}</div>
+          <div className={`inline-block ${faceAnim}`}>
+            <PetFace emoji={pet.face} />
+          </div>
         )}
         {sparkle && (
           <div className="pointer-events-none absolute -top-3 left-0 right-0 flex justify-between">
