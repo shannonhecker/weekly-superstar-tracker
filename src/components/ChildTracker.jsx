@@ -4,6 +4,7 @@ import { getBadge } from '../utils/helpers'
 import { useKidSync } from '../firebase/useFirestoreSync'
 import { updateKid, deleteKid } from '../firebase/kids'
 import { pickRandomPetIndex, pickRandomEggIndex } from '../utils/randomPets'
+import { pickSticker } from '../utils/stickerPicker'
 import ConfettiEffect from './ConfettiEffect'
 import StickerCheck from './StickerCheck'
 import VirtualPet from './VirtualPet'
@@ -420,7 +421,7 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
                         checked={checks[`${act.id}-${d}`]}
                         onClick={() => toggle(`${act.id}-${d}`)}
                         color={act.color}
-                        stickers={theme.stickers}
+                        icon={pickSticker(activeKid.id, act.id, d, activeKid.weekKey, theme.stickers)}
                       />
                     </td>
                   ))}

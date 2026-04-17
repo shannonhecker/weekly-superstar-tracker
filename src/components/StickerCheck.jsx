@@ -1,11 +1,12 @@
 import { useState } from 'react'
 
-const StickerCheck = ({ checked, onClick, color, stickers }) => {
-  const [icon, setIcon] = useState(() => stickers[Math.floor(Math.random() * stickers.length)])
+// Pure sticker cell. The icon is chosen by the caller (see
+// utils/stickerPicker.js) so the emoji is stable across reloads and
+// devices. We only own the local tap-pop animation.
+const StickerCheck = ({ checked, onClick, color, icon }) => {
   const [pop, setPop] = useState(false)
 
   const handleClick = () => {
-    if (!checked) setIcon(stickers[Math.floor(Math.random() * stickers.length)])
     setPop(true)
     setTimeout(() => setPop(false), 400)
     onClick()
