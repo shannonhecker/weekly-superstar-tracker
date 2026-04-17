@@ -21,7 +21,11 @@ import { exportKidJson, exportKidCsv } from '../utils/export'
 
 const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlock }) => {
   const { kid: liveKid, update } = useKidSync(boardId, kid.id)
-  const activeKid = liveKid || kid
+  // Only trust liveKid when it matches the current kid prop. Without
+  // this guard, the first render after a kid switch would use the
+  // previous kid's snapshot - leaving stickers, pet, and grid showing
+  // Leo while Nathan's tab was active, and routing taps to Leo's doc.
+  const activeKid = liveKid?.id === kid.id ? liveKid : kid
 
   const activities = activeKid.activities || []
   const MAX_TOTAL = activities.length * DAYS.length
