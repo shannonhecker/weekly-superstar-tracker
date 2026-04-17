@@ -4,13 +4,16 @@ import PetFace from './PetFace'
 
 const PET_ANIMATIONS = [
   'animate-pet-sleep',
-  'animate-pet-wiggle',
+  'animate-pet-bounce',
   'animate-pet-dance',
   'animate-pet-jump',
   'animate-pet-party',
 ]
 
 const SPARKLES = ['✨', '💫', '⭐', '🌟']
+
+// Aura glow alpha per tier (hex suffix on theme.accent). Egg = none.
+const GLOW_ALPHA = ['00', '66', '88', 'AA', 'CC']
 
 // Fixed pseudo-random motif positions inside the egg oval (percentages).
 const MOTIF_POSITIONS = [
@@ -30,9 +33,13 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
   const anim = PET_ANIMATIONS[tier]
 
   const prevTierRef = useRef(tier)
+  const prevScoreRef = useRef(score)
   const [sparkle, setSparkle] = useState(false)
   const [justAdvanced, setJustAdvanced] = useState(false)
+  const [tapped, setTapped] = useState(false)
+  const [bop, setBop] = useState(false)
 
+  // Stage advance: hatch-pop + sparkles
   useEffect(() => {
     const prev = prevTierRef.current
     prevTierRef.current = tier
@@ -48,25 +55,54 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
     }
   }, [tier])
 
+  // Score went up but stage didn't: quick bop acknowledgement
+  useEffect(() => {
+    const prev = prevScoreRef.current
+    prevScoreRef.current = score
+    if (score > prev && tier > 0) {
+      const prevTier = getPetTier(prev, maxTotal)
+      if (tier === prevTier) {
+        setBop(true)
+        const t = setTimeout(() => setBop(false), 380)
+        return () => clearTimeout(t)
+      }
+    }
+  }, [score, tier, maxTotal])
+
+  const handleTap = () => {
+    if (pet.isEgg || tapped || justAdvanced) return
+    setTapped(true)
+    setSparkle(true)
+    setTimeout(() => setTapped(false), 680)
+    setTimeout(() => setSparkle(false), 900)
+  }
+
   const eggAnim = pet.isEgg
     ? pet.hatchProgress >= 0.75
       ? 'animate-egg-shake'
       : 'animate-pet-wiggle'
     : ''
   const showCrack = pet.isEgg && pet.hatchProgress >= 0.5
-  const faceAnim = justAdvanced ? 'animate-hatch-pop' : anim
+
+  // Priority: tap > stage-advance > score-bop > tier idle
+  const faceAnim = tapped
+    ? 'animate-tap-happy'
+    : justAdvanced
+      ? 'animate-hatch-pop'
+      : bop
+        ? 'animate-score-bop'
+        : anim
 
   const motifs = pet.isEgg
     ? Array.from({ length: Math.min(pet.eggMotifCount || 0, MOTIF_POSITIONS.length) })
     : []
 
-  // Theme-tinted card background
-  const cardBg = theme?.accentLight
-    ? `${theme.accentLight}30`
-    : pet.bg
+  const cardBg = theme?.accentLight ? `${theme.accentLight}30` : pet.bg
   const cardBorder = theme?.accentLight
     ? `2px solid ${theme.accentLight}`
     : `2px solid ${theme?.accentLight || '#E5E7EB'}`
+
+  const glowAlpha = GLOW_ALPHA[tier] || '00'
 
   return (
     <div
@@ -74,9 +110,25 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
       style={{ background: cardBg, border: cardBorder }}
     >
       <div className="relative shrink-0">
+        {/* Tier-coloured aura glow, behind the pet */}
+        {!pet.isEgg && (
+          <div
+            aria-hidden="true"
+            className="absolute pointer-events-none rounded-full animate-aura-pulse"
+            style={{
+              top: '-14px',
+              left: '-14px',
+              right: '-14px',
+              bottom: '-14px',
+              background: `radial-gradient(circle at center, ${theme.accent}${glowAlpha} 0%, transparent 65%)`,
+              filter: 'blur(6px)',
+              zIndex: 0,
+            }}
+          />
+        )}
         {pet.isEgg ? (
           <div
-            className={`relative flex items-center justify-center ${eggAnim}`}
+            className={`relative z-10 flex items-center justify-center ${eggAnim}`}
             style={{
               width: 56,
               height: 66,
@@ -128,12 +180,17 @@ const VirtualPet = ({ score, name, theme, petIdx, eggIdx, maxTotal = 0 }) => {
             )}
           </div>
         ) : (
-          <div className={`inline-block ${faceAnim}`}>
+          <button
+            type="button"
+            onClick={handleTap}
+            aria-label={`Tap ${pet.petName} to play`}
+            className={`relative z-10 inline-block bg-transparent border-0 p-0 cursor-pointer focus:outline-none ${faceAnim}`}
+          >
             <PetFace emoji={pet.face} />
-          </div>
+          </button>
         )}
         {sparkle && (
-          <div className="pointer-events-none absolute -top-3 left-0 right-0 flex justify-between">
+          <div className="pointer-events-none absolute -top-3 left-0 right-0 z-20 flex justify-between">
             {SPARKLES.map((s, i) => (
               <span
                 key={i}
