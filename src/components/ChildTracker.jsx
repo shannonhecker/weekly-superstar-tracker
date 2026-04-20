@@ -141,6 +141,7 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
             date: new Date().toISOString(),
             checks: c,
             petIdx: activeKid.petIdx ?? null,
+            eggIdx: activeKid.eggIdx ?? null,
             theme: activeKid.theme || 'football',
           })
         }
@@ -149,14 +150,35 @@ const ChildTracker = ({ boardId, kid, theme, parentLocked = false, onRequireUnlo
         updates.customLabel = ''
         updates.weekHistory = newHistory
         updates.badges = newBadges
-        updates.petIdx = pickRandomPetIndex()
-        updates.eggIdx = pickRandomEggIndex()
+        // Pet carries over across weeks. Kids form an attachment to
+        // their creature; re-rolling on Monday wipes that out. The
+        // manual "Re-roll mystery pet" in EditKidModal stays as the
+        // opt-in way to swap.
         if (prevTotal > 0) setShowConfetti(true)
       }
       update(updates)
     }, delay)
     return () => clearTimeout(timer)
   }, [activeKid.id, activeKid.weekKey, theme, update])
+
+  // One-shot migration: earlier versions re-rolled petIdx every
+  // Monday, so this Monday a kid may already be on a fresh random
+  // pet while last week's real pet sits in weekHistory. Restore it
+  // once per kid; the `petFixedFromHistory` doc flag prevents this
+  // from undoing a later manual Re-roll.
+  useEffect(() => {
+    if (!activeKid.id) return
+    if (activeKid.petFixedFromHistory) return
+    const history = activeKid.weekHistory || []
+    const lastWithPet = [...history].reverse().find((h) => h && h.petIdx != null)
+    if (!lastWithPet) return
+    const updates = { petFixedFromHistory: true }
+    if (lastWithPet.petIdx !== activeKid.petIdx) {
+      updates.petIdx = lastWithPet.petIdx
+      if (lastWithPet.eggIdx != null) updates.eggIdx = lastWithPet.eggIdx
+    }
+    update(updates)
+  }, [activeKid.id, activeKid.petFixedFromHistory, activeKid.weekHistory, activeKid.petIdx, update])
 
   const today = new Date().getDay()
   const todayKey = DAYS[today === 0 ? 6 : today - 1]

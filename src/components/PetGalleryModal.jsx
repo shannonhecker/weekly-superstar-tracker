@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { getPetByIndex } from '../utils/randomPets'
+import { getPetByIndex, getPetTier } from '../utils/randomPets'
+import { DAYS } from '../utils/constants'
 import PetFace from './PetFace'
 
 // Gallery of every pet this kid has hatched across their weeks. Appeals
@@ -12,6 +13,10 @@ const PetGalleryModal = ({ kid, theme, onClose }) => {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  const currentScore = Object.values(kid.checks || {}).filter(Boolean).length
+  const currentMax = (kid.activities || []).length * DAYS.length
+  const currentTier = getPetTier(currentScore, currentMax)
 
   const seen = new Set()
   const pets = []
@@ -54,7 +59,12 @@ const PetGalleryModal = ({ kid, theme, onClose }) => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {pets.map(({ idx, pet, weekKey, score, current }) => {
-                const adult = pet.states[3]
+                // Current-week tile shows the stage the kid has actually
+                // reached so far. Past weeks show the adult form as a
+                // "trophy" of the creature they raised.
+                const displayState = current
+                  ? (currentTier > 0 ? pet.states[currentTier - 1] : null)
+                  : pet.states[3]
                 return (
                   <div
                     key={idx}
@@ -62,13 +72,17 @@ const PetGalleryModal = ({ kid, theme, onClose }) => {
                     style={{ background: `${theme.accentLight}30`, border: `2px solid ${theme.accentLight}` }}
                   >
                     <div className="mb-1">
-                      <PetFace emoji={adult.face} />
+                      {displayState ? (
+                        <PetFace emoji={displayState.face} />
+                      ) : (
+                        <div className="text-3xl" aria-label="Egg">🥚</div>
+                      )}
                     </div>
                     <div className="text-sm font-extrabold text-gray-800 leading-tight">
                       {pet.name}
                     </div>
                     <div className="text-[11px] font-semibold text-gray-500 leading-tight">
-                      {adult.mood}
+                      {displayState ? displayState.mood : 'Egg — keep tapping!'}
                     </div>
                     <div className="text-[10px] font-semibold mt-1" style={{ color: theme.accent }}>
                       {current ? 'This week' : `${score ?? '—'}★ · ${weekKey || ''}`}
