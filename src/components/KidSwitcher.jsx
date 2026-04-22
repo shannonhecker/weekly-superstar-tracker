@@ -1,0 +1,101 @@
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '../lib/firebase'
+import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
+import { getWeekKey } from '../lib/week'
+import { useToast } from '../contexts/ToastContext'
+import PromptModal from './PromptModal'
+
+// URL-driven kid selection. Active kid is stored in `?kid=<id>`,
+// so a Firestore re-render NEVER resets selection — that's the sticker-bug fix.
+export default function KidSwitcher({ kids, activeKidId, boardId }) {
+  const navigate = useNavigate()
+  const { boardId: currentBoardId } = useParams()
+  const [promptOpen, setPromptOpen] = useState(false)
+  const toast = useToast()
+
+  const setActive = (id) => {
+    navigate(`/board/${currentBoardId}?kid=${encodeURIComponent(id)}`, { replace: true })
+  }
+
+  const addKid = async (rawName) => {
+    const name = (rawName || '').trim()
+    setPromptOpen(false)
+    if (!name) return
+    const themeKeys = Object.keys(THEMES)
+    const theme = themeKeys[kids.length % themeKeys.length]
+    try {
+      await addDoc(collection(db, 'boards', boardId, 'kids'), {
+        name,
+        theme,
+        order: kids.length,
+        activities: DEFAULT_ACTIVITIES,
+        checks: {},
+        stickers: {},
+        badges: [],
+        petName: null,
+        reward: null,
+        weekKey: getWeekKey(),
+        weekHistory: {},
+        chainKey: null,
+        favoritePet: null,
+        createdAt: serverTimestamp(),
+      })
+    } catch (e) {
+      toast.error('Could not add superstar — try again')
+    }
+  }
+
+  return (
+    <div className="flex gap-3 justify-center mb-4 overflow-x-auto pb-1 -mx-3 px-3 flex-wrap">
+      {kids.map((kid) => {
+        const theme = THEMES[kid.theme] || THEMES.football
+        const isActive = kid.id === activeKidId
+        return (
+          <button
+            key={kid.id}
+            onClick={() => setActive(kid.id)}
+            className="flex flex-col items-center gap-1.5 shrink-0 transition-all"
+          >
+            <div
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl transition-all"
+              style={{
+                background: `${theme.accent}33`,
+                border: isActive ? `3px solid ${theme.accent}` : '3px solid transparent',
+                boxShadow: isActive ? `0 4px 14px ${theme.accent}44` : 'none',
+              }}
+            >
+              {theme.emoji}
+            </div>
+            <span
+              className="text-xs font-bold truncate max-w-[4.5rem]"
+              style={{ color: isActive ? theme.accent : '#9CA3AF' }}
+            >
+              {kid.name}
+            </span>
+          </button>
+        )
+      })}
+      <button
+        onClick={() => setPromptOpen(true)}
+        className="flex flex-col items-center gap-1.5 shrink-0"
+      >
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-gray-300 text-gray-400">
+          +
+        </div>
+        <span className="text-xs font-bold text-gray-400">Add</span>
+      </button>
+
+      <PromptModal
+        open={promptOpen}
+        onClose={() => setPromptOpen(false)}
+        onSubmit={addKid}
+        emoji="⭐"
+        title="Add a new superstar"
+        submitLabel="Add"
+        fields={[{ name: 'name', label: 'Name', placeholder: 'e.g. Leo', defaultValue: '' }]}
+      />
+    </div>
+  )
+}

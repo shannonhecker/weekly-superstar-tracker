@@ -1,0 +1,44 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './contexts/AuthContext'
+import Landing from './pages/Landing'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
+import ForgotPassword from './pages/ForgotPassword'
+import Join from './pages/Join'
+import Board from './pages/Board'
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth()
+  if (loading) return <FullPageSpinner />
+  if (!user) return <Navigate to="/signin" replace />
+  return children
+}
+
+function FullPageSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-3xl animate-pulse">⭐</div>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/join/:code" element={<Join />} />
+      <Route
+        path="/board/:boardId"
+        element={
+          <ProtectedRoute>
+            <Board />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}

@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+
+@keyframes egg-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+.egg-wobble { animation: egg-wobble 1.4s ease-in-out infinite; transform-origin: center 70%; }
+
+@keyframes egg-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.egg-float { animation: egg-float 2.2s ease-in-out infinite; }
+
+@keyframes crack-draw {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
+.crack-draw { stroke-dasharray: 40; animation: crack-draw 0.6s ease-out forwards; }
+
+@keyframes shell-float {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--sx, 0), -20px) rotate(var(--sr, 0)); opacity: 0; }
+}
+.shell-float { animation: shell-float 1.4s ease-out infinite; }
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.sparkle { animation: sparkle 1.6s ease-in-out infinite; }
+
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pop-in { animation: pop-in 0.32s ease-out; }
+
+@keyframes modal-in {
+  from { transform: scale(0.92) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-in { animation: modal-in 0.22s ease-out; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fade-in { animation: fade-in 0.2s ease-out; }
+
+@keyframes hatch-reveal {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(360deg); opacity: 1; }
+  100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+.hatch-reveal { animation: hatch-reveal 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+@keyframes avatar-bounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+  70% { transform: translateY(2px); }
+}
+.avatar-bounce { animation: avatar-bounce 0.4s ease-out; }
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); filter: brightness(1); }
+  50% { transform: scale(1.08) rotate(2deg); filter: brightness(1.15); }
+}
+.flame-flicker { animation: flame-flicker 1.2s ease-in-out infinite; display: inline-block; }
+
+@keyframes badge-flash {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); }
+  50% { transform: scale(1.25); filter: drop-shadow(0 0 10px #FFE066); }
+}
+.badge-flash { animation: badge-flash 1.2s ease-in-out; }
+
+@keyframes box-jitter {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-3px, -1px) rotate(-4deg); }
+  40% { transform: translate(3px, 1px) rotate(4deg); }
+  60% { transform: translate(-2px, 2px) rotate(-3deg); }
+  80% { transform: translate(2px, -2px) rotate(3deg); }
+}
+.box-jitter { animation: box-jitter 0.6s ease-in-out; }
+
+@keyframes today-pulse {
+  0%, 100% { opacity: 1; transform: scaleX(1); }
+  50% { opacity: 0.5; transform: scaleX(1.15); }
+}
+.today-pulse { animation: today-pulse 2s ease-in-out infinite; transform-origin: center; }
+
+@keyframes pet-dance {
+  0%, 100% { transform: rotate(0) scale(1) translateY(0); }
+  15% { transform: rotate(-10deg) scale(1.03) translateY(-3px); }
+  30% { transform: rotate(0) scale(1); }
+  45% { transform: rotate(10deg) scale(1.03) translateY(-3px); }
+  60% { transform: rotate(0) scale(1.08); }
+  75% { transform: rotate(-5deg) scale(1); }
+  90% { transform: rotate(5deg) scale(1.04); }
+}
+.pet-dance { animation: pet-dance 2.6s ease-in-out infinite; transform-origin: center bottom; }
+
+@keyframes pet-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+.pet-sway { animation: pet-sway 3s ease-in-out infinite; transform-origin: center bottom; }
+
+@keyframes pet-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+.pet-wiggle { animation: pet-wiggle 1.8s ease-in-out infinite; transform-origin: center bottom; }
+
+@keyframes bg-rainbow {
+  0% { background: radial-gradient(circle, #FFD6E8 0%, transparent 70%); }
+  25% { background: radial-gradient(circle, #FFE4A0 0%, transparent 70%); }
+  50% { background: radial-gradient(circle, #C4F4D4 0%, transparent 70%); }
+  75% { background: radial-gradient(circle, #C9DFFF 0%, transparent 70%); }
+  100% { background: radial-gradient(circle, #FFD6E8 0%, transparent 70%); }
+}
+.bg-rainbow { animation: bg-rainbow 5s linear infinite; }
+
+/* Stage-transition "level-up" burst — fires once when the kid crosses a stage threshold. */
+@keyframes level-up-burst {
+  0% { transform: scale(1) rotate(0); filter: brightness(1); }
+  30% { transform: scale(1.3) rotate(-15deg); filter: brightness(1.4) drop-shadow(0 0 12px #FFD166); }
+  55% { transform: scale(0.95) rotate(10deg); filter: brightness(1.2); }
+  80% { transform: scale(1.1) rotate(-5deg); filter: brightness(1.1); }
+  100% { transform: scale(1) rotate(0); filter: brightness(1); }
+}
+.level-up-burst { animation: level-up-burst 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+/* Stage 2: gentle bob for "growing" */
+@keyframes pet-grow-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.04); }
+}
+.pet-grow-bob { animation: pet-grow-bob 2s ease-in-out infinite; }
+
+/* Stage 3: happy hop */
+@keyframes pet-hop {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-6px); }
+  40% { transform: translateY(0); }
+  60% { transform: translateY(-3px); }
+  80% { transform: translateY(0); }
+}
+.pet-hop { animation: pet-hop 1.8s ease-in-out infinite; }
+
+/* Stage 4: excited pulse + small rotation */
+@keyframes pet-excited {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  25% { transform: rotate(3deg) scale(1.05); }
+  50% { transform: rotate(-3deg) scale(1); }
+  75% { transform: rotate(3deg) scale(1.03); }
+}
+.pet-excited { animation: pet-excited 1.3s ease-in-out infinite; }
+
+/* Stage 5: confident strut — slight lean + subtle zoom pulse */
+@keyframes pet-strut {
+  0%, 100% { transform: rotate(-4deg) scale(1); }
+  50% { transform: rotate(6deg) scale(1.05); }
+}
+.pet-strut { animation: pet-strut 2.4s ease-in-out infinite; }
+
+/* Emotion overlay bobbing so it feels alive */
+@keyframes emotion-bob {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-3px) rotate(5deg); }
+}
+.emotion-bob { animation: emotion-bob 1.6s ease-in-out infinite; }
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  background:
+    radial-gradient(at 0% 0%, #FFF0F8 0%, transparent 45%),
+    radial-gradient(at 100% 0%, #F0F4FF 0%, transparent 45%),
+    radial-gradient(at 50% 100%, #FFF8E0 0%, transparent 50%),
+    #FBF7FF;
+  background-attachment: fixed;
+  color: #4a4458;
+  -webkit-font-smoothing: antialiased;
+}
