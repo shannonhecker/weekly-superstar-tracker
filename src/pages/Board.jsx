@@ -17,6 +17,8 @@ import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
 import WeeklySummary from '../components/WeeklySummary'
+import { KidAvatar } from '../components/KidAvatar'
+import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_ASSET, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 
@@ -310,15 +312,11 @@ export default function Board() {
                 className="rounded-3xl p-3 sm:p-4"
                 style={{ background: `linear-gradient(180deg, ${activeTheme.accent}1F 0%, ${activeTheme.accent}08 100%)` }}
               >
+                <BirthdayBanner kid={activeKid} />
                 {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0"
-                      style={{ background: `${activeTheme.accent}33` }}
-                    >
-                      {activeTheme.emoji}
-                    </div>
+                    <KidAvatar kid={activeKid} size={40} />
                     <h2 className="text-lg sm:text-xl font-black font-display truncate">{activeKid.name}</h2>
                     <button
                       onClick={() => setEditKidOpen(true)}
@@ -350,6 +348,21 @@ export default function Board() {
                           ⭐ {activeKid.favoritePet.petName || activeKid.favoritePet.chainLabel || 'Favorite'}
                         </span>
                       </button>
+                    )}
+                    {activeKid.custodyLabel && (
+                      <span
+                        className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: `${activeTheme.accent}33`,
+                          color: activeTheme.deeper,
+                        }}
+                        aria-label={`At ${activeKid.custodyLabel} this week`}
+                      >
+                        <span className="text-[12px]" aria-hidden>🏠</span>
+                        <span className="text-[11px] font-bold truncate max-w-[120px]">
+                          {activeKid.custodyLabel}
+                        </span>
+                      </span>
                     )}
                   </div>
                   <div className="px-2 py-1 rounded-lg bg-white text-xs font-bold text-gray-600 shrink-0">

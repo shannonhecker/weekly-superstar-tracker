@@ -9,6 +9,10 @@ const EGG_PATTERNS = {
   animals:  { spots: '#8B5E3C', spotShape: 'paw' },
   rocket:   { spots: '#FFD700', spotShape: 'star' },
   princess: { spots: '#FFFFFF', spotShape: 'heart' },
+  ocean:    { spots: '#FFFFFF', spotShape: 'drop' },
+  garden:   { spots: '#FFF7D1', spotShape: 'flower' },
+  robot:    { spots: '#F4D35E', spotShape: 'bolt' },
+  magic:    { spots: '#FFFFFF', spotShape: 'moon' },
 }
 
 function Spot({ shape, x, y, color, scale = 1 }) {
@@ -25,10 +29,23 @@ function Spot({ shape, x, y, color, scale = 1 }) {
       <circle cx="3" cy="-2" r="1.3" />
     </g>
   )
+  if (shape === 'drop') return <path transform={t} d="M0,-6 C3,-2 4,1 4,3 C4,5.2 2.2,7 0,7 C-2.2,7 -4,5.2 -4,3 C-4,1 -3,-2 0,-6 Z" fill={color} />
+  if (shape === 'flower') return (
+    <g transform={t} fill={color}>
+      <circle cx="0" cy="-4" r="2" />
+      <circle cx="3.8" cy="-1.2" r="2" />
+      <circle cx="2.4" cy="3.2" r="2" />
+      <circle cx="-2.4" cy="3.2" r="2" />
+      <circle cx="-3.8" cy="-1.2" r="2" />
+      <circle cx="0" cy="0" r="1.3" fill="#FFD15C" />
+    </g>
+  )
+  if (shape === 'bolt') return <path transform={t} d="M1,-7 L-3,1 L0,1 L-1,7 L3,-1 L0,-1 Z" fill={color} />
+  if (shape === 'moon') return <path transform={t} d="M2,-6 C-2,-6 -5,-3 -5,1 C-5,5 -2,8 2,8 C0,7 -1,4 -1,1 C-1,-2 0,-5 2,-6 Z" fill={color} />
   return <circle transform={t} r="3" fill={color} />
 }
 
-function ThemedSvgEgg({ themeKey, accent, size }) {
+function ThemedSvgEgg({ themeKey, accent, size, rare }) {
   const pattern = EGG_PATTERNS[themeKey] || EGG_PATTERNS.dinosaur
   const gradId = `egg-grad-${themeKey || 'default'}`
   const shadowId = `egg-shadow-${themeKey || 'default'}`
@@ -50,6 +67,23 @@ function ThemedSvgEgg({ themeKey, accent, size }) {
           <feDropShadow dx="0" dy="3" stdDeviation="2" floodOpacity="0.18" />
         </filter>
       </defs>
+      {rare && (
+        <g>
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+            const rad = (deg * Math.PI) / 180
+            const cx = 50 + Math.cos(rad) * 48
+            const cy = 70 + Math.sin(rad) * 60
+            return (
+              <path
+                key={deg}
+                transform={`translate(${cx} ${cy})`}
+                d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z"
+                fill="#FFD166"
+              />
+            )
+          })}
+        </g>
+      )}
       <g filter={`url(#${shadowId})`}>
         <ellipse cx="50" cy="70" rx="42" ry="55" fill={`url(#${gradId})`} />
         <Spot shape={pattern.spotShape} x={32} y={50} color={pattern.spots} scale={0.9} />
@@ -187,7 +221,7 @@ function PetImage({ emoji, sizePx, className, style }) {
   )
 }
 
-export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size = 96 }) {
+export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size = 96, rare = false }) {
   const stage = progressToStage(totalStars, max)
 
   // Stage 0: themed SVG egg with dotted pattern & pastel gradient (original design)
@@ -197,7 +231,7 @@ export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size 
         className="relative flex items-center justify-center"
         style={{ width: size, height: size }}
       >
-        <ThemedSvgEgg themeKey={themeKey} accent={accent} size={size} />
+        <ThemedSvgEgg themeKey={themeKey} accent={accent} size={size} rare={rare} />
       </div>
     )
   }

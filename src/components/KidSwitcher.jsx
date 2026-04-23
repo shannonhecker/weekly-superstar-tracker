@@ -6,6 +6,7 @@ import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
 import { useToast } from '../contexts/ToastContext'
 import PromptModal from './PromptModal'
+import { KidAvatar } from './KidAvatar'
 
 // URL-driven kid selection. Active kid is stored in `?kid=<id>`,
 // so a Firestore re-render NEVER resets selection — that's the sticker-bug fix.
@@ -59,14 +60,17 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
             className="flex flex-col items-center gap-1.5 shrink-0 transition-all"
           >
             <div
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl transition-all"
+              className="transition-all"
               style={{
-                background: `${theme.accent}33`,
-                border: isActive ? `3px solid ${theme.accent}` : '3px solid transparent',
                 boxShadow: isActive ? `0 4px 14px ${theme.accent}44` : 'none',
+                borderRadius: '999px',
               }}
             >
-              {theme.emoji}
+              <KidAvatar
+                kid={kid}
+                size={64}
+                borderColor={isActive ? theme.accent : 'transparent'}
+              />
             </div>
             <span
               className="text-xs font-bold truncate max-w-[4.5rem]"

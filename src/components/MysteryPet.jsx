@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { THEMES, EGG_NAMES, PET_CHAINS, PET_ASSET, chainFor, petAtStage, stageToChainIdx, progressToStage, HATCH_GOAL } from '../lib/themes'
+import { THEMES, EGG_NAMES, PET_CHAINS, PET_ASSET, chainFor, isRareChain, petAtStage, stageToChainIdx, progressToStage, HATCH_GOAL } from '../lib/themes'
 import Modal from './Modal'
 import { getWeekKey } from '../lib/week'
 import { useToast } from '../contexts/ToastContext'
@@ -52,6 +52,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
   const stage = progressToStage(totalStars, HATCH_GOAL)
   const { emoji: petEmoji, name: petDisplayName } = petAtStage(chainKey, stage)
   const isHatched = totalStars >= HATCH_GOAL
+  const isRare = isRareChain(chainKey)
   const petName = kid.petName
   const petNameDeclined = kid.petNameDeclined
   const remaining = Math.max(0, HATCH_GOAL - totalStars)
@@ -177,6 +178,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
             max={HATCH_GOAL}
             petEmoji={petEmoji}
             size={64}
+            rare={isRare}
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -235,11 +237,12 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         onClose={() => setEvolution(null)}
         emoji={evolution?.kind === 'hatch' ? '🎉' : evolution?.kind === 'adult' ? '🏆' : '✨'}
         title={
-          evolution?.kind === 'hatch'
+          (isRare && evolution?.kind === 'hatch' ? '✨ Rare find! ' : '') +
+          (evolution?.kind === 'hatch'
             ? `${kid.name}'s egg cracked!`
             : evolution?.kind === 'adult'
               ? `${kid.name}'s pet is all grown!`
-              : `${kid.name}'s pet grew up!`
+              : `${kid.name}'s pet grew up!`)
         }
       >
         <div className="flex flex-col items-center py-4">
