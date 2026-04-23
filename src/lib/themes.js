@@ -10,6 +10,7 @@ export {
   stageToChainIdx,
   progressToStage,
   chainFor,
+  pickFreshChain,
   assignChainsForBoard,
   petAtStage,
   adultPet,

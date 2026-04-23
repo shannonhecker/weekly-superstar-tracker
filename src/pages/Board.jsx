@@ -18,7 +18,7 @@ import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
 import WeeklySummary from '../components/WeeklySummary'
 import { isMuted, setMuted } from '../lib/sounds'
-import { assignChainsForBoard, PET_ASSET, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import { assignChainsForBoard, pickFreshChain, PET_ASSET, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 
 const HATCH_GOAL = 50
 
@@ -130,18 +130,32 @@ export default function Board() {
 
   // Auto-rollover on Monday: when the calendar advances to a new week, archive
   // the outgoing week's pet into weekHistory, reset progress, and assign a fresh
-  // chain. Mirrors what the "New week" button does, so kids always get a new
-  // random pet each week AND last week's pet is preserved in the Pet Collection.
-  // When only chainKey is missing (brand-new kid), just set it — no archive.
+  // chain via pickFreshChain — random but avoids each kid's recent chains AND
+  // chains already picked for siblings this week. Preserves last week's pet in
+  // weekHistory. When only chainKey is missing (brand-new kid), just set it —
+  // no archive.
   useEffect(() => {
     if (loading || kids.length === 0) return
+    const usedThisWeek = new Set()
     for (const kid of kids) {
-      const assigned = chainAssignment[kid.id]
-      if (!assigned) continue
       const weekChanged = kid.weekKey && kid.weekKey !== thisWeekKey
       const chainMissing = !kid.chainKey
+      if (!weekChanged && !chainMissing) {
+        if (kid.chainKey) usedThisWeek.add(kid.chainKey)
+        continue
+      }
+      const recent = []
+      if (kid.chainKey) recent.push(kid.chainKey)
+      const history = kid.weekHistory || {}
+      const pastKeys = Object.keys(history).sort().slice(-4)
+      for (const k of pastKeys) {
+        const c = history[k]?.chainKey
+        if (c) recent.push(c)
+      }
+      for (const used of usedThisWeek) recent.push(used)
+      const picked = pickFreshChain(recent)
+      usedThisWeek.add(picked)
       if (weekChanged) {
-        // Roll over: archive the outgoing week, reset progress, set new chain.
         const oldKey = kid.weekKey
         const oldChainKey = kid.chainKey || 'cats'
         const oldStars = totalStarsFor(kid)
@@ -161,16 +175,16 @@ export default function Board() {
           petName: null,
           petNameDeclined: false,
           weekKey: thisWeekKey,
-          chainKey: assigned,
+          chainKey: picked,
         }).catch(() => {})
-      } else if (chainMissing) {
+      } else {
         updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
-          chainKey: assigned,
+          chainKey: picked,
           weekKey: thisWeekKey,
         }).catch(() => {})
       }
     }
-  }, [loading, kids, thisWeekKey, chainAssignment, boardId])
+  }, [loading, kids, thisWeekKey, boardId])
 
   const onSignOut = async () => {
     await signOut(auth)
