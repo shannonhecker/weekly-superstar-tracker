@@ -167,7 +167,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
       <button
         onClick={onClose}
         disabled={busy}
-        className="w-full mt-4 py-2 rounded-xl text-gray-400 font-bold text-sm"
+        className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
       >
         Done
       </button>

@@ -88,7 +88,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                     key={tier.stars}
                     title={`${tier.stars} stars`}
                     className={`text-2xl transition-all ${flashIdx === idx ? 'badge-flash' : ''}`}
-                    style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.3 }}
+                    style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                   >
                     {tier.emoji}
                   </div>
@@ -103,7 +103,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                     key={a.id}
                     title={a.label}
                     className={`text-lg transition-all ${flashAchievement === a.id ? 'badge-flash' : ''}`}
-                    style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.25 }}
+                    style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                   >
                     {a.emoji}
                   </div>
@@ -126,7 +126,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
               <div key={tier.stars} className="flex items-center gap-3 p-2 rounded-xl mb-1">
                 <div
                   className="text-3xl shrink-0"
-                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.35 }}
+                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                 >
                   {tier.emoji}
                 </div>
@@ -140,7 +140,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#EEE' }}>
                         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
                       </div>
-                      <div className="text-[10px] text-gray-400 font-bold mt-0.5">{remaining} more to go</div>
+                      <div className="text-[11px] text-gray-500 font-bold mt-0.5">{remaining} more to go</div>
                     </div>
                   )}
                 </div>
@@ -159,7 +159,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
               <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl mb-1">
                 <div
                   className="text-3xl shrink-0"
-                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.35 }}
+                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                 >
                   {a.emoji}
                 </div>
@@ -176,7 +176,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         </div>
         <button
           onClick={() => setDetailsOpen(false)}
-          className="w-full mt-4 py-2 rounded-xl text-gray-400 font-bold text-sm"
+          className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
         >
           Close
         </button>

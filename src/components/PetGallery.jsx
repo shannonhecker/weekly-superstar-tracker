@@ -90,7 +90,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         <div className="mb-4">
           <div className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2">🎁 Mystery Treasures</div>
           {rareEntries.length === 0 && bonusStars === 0 ? (
-            <p className="text-xs text-gray-400 font-bold py-2">
+            <p className="text-xs text-gray-500 font-bold py-2">
               Keep tapping stickers — mystery boxes appear once in a while!
             </p>
           ) : (
@@ -169,7 +169,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 aria-label={currentFav ? 'Unset favorite' : 'Set as favorite'}
                 aria-pressed={currentFav}
                 className="shrink-0 text-lg px-2"
-                style={{ color: currentFav ? '#F59E0B' : '#D1D5DB' }}
+                style={{ color: currentFav ? '#F59E0B' : '#6B7280' }}
               >
                 {currentFav ? '⭐' : '☆'}
               </button>
@@ -187,7 +187,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         })()}
 
         {entries.length === 0 && (
-          <p className="text-xs text-gray-400 font-bold py-2">
+          <p className="text-xs text-gray-500 font-bold py-2">
             No past weeks yet.
           </p>
         )}
@@ -232,14 +232,14 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 aria-label={isFav ? 'Unset favorite' : 'Set as favorite'}
                 aria-pressed={isFav}
                 className="shrink-0 text-lg px-2"
-                style={{ color: isFav ? '#F59E0B' : '#D1D5DB' }}
+                style={{ color: isFav ? '#F59E0B' : '#6B7280' }}
               >
                 {isFav ? '⭐' : '☆'}
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); deleteEntry(weekKey) }}
                 aria-label="Delete history entry"
-                className="shrink-0 text-gray-300 hover:text-red-400 text-lg px-2"
+                className="shrink-0 text-gray-500 hover:text-red-400 text-lg px-2"
               >
                 🗑
               </button>
@@ -249,7 +249,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
       </div>
       <button
         onClick={onClose}
-        className="w-full mt-4 py-2 rounded-xl text-gray-400 font-bold text-sm"
+        className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
       >
         Close
       </button>

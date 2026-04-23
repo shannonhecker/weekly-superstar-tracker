@@ -85,10 +85,10 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         onClick={() => setPromptOpen(true)}
         className="flex flex-col items-center gap-1.5 shrink-0"
       >
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-gray-300 text-gray-400">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-gray-300 text-gray-500">
           +
         </div>
-        <span className="text-xs font-bold text-gray-400">Add</span>
+        <span className="text-xs font-bold text-gray-500">Add</span>
       </button>
 
       <PromptModal

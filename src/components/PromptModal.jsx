@@ -57,7 +57,7 @@ export default function PromptModal({
         <button
           type="button"
           onClick={onClose}
-          className="w-full mt-2 py-2 rounded-xl text-gray-400 font-bold text-sm"
+          className="w-full mt-2 py-2 rounded-xl text-gray-500 font-bold text-sm"
         >
           {cancelLabel}
         </button>

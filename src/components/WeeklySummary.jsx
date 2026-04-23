@@ -144,7 +144,7 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
   return (
     <Modal open={open} onClose={onClose} title={`${kid?.name || 'Your'}'s week recap`} emoji="🎉">
-      <div className="text-center -mt-2 mb-3 text-xs font-bold text-gray-400">
+      <div className="text-center -mt-2 mb-3 text-xs font-bold text-gray-500">
         {formatWeekRange(weekKey)}
       </div>
 
@@ -190,7 +190,7 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
         <div className="mb-4 rounded-2xl p-3 border border-gray-100"
           style={{ background: `${theme.accent}10` }}
         >
-          <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1.5">
+          <div className="text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1.5">
             ✨ What went well
           </div>
           <ul className="space-y-1">
@@ -227,7 +227,7 @@ function Stat({ icon, label, value }) {
     <div className="bg-white rounded-xl border border-gray-100 p-2.5 flex items-center gap-2 shadow-card">
       <div className="text-lg shrink-0" aria-hidden>{icon}</div>
       <div className="min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{label}</div>
+        <div className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{label}</div>
         <div className="text-sm font-black font-display text-gray-700 truncate">{value}</div>
       </div>
     </div>

@@ -435,10 +435,10 @@ export default function Board() {
         onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
       />
 
-      <p className="text-center text-gray-300 text-[11px] mt-6 font-semibold">
+      <p className="text-center text-gray-500 text-[12px] mt-6 font-semibold">
         💡 Tap a sticker square to mark it. Switch kids with the avatars above.
       </p>
-      <p className="text-center text-gray-300 text-[10px] mt-1 font-semibold">
+      <p className="text-center text-gray-500 text-[11px] mt-1 font-semibold">
         Pet art:{' '}
         <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline">Microsoft Fluent Emoji</a>
         {' '}(MIT)

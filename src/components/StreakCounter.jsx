@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getCurrentWeek } from '../lib/week'
 import { THEMES } from '../lib/themes'
 
@@ -16,9 +17,24 @@ function calculateStreak(kid, days) {
 }
 
 export default function StreakCounter({ kid }) {
-  const { days } = getCurrentWeek()
-  const streak = calculateStreak(kid, days)
+  const days = useMemo(() => getCurrentWeek().days, [])
+  const streak = useMemo(
+    () => calculateStreak(kid, days),
+    [kid.checks, kid.activities, days],
+  )
   const theme = THEMES[kid.theme] || THEMES.football
+
+  // Re-mount the streak text via key when the number changes so it pulses
+  // in — gives parents visible confirmation when the 7th tick lands.
+  const prevStreakRef = useRef(streak)
+  const [pulseKey, setPulseKey] = useState(0)
+  useEffect(() => {
+    if (prevStreakRef.current !== streak) {
+      prevStreakRef.current = streak
+      setPulseKey((k) => k + 1)
+    }
+  }, [streak])
+
   return (
     <div
       className="rounded-2xl p-3 flex items-center gap-3 h-full bg-white shadow-card"
@@ -30,10 +46,10 @@ export default function StreakCounter({ kid }) {
         className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shrink-0"
         style={{ background: `${theme.accent}33` }}
       >
-        {streak > 0 ? <span className="flame-flicker">🔥</span> : '💤'}
+        {streak > 0 ? <span className="flame-flicker" key={`emoji-${pulseKey}`}>🔥</span> : <span key={`emoji-${pulseKey}`}>💤</span>}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-black font-display text-gray-700">
+        <div className="text-sm font-black font-display text-gray-700" key={`label-${pulseKey}`}>
           {streak > 0 ? `${streak}-day streak!` : 'No streak yet'}
         </div>
         <div className="text-[11px] font-bold mt-0.5" style={{ color: theme.deeper, opacity: 0.85 }}>

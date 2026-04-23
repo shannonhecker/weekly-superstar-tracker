@@ -37,12 +37,12 @@ export default function ShareModal({ open, onClose, shareCode }) {
         >
           {copied ? 'Copied!' : 'Copy link'}
         </button>
-        <p className="text-center text-xs text-gray-400 mt-3 font-bold">
+        <p className="text-center text-xs text-gray-500 mt-3 font-bold">
           Code: {shareCode}
         </p>
         <button
           onClick={onClose}
-          className="w-full mt-2 py-2 rounded-xl text-gray-400 font-bold text-sm"
+          className="w-full mt-2 py-2 rounded-xl text-gray-500 font-bold text-sm"
         >
           Close
         </button>

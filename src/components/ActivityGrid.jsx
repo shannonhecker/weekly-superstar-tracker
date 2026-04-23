@@ -69,9 +69,13 @@ export default function ActivityGrid({ kid, boardId }) {
           setMysteryPrize(prize)
           setMysteryOpen(true)
         }
-        // Daily clean-sweep: every activity checked for this day now.
-        const allDone = activities.every((a) => a.id === activityId || checks[`${a.id}-${dayKey}`])
-        if (allDone && activities.length > 0) {
+        // Daily clean-sweep: use the POST-toggle checks so uncheck/re-check
+        // edges don't false-fire via the stale closure.
+        const nextChecks = { ...checks, [key]: next }
+        const allDone =
+          activities.length > 0 &&
+          activities.every((a) => nextChecks[`${a.id}-${dayKey}`])
+        if (allDone) {
           setTimeout(() => { celebrate('day'); play('cheer') }, 250)
         }
       }
@@ -93,8 +97,8 @@ export default function ActivityGrid({ kid, boardId }) {
                 d.date.toDateString() === today.toDateString()
               return (
                 <th key={d.key} className="px-1 py-2 font-bold relative">
-                  <div className={isToday ? 'text-emerald-600' : ''}>{d.label}</div>
-                  <div className={`text-[9px] font-bold ${isToday ? 'text-emerald-600' : 'text-gray-300'}`}>
+                  <div className={isToday ? 'text-emerald-600' : 'text-gray-600'}>{d.label}</div>
+                  <div className={`text-[11px] font-bold ${isToday ? 'text-emerald-600' : 'text-gray-500'}`}>
                     {monthShort(d.date)} {d.date.getDate()}
                   </div>
                   {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />}
