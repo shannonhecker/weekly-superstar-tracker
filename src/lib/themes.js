@@ -12,7 +12,6 @@ export {
   progressToStage,
   chainFor,
   pickFreshChain,
-  isRareChain,
   assignChainsForBoard,
   petAtStage,
   adultPet,

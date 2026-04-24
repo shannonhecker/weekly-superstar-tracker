@@ -45,7 +45,7 @@ function Spot({ shape, x, y, color, scale = 1 }) {
   return <circle transform={t} r="3" fill={color} />
 }
 
-function ThemedSvgEgg({ themeKey, accent, size, rare }) {
+function ThemedSvgEgg({ themeKey, accent, size }) {
   const pattern = EGG_PATTERNS[themeKey] || EGG_PATTERNS.dinosaur
   const gradId = `egg-grad-${themeKey || 'default'}`
   const shadowId = `egg-shadow-${themeKey || 'default'}`
@@ -67,23 +67,6 @@ function ThemedSvgEgg({ themeKey, accent, size, rare }) {
           <feDropShadow dx="0" dy="3" stdDeviation="2" floodOpacity="0.18" />
         </filter>
       </defs>
-      {rare && (
-        <g>
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
-            const rad = (deg * Math.PI) / 180
-            const cx = 50 + Math.cos(rad) * 48
-            const cy = 70 + Math.sin(rad) * 60
-            return (
-              <path
-                key={deg}
-                transform={`translate(${cx} ${cy})`}
-                d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z"
-                fill="#FFD166"
-              />
-            )
-          })}
-        </g>
-      )}
       <g filter={`url(#${shadowId})`}>
         <ellipse cx="50" cy="70" rx="42" ry="55" fill={`url(#${gradId})`} />
         <Spot shape={pattern.spotShape} x={32} y={50} color={pattern.spots} scale={0.9} />
@@ -221,7 +204,7 @@ function PetImage({ emoji, sizePx, className, style }) {
   )
 }
 
-export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size = 96, rare = false }) {
+export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size = 96 }) {
   const stage = progressToStage(totalStars, max)
 
   // Stage 0: themed SVG egg with dotted pattern & pastel gradient (original design)
@@ -231,7 +214,7 @@ export default function Egg({ themeKey, accent, totalStars, max, petEmoji, size 
         className="relative flex items-center justify-center"
         style={{ width: size, height: size }}
       >
-        <ThemedSvgEgg themeKey={themeKey} accent={accent} size={size} rare={rare} />
+        <ThemedSvgEgg themeKey={themeKey} accent={accent} size={size} />
       </div>
     )
   }
