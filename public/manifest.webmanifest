@@ -1,0 +1,23 @@
+{
+  "name": "Winking Star",
+  "short_name": "Winking Star",
+  "description": "A weekly sticker chart that turns daily routines into a celebratory journey for kids.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF7FF",
+  "theme_color": "#EC4899",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
