@@ -18,11 +18,11 @@ export default function ShareModal({ open, onClose, shareCode }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-earthy-cocoa/55 backdrop-blur-sm flex items-center justify-center px-5 fade-in"
+      className="fixed inset-0 z-50 bg-white/80 backdrop-blur-md flex items-center justify-center px-5 fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-earthy-cream rounded-3xl p-6 max-w-md w-full shadow-earthy-lifted modal-in font-jakarta"
+        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-earthy-lifted ring-1 ring-earthy-divider modal-in font-jakarta"
       >
         <div className="text-center mb-4">
           <div className="text-4xl mb-2">🔗</div>

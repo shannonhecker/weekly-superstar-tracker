@@ -19,6 +19,8 @@ export default {
         brand: colors.brand,
         fav: colors.fav,
         surface: colors.surface,
+        earthy: colors.earthy,
+        semantic: colors.semantic,
       },
       borderRadius: {
         pill: radii.pill,
@@ -26,6 +28,9 @@ export default {
       boxShadow: {
         card: shadowsCss.card,
         pop: shadowsCss.pop,
+        'earthy-flat': shadowsCss.earthyFlat,
+        'earthy-soft': shadowsCss.earthySoft,
+        'earthy-lifted': shadowsCss.earthyLifted,
       },
       transitionTimingFunction: {
         spring: motion.springCss,

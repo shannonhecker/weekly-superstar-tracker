@@ -22,6 +22,7 @@ import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 import Logo from '../components/Logo'
+import ThemeScene from '../components/ThemeScene'
 
 const HATCH_GOAL = 50
 
@@ -232,7 +233,14 @@ export default function Board() {
   const { monday, sunday } = getCurrentWeek()
 
   return (
-    <div className="min-h-screen bg-earthy-ivory px-3 sm:px-4 py-3 sm:py-4 pb-10 font-jakarta">
+    <div className="relative min-h-screen bg-earthy-ivory px-3 sm:px-4 py-3 sm:py-4 pb-10 font-jakarta">
+      {/* Per-kid bg wash — subtle ~8% accent overlay over ivory, fades when switching kids. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 transition-colors duration-500"
+        style={{ backgroundColor: `${activeTheme.accent}14` }}
+      />
+      <div className="relative z-10">
       <OfflineBanner />
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
@@ -261,12 +269,12 @@ export default function Board() {
             </button>
             {menuOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 bg-earthy-cream rounded-2xl shadow-earthy-lifted border border-earthy-divider py-1 min-w-[200px]">
+                <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl shadow-earthy-lifted ring-1 ring-earthy-divider py-1 min-w-[220px]">
                   {activeKid && (
                     <button
                       onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>🏆</span>
                       <span>Pet collection</span>
@@ -276,7 +284,7 @@ export default function Board() {
                     <Link
                       to={`/board/${boardId}/print/${activeKid.id}`}
                       onClick={() => setMenuOpen(false)}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>🖨️</span>
                       <span>Print this week's sheet</span>
@@ -284,7 +292,7 @@ export default function Board() {
                   )}
                   <button
                     onClick={() => { setMenuOpen(false); toggleMute() }}
-                    className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
+                    className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                   >
                     <span>{muted ? '🔇' : '🔊'}</span>
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
@@ -292,7 +300,7 @@ export default function Board() {
                   {user && !user.isAnonymous && (
                     <button
                       onClick={() => { setMenuOpen(false); onSignOut() }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>↩︎</span>
                       <span>Sign out</span>
@@ -314,24 +322,24 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="relative overflow-hidden rounded-3xl p-3 sm:p-4 bg-earthy-cream"
+                className="relative overflow-hidden rounded-3xl bg-earthy-cream"
                 style={{
                   boxShadow: `inset 0 0 0 1px ${activeTheme.accent}55`,
                 }}
               >
-                {/* Floating theme-emoji backdrop — reinforces the kid's chosen
-                    identity without competing for attention. Pure decorative,
-                    aria-hidden, low opacity, gentle sway. */}
+                {/* Per-theme illustrated scene — flat, rounded, soft palette
+                    art (style references: Indonesian earthy mood board +
+                    Learning Animals app). Sits at the top of the card as an
+                    ambient backdrop for the kid's identity. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -top-4 -right-4 sm:-top-6 sm:-right-6 opacity-[0.07]"
+                  className="pointer-events-none w-full"
+                  style={{ height: 100 }}
                 >
-                  <span className="text-[8rem] sm:text-[11rem] leading-none block pet-sway">
-                    {activeTheme.emoji}
-                  </span>
+                  <ThemeScene themeKey={activeKid.theme || 'football'} />
                 </div>
 
-                <div className="relative">
+                <div className="relative p-3 sm:p-4 pt-2 sm:pt-2">
                 <BirthdayBanner kid={activeKid} />
                 {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -445,6 +453,7 @@ export default function Board() {
         <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline hover:text-earthy-cocoa">Microsoft Fluent Emoji</a>
         {' '}(MIT)
       </p>
+      </div>
     </div>
   )
 }
