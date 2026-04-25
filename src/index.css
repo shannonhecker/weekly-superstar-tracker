@@ -177,6 +177,42 @@ html, body, #root { height: 100%; }
   50% { transform: translateY(-3px) rotate(5deg); }
 }
 .emotion-bob { animation: emotion-bob 1.6s ease-in-out infinite; }
+
+/* Printable sheet — print rules. The on-screen preview keeps a soft grey
+   shell; print output drops the shell so the white A4 page lands at the
+   physical size set in PrintSheet.jsx (210mm × 297mm). */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body, #root {
+    background: white !important;
+    height: auto;
+  }
+  body {
+    background: white !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .print-shell {
+    background: white !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .print-page {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  /* Force colour fidelity for theme accents and gradients */
+  .print-page, .print-page * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
 body {
   font-family: 'Nunito', system-ui, sans-serif;
   background:
