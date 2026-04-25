@@ -92,11 +92,11 @@ export default function ActivityGrid({ kid, boardId }) {
   return (
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
-    <div className="bg-white rounded-2xl shadow-earthy-soft ring-1 ring-earthy-divider overflow-x-auto font-jakarta">
+    <div className="bg-white rounded-2xl shadow-earthy-soft ring-1 ring-earthy-divider overflow-x-auto font-jakarta p-2 sm:p-4">
       <table className="w-full text-center text-xs">
-        <thead className="bg-earthy-ivory">
+        <thead className="bg-earthy-ivory rounded-xl">
           <tr className="text-earthy-cocoaSoft">
-            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-ivory z-10 uppercase tracking-wide">Activity</th>
+            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-ivory z-10 uppercase tracking-wide rounded-l-xl">Activity</th>
             {days.map((d) => {
               const isToday =
                 d.date.toDateString() === today.toDateString()
@@ -115,7 +115,7 @@ export default function ActivityGrid({ kid, boardId }) {
                 </th>
               )
             })}
-            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide">Total</th>
+            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-xl">Total</th>
           </tr>
         </thead>
         <tbody>
