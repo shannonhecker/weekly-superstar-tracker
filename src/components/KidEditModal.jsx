@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { THEMES } from '../lib/themes'
+import { THEMES, KID_AVATARS } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
 import ActivitiesModal from './ActivitiesModal'
+import { KidAvatar } from './KidAvatar'
+import { uploadKidAvatar, deleteKidAvatar } from '../lib/avatarUpload'
 
 export default function KidEditModal({ open, onClose, kid, kids, boardId, onDeleted }) {
   const [name, setName] = useState(kid?.name || '')
@@ -13,6 +15,9 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
   const [deleteTyped, setDeleteTyped] = useState('')
   const [busy, setBusy] = useState(false)
   const [tasksOpen, setTasksOpen] = useState(false)
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
   const toast = useToast()
 
   useEffect(() => {
@@ -22,6 +27,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     setConfirmingDelete(false)
     setDeleteTyped('')
     setTasksOpen(false)
+    setEmojiPickerOpen(false)
   }, [open, kid?.id])
 
   if (!kid) return null
@@ -45,6 +51,50 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     setTheme(newTheme)
     try { await updateDoc(ref, { theme: newTheme }) }
     catch { toast.error('Could not save theme'); setTheme(kid.theme) }
+  }
+
+  const handlePhotoPick = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    try {
+      const url = await uploadKidAvatar({ boardId, kidId: kid.id, file })
+      await updateDoc(ref, {
+        avatarKind: 'photo',
+        avatarUrl: url,
+        avatarEmoji: kid.avatarEmoji ?? null,
+      })
+      toast.success?.('Photo saved')
+    } catch (err) {
+      toast.error(err?.message || 'Could not upload photo')
+    }
+    setUploading(false)
+  }
+
+  const pickEmoji = async (emoji) => {
+    try {
+      await updateDoc(ref, {
+        avatarKind: 'preset',
+        avatarEmoji: emoji,
+      })
+      setEmojiPickerOpen(false)
+    } catch { toast.error('Could not save avatar') }
+  }
+
+  const useThemeDefault = async () => {
+    try {
+      await updateDoc(ref, {
+        avatarKind: 'theme',
+        avatarUrl: null,
+        avatarEmoji: null,
+      })
+      if (kid.avatarKind === 'photo') {
+        // best-effort cleanup of the storage object — failure is non-blocking
+        deleteKidAvatar({ boardId, kidId: kid.id }).catch(() => {})
+      }
+      setEmojiPickerOpen(false)
+    } catch { toast.error('Could not reset avatar') }
   }
 
   const swapOrder = async (direction) => {
@@ -73,6 +123,74 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
   return (
     <Modal open={open} onClose={busy ? undefined : onClose} emoji="✏️" title={`Edit ${kid.name}`}>
       <div className="max-h-[65vh] overflow-y-auto">
+        {/* Avatar */}
+        <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">Avatar</label>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="relative shrink-0">
+            <KidAvatar kid={kid} size={64} />
+            {uploading && (
+              <div className="absolute inset-0 rounded-full bg-earthy-cocoa/60 flex items-center justify-center text-earthy-ivory text-xs font-bold">
+                …
+              </div>
+            )}
+          </div>
+          <div className="flex-1 grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || busy}
+              className="py-2 px-2 rounded-xl bg-earthy-ivory border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:bg-earthy-cream active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              📷 Photo
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmojiPickerOpen((v) => !v)}
+              disabled={uploading || busy}
+              className="py-2 px-2 rounded-xl bg-earthy-ivory border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:bg-earthy-cream active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              😀 Emoji
+            </button>
+            <button
+              type="button"
+              onClick={useThemeDefault}
+              disabled={uploading || busy || (kid.avatarKind ?? 'theme') === 'theme'}
+              className="py-2 px-2 rounded-xl bg-earthy-ivory border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:bg-earthy-cream active:scale-[0.98] transition-all disabled:opacity-40"
+            >
+              🎨 Default
+            </button>
+          </div>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoPick}
+          className="hidden"
+        />
+        {emojiPickerOpen && (
+          <div className="bg-earthy-ivory border border-earthy-divider rounded-xl p-2 mb-4 grid grid-cols-8 gap-1">
+            {KID_AVATARS.map((emoji) => {
+              const active = kid.avatarKind === 'preset' && kid.avatarEmoji === emoji
+              return (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => pickEmoji(emoji)}
+                  className="aspect-square rounded-lg text-xl flex items-center justify-center transition-all"
+                  style={{
+                    background: active ? `${THEMES[kid.theme || 'football']?.accent}55` : 'transparent',
+                    border: active ? `2px solid ${THEMES[kid.theme || 'football']?.deeper}` : '2px solid transparent',
+                  }}
+                >
+                  {emoji}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {!emojiPickerOpen && <div className="mb-4" />}
+
         {/* Name */}
         <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 block uppercase tracking-wide">Name</label>
         <input

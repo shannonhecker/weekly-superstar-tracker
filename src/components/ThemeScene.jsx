@@ -38,19 +38,84 @@ function Hill({ cx, cy, rx, ry, fill }) {
 // --- per-theme scene compositions -------------------------------------------
 
 function FootballScene({ accent, deeper }) {
+  // Sage rabbit kicking a soccer ball, against layered hills with scattered
+  // bushy trees, ground tufts, and a soft sky. Mascot proportions: large
+  // head, soft body, eye-dots only, single cream cheek-blush.
+  const RABBIT = '#C8B69A'      // warm sandy fur (in palette family)
+  const RABBIT_INNER = '#F4C8A8' // ear inner / nose (terracottaSoft)
   return (
     <>
-      <Hill cx={120} cy={140} rx={180} ry={50} fill={deeper} />
-      <Hill cx={460} cy={150} rx={220} ry={55} fill={accent} />
-      {/* Goalpost */}
-      <rect x={80} y={70} width={2} height={30} fill={CLOUD} />
-      <rect x={130} y={70} width={2} height={30} fill={CLOUD} />
-      <rect x={80} y={70} width={52} height={2} fill={CLOUD} />
-      {/* Ball */}
-      <circle cx={500} cy={92} r={9} fill={CLOUD} />
-      <Eye cx={497} cy={89} r={1.5} />
-      <Eye cx={503} cy={89} r={1.5} />
-      <Cloud x={300} y={28} scale={0.7} />
+      {/* Sky band */}
+      <rect x={0} y={0} width={600} height={75} fill="#FBEFE0" />
+      {/* Distant rolling hills */}
+      <ellipse cx={100} cy={110} rx={150} ry={45} fill={deeper} opacity={0.5} />
+      <ellipse cx={340} cy={120} rx={200} ry={55} fill={accent} opacity={0.7} />
+      <ellipse cx={550} cy={115} rx={130} ry={40} fill={deeper} opacity={0.5} />
+      {/* Bushy background trees — broccoli clusters */}
+      <g transform="translate(60 95)">
+        <circle cx={-8} cy={-2} r={9} fill={deeper} />
+        <circle cx={6} cy={-5} r={11} fill={deeper} />
+        <circle cx={0} cy={-12} r={9} fill={deeper} />
+        <rect x={-1.5} y={-4} width={3} height={12} fill={COCOA} />
+      </g>
+      <g transform="translate(550 100)">
+        <circle cx={-7} cy={-3} r={8} fill={deeper} opacity={0.85} />
+        <circle cx={5} cy={-6} r={10} fill={deeper} opacity={0.85} />
+        <circle cx={0} cy={-13} r={8} fill={deeper} opacity={0.85} />
+        <rect x={-1.5} y={-5} width={3} height={11} fill={COCOA} />
+      </g>
+      {/* Foreground hill */}
+      <ellipse cx={300} cy={145} rx={400} ry={40} fill={accent} />
+      {/* Grass tufts scattered along the foreground */}
+      {[40, 110, 175, 240, 410, 470, 535, 575].map((x, i) => (
+        <g key={i} transform={`translate(${x} 112)`}>
+          <path d="M -3 4 L 0 -4 L 3 4 Z" fill={deeper} />
+          <path d="M -6 5 L -3 -1 L 0 5 Z" fill={deeper} opacity={0.7} />
+          <path d="M 0 5 L 3 -1 L 6 5 Z" fill={deeper} opacity={0.7} />
+        </g>
+      ))}
+      {/* Foreground rock */}
+      <ellipse cx={155} cy={114} rx={14} ry={5} fill={COCOA} opacity={0.4} />
+      {/* Soccer ball — sits on the grass */}
+      <circle cx={155} cy={107} r={8} fill={CLOUD} />
+      <path d="M 152 102 L 155 99 L 158 102 L 157 105 L 153 105 Z" fill={COCOA} />
+      <line x1={147} y1={107} x2={163} y2={107} stroke={COCOA} strokeWidth={0.6} opacity={0.4} />
+      {/* --- Rabbit mascot ------------------------------------------------ */}
+      {/* Sit shadow */}
+      <ellipse cx={345} cy={118} rx={36} ry={4} fill={COCOA} opacity={0.18} />
+      {/* Body */}
+      <ellipse cx={345} cy={100} rx={25} ry={20} fill={RABBIT} />
+      {/* Hind foot */}
+      <ellipse cx={325} cy={117} rx={10} ry={5} fill={RABBIT} />
+      <ellipse cx={365} cy={117} rx={10} ry={5} fill={RABBIT} />
+      {/* Front paw — holding the ball direction */}
+      <ellipse cx={326} cy={105} rx={5} ry={7} fill={RABBIT} transform="rotate(-15 326 105)" />
+      {/* Tail */}
+      <circle cx={372} cy={102} r={5} fill={CLOUD} />
+      {/* Head */}
+      <circle cx={345} cy={70} r={20} fill={RABBIT} />
+      {/* Ears — outer */}
+      <ellipse cx={335} cy={45} rx={5} ry={16} fill={RABBIT} transform="rotate(-12 335 45)" />
+      <ellipse cx={355} cy={45} rx={5} ry={16} fill={RABBIT} transform="rotate(12 355 45)" />
+      {/* Ears — inner */}
+      <ellipse cx={335} cy={47} rx={2.5} ry={11} fill={RABBIT_INNER} transform="rotate(-12 335 47)" />
+      <ellipse cx={355} cy={47} rx={2.5} ry={11} fill={RABBIT_INNER} transform="rotate(12 355 47)" />
+      {/* Cheek blush */}
+      <circle cx={332} cy={75} r={3.5} fill={RABBIT_INNER} opacity={0.7} />
+      <circle cx={358} cy={75} r={3.5} fill={RABBIT_INNER} opacity={0.7} />
+      {/* Eyes */}
+      <Eye cx={338} cy={68} r={2.5} />
+      <Eye cx={352} cy={68} r={2.5} />
+      {/* Eye highlights */}
+      <circle cx={339} cy={67} r={0.8} fill={CLOUD} />
+      <circle cx={353} cy={67} r={0.8} fill={CLOUD} />
+      {/* Nose */}
+      <ellipse cx={345} cy={75} rx={1.8} ry={1.3} fill={COCOA} />
+      {/* Mouth — tiny soft curve */}
+      <path d="M 342 79 Q 345 81 348 79" stroke={COCOA} strokeWidth={1} fill="none" strokeLinecap="round" />
+      {/* Cloud */}
+      <Cloud x={460} y={30} scale={0.6} />
+      <Cloud x={120} y={40} scale={0.5} />
     </>
   )
 }
