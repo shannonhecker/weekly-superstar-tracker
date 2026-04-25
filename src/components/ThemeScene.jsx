@@ -697,6 +697,260 @@ function MagicScene({ accent, deeper }) {
   )
 }
 
+function RugbyScene({ accent, deeper }) {
+  // Sturdy bull mascot kicking a rugby ball; warm tan field.
+  const BULL = deeper             // cocoaSoft
+  const BULL_LIGHT = accent       // warm tan
+  return (
+    <>
+      <rect x={0} y={0} width={600} height={75} fill={SKY_PEACH} />
+      <ellipse cx={130} cy={120} rx={180} ry={55} fill={SAGE_DEEP} opacity={0.4} />
+      <ellipse cx={470} cy={125} rx={200} ry={50} fill={accent} opacity={0.7} />
+      <BushyTree x={60} y={100} fill={SAGE_DEEP} opacity={0.7} />
+      <BushyTree x={555} y={108} fill={SAGE_DEEP} opacity={0.7} scale={0.85} />
+      <ellipse cx={300} cy={148} rx={400} ry={42} fill={accent} />
+      <GrassTufts positions={[40, 110, 175, 240, 410, 470, 540]} fill={SAGE_DEEP} />
+      {/* Goalpost in the far distance */}
+      <rect x={500} y={62} width={2} height={45} fill={CLOUD} />
+      <rect x={528} y={62} width={2} height={45} fill={CLOUD} />
+      <rect x={500} y={62} width={30} height={2} fill={CLOUD} />
+      {/* Rugby ball on the grass */}
+      <ellipse cx={170} cy={107} rx={11} ry={6} fill={TERRACOTTA} transform="rotate(-20 170 107)" />
+      <line x1={163} y1={108} x2={177} y2={106} stroke={CLOUD} strokeWidth={0.8} />
+      <line x1={172} y1={102} x2={172} y2={112} stroke={CLOUD} strokeWidth={0.8} />
+      {/* Bull mascot */}
+      <ellipse cx={350} cy={120} rx={42} ry={4} fill={COCOA} opacity={0.18} />
+      {/* Body */}
+      <ellipse cx={355} cy={97} rx={30} ry={20} fill={BULL} />
+      {/* Belly */}
+      <ellipse cx={355} cy={104} rx={18} ry={11} fill={BULL_LIGHT} />
+      {/* Legs */}
+      <rect x={338} y={113} width={7} height={9} fill={BULL} rx={2} />
+      <rect x={368} y={113} width={7} height={9} fill={BULL} rx={2} />
+      {/* Tail */}
+      <path d="M 384 95 Q 396 92 396 105 Q 388 108 384 102 Z" fill={BULL} />
+      {/* Head */}
+      <ellipse cx={328} cy={80} rx={18} ry={15} fill={BULL} />
+      {/* Snout */}
+      <ellipse cx={316} cy={86} rx={9} ry={6} fill={CLOUD} />
+      <circle cx={313} cy={86} r={1} fill={COCOA} />
+      <circle cx={319} cy={86} r={1} fill={COCOA} />
+      {/* Horns */}
+      <path d="M 318 70 Q 312 60 318 65 Q 322 67 322 72 Z" fill={CLOUD} />
+      <path d="M 338 70 Q 344 60 338 65 Q 334 67 334 72 Z" fill={CLOUD} />
+      {/* Ears */}
+      <ellipse cx={314} cy={75} rx={3} ry={5} fill={BULL} transform="rotate(-30 314 75)" />
+      <ellipse cx={342} cy={75} rx={3} ry={5} fill={BULL} transform="rotate(30 342 75)" />
+      {/* Eyes */}
+      <EyeWithHighlight cx={325} cy={78} r={2.3} />
+      <EyeWithHighlight cx={335} cy={78} r={2.3} />
+      {/* Cheek */}
+      <circle cx={322} cy={86} r={2.5} fill={TERRA_SOFT} opacity={0.5} />
+      <circle cx={338} cy={86} r={2.5} fill={TERRA_SOFT} opacity={0.5} />
+      <Cloud x={150} y={32} scale={0.55} />
+      <Cloud x={460} y={28} scale={0.5} />
+    </>
+  )
+}
+
+function TrainScene({ accent, deeper }) {
+  // Smiling steam train engine with smoke puffs; tracks below.
+  const ENGINE = deeper           // deep cocoa-grey
+  const ENGINE_LIGHT = accent     // warm grey-tan
+  return (
+    <>
+      <rect x={0} y={0} width={600} height={75} fill={SKY_PEACH} />
+      <ellipse cx={130} cy={120} rx={180} ry={55} fill={deeper} opacity={0.45} />
+      <ellipse cx={470} cy={125} rx={200} ry={50} fill={accent} opacity={0.7} />
+      <BushyTree x={60} y={108} fill={SAGE_DEEP} opacity={0.7} scale={0.85} />
+      <BushyTree x={555} y={108} fill={SAGE_DEEP} opacity={0.7} scale={0.85} />
+      <ellipse cx={300} cy={148} rx={400} ry={42} fill={accent} />
+      <GrassTufts positions={[40, 110, 540]} fill={SAGE_DEEP} />
+      {/* Tracks */}
+      <rect x={150} y={117} width={300} height={3} fill={COCOA} opacity={0.6} />
+      {[160, 195, 230, 265, 300, 335, 370, 405, 440].map((x) => (
+        <rect key={x} x={x} y={114} width={4} height={9} fill={COCOA} opacity={0.5} />
+      ))}
+      {/* Smoke puffs */}
+      <Cloud x={290} y={35} scale={0.55} />
+      <Cloud x={250} y={50} scale={0.4} />
+      <Cloud x={325} y={48} scale={0.4} />
+      {/* Train body */}
+      <ellipse cx={340} cy={120} rx={62} ry={4} fill={COCOA} opacity={0.2} />
+      {/* Coal car */}
+      <rect x={388} y={88} width={32} height={28} rx={3} fill={ENGINE} />
+      <rect x={392} y={94} width={24} height={4} fill={TERRACOTTA} />
+      {/* Engine main body */}
+      <rect x={300} y={75} width={86} height={42} rx={6} fill={ENGINE} />
+      {/* Boiler — cylinder */}
+      <ellipse cx={340} cy={75} rx={20} ry={6} fill={ENGINE_LIGHT} />
+      <ellipse cx={340} cy={117} rx={20} ry={6} fill={ENGINE_LIGHT} />
+      <rect x={320} y={75} width={40} height={42} fill={ENGINE_LIGHT} />
+      {/* Smokestack */}
+      <rect x={330} y={55} width={8} height={20} fill={ENGINE} />
+      <rect x={326} y={52} width={16} height={5} rx={1} fill={ENGINE} />
+      {/* Cabin window */}
+      <rect x={365} y={82} width={16} height={14} rx={2} fill={CLOUD} />
+      <rect x={365} y={82} width={16} height={14} rx={2} fill={SKY_BLUE} opacity={0.5} />
+      {/* Front face */}
+      <circle cx={310} cy={97} r={14} fill={CLOUD} />
+      <EyeWithHighlight cx={306} cy={94} r={2.2} />
+      <EyeWithHighlight cx={314} cy={94} r={2.2} />
+      <path d="M 306 102 Q 310 105 314 102" stroke={COCOA} strokeWidth={1} fill="none" strokeLinecap="round" />
+      <circle cx={303} cy={102} r={1.8} fill={TERRA_SOFT} opacity={0.7} />
+      <circle cx={317} cy={102} r={1.8} fill={TERRA_SOFT} opacity={0.7} />
+      {/* Headlamp */}
+      <circle cx={296} cy={92} r={3} fill={TERRA_SOFT} />
+      {/* Wheels */}
+      <circle cx={315} cy={117} r={8} fill={COCOA} />
+      <circle cx={315} cy={117} r={3} fill={CLOUD} />
+      <circle cx={345} cy={117} r={9} fill={COCOA} />
+      <circle cx={345} cy={117} r={3.5} fill={CLOUD} />
+      <circle cx={375} cy={117} r={8} fill={COCOA} />
+      <circle cx={375} cy={117} r={3} fill={CLOUD} />
+      <circle cx={400} cy={117} r={6} fill={COCOA} />
+      <circle cx={400} cy={117} r={2.5} fill={CLOUD} />
+      <circle cx={414} cy={117} r={6} fill={COCOA} />
+      <circle cx={414} cy={117} r={2.5} fill={CLOUD} />
+    </>
+  )
+}
+
+function FairyScene({ accent, deeper }) {
+  // Small fairy mascot with translucent wings, holding a wand.
+  const SKIN = '#F4D9C4'        // warm peach skin
+  const DRESS = accent          // dusty pink-lavender
+  const HAIR = deeper           // deeper purple
+  return (
+    <>
+      <rect x={0} y={0} width={600} height={75} fill={SKY_PURPLE} />
+      <ellipse cx={130} cy={120} rx={180} ry={55} fill={SAGE_DEEP} opacity={0.4} />
+      <ellipse cx={470} cy={125} rx={200} ry={50} fill={accent} opacity={0.7} />
+      <BushyTree x={60} y={108} fill={SAGE_DEEP} opacity={0.7} scale={0.85} />
+      {/* Mushroom toadstool to the side */}
+      <g transform="translate(540 110)">
+        <rect x={-3} y={-8} width={6} height={10} fill={CLOUD} />
+        <ellipse cx={0} cy={-10} rx={11} ry={6} fill={TERRACOTTA} />
+        <circle cx={-4} cy={-11} r={1.4} fill={CLOUD} />
+        <circle cx={3} cy={-13} r={1.2} fill={CLOUD} />
+        <circle cx={5} cy={-9} r={1.2} fill={CLOUD} />
+      </g>
+      <ellipse cx={300} cy={148} rx={400} ry={42} fill={accent} />
+      <GrassTufts positions={[40, 110, 175, 240, 480]} fill={SAGE_DEEP} />
+      {/* Sparkles */}
+      <Sparkle cx={150} cy={45} size={2.5} fill={accent} />
+      <Sparkle cx={420} cy={35} size={2} fill={accent} />
+      <Sparkle cx={500} cy={50} size={2.5} fill={TERRACOTTA} />
+      <Sparkle cx={235} cy={80} size={1.7} fill={accent} />
+      {/* Flower in foreground */}
+      <line x1={210} y1={113} x2={210} y2={92} stroke={SAGE_DEEP} strokeWidth={2} />
+      <circle cx={206} cy={88} r={3.5} fill={DRESS} />
+      <circle cx={214} cy={88} r={3.5} fill={DRESS} />
+      <circle cx={210} cy={84} r={3.5} fill={DRESS} />
+      <circle cx={210} cy={92} r={3.5} fill={DRESS} />
+      <circle cx={210} cy={88} r={2.5} fill={CLOUD} />
+      {/* Fairy mascot */}
+      <ellipse cx={345} cy={120} rx={32} ry={3} fill={COCOA} opacity={0.16} />
+      {/* Wings — pair behind body */}
+      <ellipse cx={325} cy={75} rx={12} ry={20} fill={CLOUD} opacity={0.7} transform="rotate(-15 325 75)" />
+      <ellipse cx={365} cy={75} rx={12} ry={20} fill={CLOUD} opacity={0.7} transform="rotate(15 365 75)" />
+      <ellipse cx={322} cy={92} rx={9} ry={14} fill={CLOUD} opacity={0.6} transform="rotate(-25 322 92)" />
+      <ellipse cx={368} cy={92} rx={9} ry={14} fill={CLOUD} opacity={0.6} transform="rotate(25 368 92)" />
+      {/* Dress */}
+      <path d="M 332 92 L 358 92 L 365 117 L 325 117 Z" fill={DRESS} />
+      {/* Belt */}
+      <rect x={332} y={92} width={26} height={3} fill={deeper} opacity={0.5} />
+      {/* Arms */}
+      <ellipse cx={325} cy={92} rx={4} ry={7} fill={SKIN} transform="rotate(-30 325 92)" />
+      <ellipse cx={365} cy={92} rx={4} ry={7} fill={SKIN} transform="rotate(30 365 92)" />
+      {/* Wand in right hand */}
+      <line x1={370} y1={95} x2={385} y2={75} stroke={SAGE_DEEP} strokeWidth={1.5} strokeLinecap="round" />
+      <Sparkle cx={386} cy={73} size={3.5} fill={TERRACOTTA} />
+      {/* Legs */}
+      <ellipse cx={338} cy={119} rx={3} ry={3} fill={SKIN} />
+      <ellipse cx={352} cy={119} rx={3} ry={3} fill={SKIN} />
+      {/* Head */}
+      <circle cx={345} cy={75} r={14} fill={SKIN} />
+      {/* Hair */}
+      <path d="M 332 70 Q 345 55 358 70 Q 360 65 357 60 Q 345 50 333 60 Q 330 65 332 70 Z" fill={HAIR} />
+      <path d="M 333 75 Q 332 88 340 88" stroke={HAIR} strokeWidth={3} fill="none" strokeLinecap="round" />
+      <path d="M 357 75 Q 358 88 350 88" stroke={HAIR} strokeWidth={3} fill="none" strokeLinecap="round" />
+      {/* Face */}
+      <EyeWithHighlight cx={341} cy={76} r={2} />
+      <EyeWithHighlight cx={349} cy={76} r={2} />
+      <circle cx={337} cy={81} r={2} fill={DRESS} opacity={0.7} />
+      <circle cx={353} cy={81} r={2} fill={DRESS} opacity={0.7} />
+      <path d="M 343 81 Q 345 83 347 81" stroke={COCOA} strokeWidth={0.8} fill="none" strokeLinecap="round" />
+      <Cloud x={120} y={40} scale={0.5} />
+    </>
+  )
+}
+
+function BearScene({ accent, deeper }) {
+  // Brown bear holding a honey pot; bee buzzing nearby; pine + flower.
+  const BEAR = deeper             // deep cocoa
+  const BEAR_LIGHT = accent       // warm tan (snout, belly)
+  return (
+    <>
+      <rect x={0} y={0} width={600} height={75} fill={SKY_PEACH} />
+      <ellipse cx={130} cy={120} rx={180} ry={55} fill={SAGE_DEEP} opacity={0.5} />
+      <ellipse cx={470} cy={125} rx={200} ry={50} fill={accent} opacity={0.65} />
+      <BushyTree x={60} y={100} fill={SAGE_DEEP} />
+      <BushyTree x={555} y={108} fill={SAGE_DEEP} opacity={0.85} scale={0.9} />
+      <ellipse cx={300} cy={148} rx={400} ry={42} fill={accent} />
+      <GrassTufts positions={[40, 110, 175, 240, 410, 480, 540]} fill={SAGE_DEEP} />
+      {/* Small flower */}
+      <line x1={210} y1={113} x2={210} y2={98} stroke={SAGE_DEEP} strokeWidth={1.5} />
+      <circle cx={210} cy={95} r={3.5} fill={TERRACOTTA} />
+      <circle cx={210} cy={95} r={1.5} fill={CLOUD} />
+      {/* Bee buzzing in the air */}
+      <g transform="translate(440 55)">
+        <ellipse cx={0} cy={0} rx={5} ry={3.5} fill={CLOUD} />
+        <rect x={-3} y={-2} width={6} height={1.5} fill={COCOA} />
+        <rect x={-3} y={1} width={6} height={1.5} fill={COCOA} />
+        <ellipse cx={-3} cy={-3} rx={3} ry={2} fill={CLOUD} opacity={0.6} />
+        <ellipse cx={3} cy={-3} rx={3} ry={2} fill={CLOUD} opacity={0.6} />
+        <Eye cx={0} cy={0} r={0.6} />
+      </g>
+      <path d="M 430 60 Q 425 55 432 50" stroke={COCOA} strokeWidth={0.6} fill="none" strokeDasharray="1.5 1.5" opacity={0.6} />
+      {/* Bear mascot */}
+      <ellipse cx={345} cy={120} rx={42} ry={4} fill={COCOA} opacity={0.2} />
+      {/* Body */}
+      <ellipse cx={350} cy={100} rx={28} ry={20} fill={BEAR} />
+      {/* Belly */}
+      <ellipse cx={350} cy={107} rx={14} ry={11} fill={BEAR_LIGHT} />
+      {/* Legs */}
+      <rect x={335} y={114} width={7} height={8} fill={BEAR} rx={2} />
+      <rect x={358} y={114} width={7} height={8} fill={BEAR} rx={2} />
+      {/* Front paw holding the honey pot */}
+      <ellipse cx={332} cy={108} rx={5} ry={5} fill={BEAR} />
+      {/* Honey pot */}
+      <path d="M 313 102 L 327 102 L 325 117 L 315 117 Z" fill={TERRACOTTA} />
+      <ellipse cx={320} cy={102} rx={7} ry={2} fill={CLOUD} />
+      <text x={317} y={113} fontSize="6" fontWeight="bold" fill={CLOUD}>HONEY</text>
+      {/* Head */}
+      <circle cx={345} cy={75} r={18} fill={BEAR} />
+      {/* Inner ears */}
+      <circle cx={332} cy={62} r={5} fill={BEAR} />
+      <circle cx={358} cy={62} r={5} fill={BEAR} />
+      <circle cx={332} cy={62} r={2.5} fill={BEAR_LIGHT} />
+      <circle cx={358} cy={62} r={2.5} fill={BEAR_LIGHT} />
+      {/* Snout */}
+      <ellipse cx={345} cy={82} rx={9} ry={6} fill={BEAR_LIGHT} />
+      <ellipse cx={345} cy={79} rx={1.8} ry={1.3} fill={COCOA} />
+      <path d="M 342 84 Q 345 86 348 84" stroke={COCOA} strokeWidth={0.9} fill="none" strokeLinecap="round" />
+      {/* Eyes */}
+      <EyeWithHighlight cx={339} cy={73} r={2.2} />
+      <EyeWithHighlight cx={351} cy={73} r={2.2} />
+      {/* Cheek */}
+      <circle cx={334} cy={80} r={2.5} fill={TERRA_SOFT} opacity={0.55} />
+      <circle cx={356} cy={80} r={2.5} fill={TERRA_SOFT} opacity={0.55} />
+      <Cloud x={150} y={32} scale={0.55} />
+      <Cloud x={500} y={28} scale={0.5} />
+    </>
+  )
+}
+
 const SCENES = {
   football: FootballScene,
   dinosaur: DinosaurScene,
@@ -708,6 +962,10 @@ const SCENES = {
   garden: GardenScene,
   robot: RobotScene,
   magic: MagicScene,
+  rugby: RugbyScene,
+  train: TrainScene,
+  fairy: FairyScene,
+  bear: BearScene,
 }
 
 export default function ThemeScene({ themeKey, className = '' }) {
