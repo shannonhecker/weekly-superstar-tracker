@@ -8,6 +8,7 @@ import { THEMES } from '../lib/themes'
 import { getCurrentWeek, formatWeekRange, getWeekKey } from '../lib/week'
 import KidSwitcher from '../components/KidSwitcher'
 import ActivityGrid from '../components/ActivityGrid'
+import ActivitiesModal from '../components/ActivitiesModal'
 import ShareModal from '../components/ShareModal'
 import MysteryPet from '../components/MysteryPet'
 import StreakCounter from '../components/StreakCounter'
@@ -22,6 +23,9 @@ import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 import Logo from '../components/Logo'
+import LogoLoader from '../components/LogoLoader'
+import ThemeScene from '../components/ThemeScene'
+import EmptyStateScene from '../components/EmptyStateScene'
 
 const HATCH_GOAL = 50
 
@@ -68,6 +72,7 @@ export default function Board() {
   const [loading, setLoading] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
   const [editKidOpen, setEditKidOpen] = useState(false)
+  const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
@@ -222,7 +227,7 @@ export default function Board() {
     setSummary({ kid: activeKid, archive, weekKey, replay: true })
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse"><Logo size={48} /></div></div>
+  if (loading) return <LogoLoader label="Loading board..." />
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
@@ -232,13 +237,20 @@ export default function Board() {
   const { monday, sunday } = getCurrentWeek()
 
   return (
-    <div className="min-h-screen px-3 sm:px-4 py-3 sm:py-4 pb-10">
+    <div className="relative min-h-screen bg-earthy-ivory px-3 sm:px-4 py-3 sm:py-4 pb-10 font-jakarta">
+      {/* Per-kid bg wash — subtle ~8% accent overlay over ivory, fades when switching kids. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 transition-colors duration-500"
+        style={{ backgroundColor: `${activeTheme.accent}14` }}
+      />
+      <div className="relative z-10">
       <OfflineBanner />
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
-        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-2 min-w-0">
+        <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
           <Logo size={36} className="shrink-0" />
-          <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent truncate">
+          <span className="text-earthy-cocoa truncate">
             {board.name}
           </span>
         </h1>
@@ -246,7 +258,7 @@ export default function Board() {
           <button
             onClick={() => setShareOpen(true)}
             aria-label="Share"
-            className="px-3 sm:px-4 py-1.5 rounded-xl bg-white border border-purple-200 text-xs font-bold text-purple-600 hover:border-purple-400 active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-300"
+            className="px-3 sm:px-4 py-1.5 rounded-pill bg-earthy-cream border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:border-earthy-cocoaSoft active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
           >
             🔗<span className="hidden sm:inline"> Share</span>
           </button>
@@ -255,28 +267,41 @@ export default function Board() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="More options"
               aria-expanded={menuOpen}
-              className="w-8 h-8 rounded-xl bg-white border border-gray-200 text-sm font-bold text-gray-500 hover:border-gray-400 active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-300"
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-9 h-9 rounded-full text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
             >
               ⋯
             </button>
             {menuOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[180px]">
+                <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl shadow-earthy-pop py-1 min-w-[220px]">
                   {activeKid && (
                     <button
                       onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>🏆</span>
                       <span>Pet collection</span>
                     </button>
                   )}
                   {activeKid && (
+                    <button
+                      onClick={() => { setMenuOpen(false); setTasksOpen(true) }}
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
+                    >
+                      <span>📝</span>
+                      <span className="flex-1">Edit tasks</span>
+                      <span className="text-xs text-earthy-cocoaSoft">
+                        {(activeKid.activities?.length ?? 0)} of 10
+                      </span>
+                    </button>
+                  )}
+                  {activeKid && (
                     <Link
                       to={`/board/${boardId}/print/${activeKid.id}`}
                       onClick={() => setMenuOpen(false)}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>🖨️</span>
                       <span>Print this week's sheet</span>
@@ -284,7 +309,7 @@ export default function Board() {
                   )}
                   <button
                     onClick={() => { setMenuOpen(false); toggleMute() }}
-                    className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                   >
                     <span>{muted ? '🔇' : '🔊'}</span>
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
@@ -292,7 +317,7 @@ export default function Board() {
                   {user && !user.isAnonymous && (
                     <button
                       onClick={() => { setMenuOpen(false); onSignOut() }}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>↩︎</span>
                       <span>Sign out</span>
@@ -314,72 +339,55 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="relative overflow-hidden rounded-3xl p-3 sm:p-4"
+                className="relative rounded-3xl shadow-earthy-card"
                 style={{
-                  background: `radial-gradient(140% 90% at 50% 0%, ${activeTheme.accent}33 0%, ${activeTheme.accent}10 45%, ${activeTheme.accent}05 100%)`,
-                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}22`,
+                  backgroundColor: '#FFFDF7',
+                  border: `1px solid ${activeTheme.accent}66`,
                 }}
               >
-                {/* Floating theme-emoji backdrop — reinforces the kid's chosen
-                    identity without competing for attention. Pure decorative,
-                    aria-hidden, low opacity, gentle sway. */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -top-4 -right-4 sm:-top-6 sm:-right-6 opacity-[0.07]"
-                >
-                  <span className="text-[8rem] sm:text-[11rem] leading-none block pet-sway">
-                    {activeTheme.emoji}
-                  </span>
+                <div className="relative p-3 sm:p-4">
+                <div className="mb-3 overflow-hidden rounded-[24px]">
+                  <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(136px, 22vw, 188px)" />
                 </div>
 
-                <div className="relative">
-                <BirthdayBanner kid={activeKid} />
-                {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <KidAvatar kid={activeKid} size={40} />
-                    <h2
-                      className="text-xl sm:text-2xl font-black font-display truncate"
-                      style={{
-                        // backgroundImage (NOT the `background` shorthand) —
-                        // the shorthand resets background-clip to border-box,
-                        // which kills the text mask and leaves the heading
-                        // invisible behind a solid gradient bar.
-                        backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        color: activeTheme.deeper,
-                      }}
-                    >
-                      {activeKid.name}
-                    </h2>
-                    <button
-                      onClick={() => setEditKidOpen(true)}
-                      aria-label={`Edit ${activeKid.name}`}
-                      className="shrink-0 w-7 h-7 rounded-full bg-white text-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center"
-                      style={{ border: `1px solid ${activeTheme.accent}55` }}
-                    >
-                      ✏️
-                    </button>
-                    {activeKid.custodyLabel && (
-                      <span
-                        className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
-                        style={{
-                          backgroundColor: `${activeTheme.accent}33`,
-                          color: activeTheme.deeper,
-                        }}
-                        aria-label={`At ${activeKid.custodyLabel} this week`}
+                <div className="mb-3">
+                  <BirthdayBanner kid={activeKid} />
+                  {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <KidAvatar kid={activeKid} size={46} />
+                      <h2
+                        className="text-2xl sm:text-3xl font-extrabold truncate text-earthy-cocoa"
                       >
-                        <span className="text-[12px]" aria-hidden>🏠</span>
-                        <span className="text-[11px] font-bold truncate max-w-[120px]">
-                          {activeKid.custodyLabel}
+                        {activeKid.name}
+                      </h2>
+                      <button
+                        onClick={() => setEditKidOpen(true)}
+                        aria-label={`Edit ${activeKid.name}`}
+                        className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory text-xs hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center"
+                        style={{ border: `1px solid ${activeTheme.deeper}66` }}
+                      >
+                        ✏️
+                      </button>
+                      {activeKid.custodyLabel && (
+                        <span
+                          className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: `${activeTheme.accent}33`,
+                            color: activeTheme.deeper,
+                          }}
+                          aria-label={`At ${activeKid.custodyLabel} this week`}
+                        >
+                          <span className="text-[12px]" aria-hidden>🏠</span>
+                          <span className="text-[11px] font-bold truncate max-w-[120px]">
+                            {activeKid.custodyLabel}
+                          </span>
                         </span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="px-2 py-1 rounded-lg bg-white text-xs font-bold text-gray-600 shrink-0">
-                    📅 {formatWeekRange(monday, sunday)}
+                      )}
+                    </div>
+                    <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
+                      📅 {formatWeekRange(monday, sunday)}
+                    </div>
                   </div>
                 </div>
 
@@ -439,6 +447,13 @@ export default function Board() {
         }}
       />
 
+      <ActivitiesModal
+        open={tasksOpen}
+        onClose={() => setTasksOpen(false)}
+        kid={activeKid}
+        boardId={boardId}
+      />
+
       <WeeklySummary
         open={!!summary}
         onClose={dismissSummary}
@@ -449,26 +464,30 @@ export default function Board() {
         onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
       />
 
-      <p className="text-center text-gray-500 text-[12px] mt-6 font-semibold">
+      <p className="text-center text-earthy-cocoaSoft text-[12px] mt-6 font-semibold">
         💡 Tap a sticker square to mark it. Switch kids with the avatars above.
       </p>
-      <p className="text-center text-gray-500 text-[11px] mt-1 font-semibold">
+      <p className="text-center text-earthy-cocoaSoft/70 text-[11px] mt-1 font-semibold">
         Pet art:{' '}
-        <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline">Microsoft Fluent Emoji</a>
+        <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline hover:text-earthy-cocoa">Microsoft Fluent Emoji</a>
         {' '}(MIT)
       </p>
+      </div>
     </div>
   )
 }
 
 function EmptyState({ boardId }) {
   return (
-    <div className="text-center py-10">
-      <div className="flex justify-center mb-3">
-        <Logo size={56} />
+    <div className="text-center py-6">
+      <div className="max-w-md mx-auto mb-4 rounded-3xl overflow-hidden ring-1 ring-earthy-divider bg-earthy-cream">
+        <EmptyStateScene variant="no-kids" />
       </div>
-      <p className="text-gray-500 font-bold mb-4">
-        No superstars yet — add your first one above using the “+ Add” button.
+      <p className="text-earthy-cocoa font-extrabold text-lg mb-1">
+        No superstars yet
+      </p>
+      <p className="text-earthy-cocoaSoft font-bold mb-5 text-sm">
+        Add your first one above using the “+ Add” button.
       </p>
       <KidSwitcher kids={[]} activeKidId={null} boardId={boardId} />
     </div>

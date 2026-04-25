@@ -144,7 +144,7 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
   return (
     <Modal open={open} onClose={onClose} title={`${kid?.name || 'Your'}'s week recap`} emoji="🎉">
-      <div className="text-center -mt-2 mb-3 text-xs font-bold text-gray-500">
+      <div className="text-center -mt-2 mb-3 text-xs font-bold text-earthy-cocoaSoft">
         {formatWeekRange(weekKey)}
       </div>
 
@@ -168,10 +168,10 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
       {/* Name line */}
       <div className="text-center mb-4">
-        <div className="font-black font-display text-lg text-gray-800">
+        <div className="font-black font-display text-lg text-earthy-cocoa">
           {petName ? `${petName}` : `Your ${chainLabel.toLowerCase().replace(' family', '')}`}
         </div>
-        <div className="text-xs font-bold text-gray-500">
+        <div className="text-xs font-bold text-earthy-cocoaSoft">
           {totalStars >= 50 ? '🎉 Fully grown!' : `grew to ${totalStars} stars`}
         </div>
       </div>
@@ -187,15 +187,15 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
       {/* What went well */}
       {wins.length > 0 && (
-        <div className="mb-4 rounded-2xl p-3 border border-gray-100"
+        <div className="mb-4 rounded-2xl p-3 border border-earthy-divider"
           style={{ background: `${theme.accent}10` }}
         >
-          <div className="text-[11px] font-bold uppercase tracking-wide text-gray-500 mb-1.5">
+          <div className="text-[11px] font-bold uppercase tracking-wide text-earthy-cocoaSoft mb-1.5">
             ✨ What went well
           </div>
           <ul className="space-y-1">
             {wins.map((w, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm font-bold text-gray-700">
+              <li key={i} className="flex items-center gap-2 text-sm font-bold text-earthy-cocoa">
                 <span className="text-base" aria-hidden>{w.icon}</span>
                 <span>{w.text}</span>
               </li>
@@ -206,14 +206,15 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
       <button
         onClick={onClose}
-        className="w-full py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-amber-400 to-pink-500 shadow-card hover:shadow-pop active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-400"
+        style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+        className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] shadow-earthy-soft active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
       >
         Yay!
       </button>
       {onOpenCollection && (
         <button
           onClick={() => { onClose?.(); onOpenCollection?.() }}
-          className="w-full mt-2 py-2 rounded-xl text-gray-500 font-bold text-sm hover:text-gray-700 transition-colors"
+          className="w-full mt-2 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa transition-colors"
         >
           See full collection →
         </button>
@@ -224,11 +225,11 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
 function Stat({ icon, label, value }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-2.5 flex items-center gap-2 shadow-card">
+    <div className="bg-earthy-ivory rounded-xl border border-earthy-divider p-2.5 flex items-center gap-2 shadow-earthy-soft">
       <div className="text-lg shrink-0" aria-hidden>{icon}</div>
       <div className="min-w-0">
-        <div className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{label}</div>
-        <div className="text-sm font-black font-display text-gray-700 truncate">{value}</div>
+        <div className="text-[11px] font-bold uppercase tracking-wide text-earthy-cocoaSoft">{label}</div>
+        <div className="text-sm font-black font-display text-earthy-cocoa truncate">{value}</div>
       </div>
     </div>
   )

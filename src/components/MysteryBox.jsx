@@ -25,14 +25,15 @@ export default function MysteryBox({ open, onClose, prize }) {
         ) : (
           <div className="text-center">
             <div className="text-7xl animate-bounce">{prize?.emoji || '✨'}</div>
-            <div className="font-bold font-display text-gray-700 mt-3">{prize?.label}</div>
+            <div className="font-extrabold text-earthy-cocoa mt-3">{prize?.label}</div>
           </div>
         )}
       </div>
       {revealed && (
         <button
           onClick={onClose}
-          className="w-full mt-2 py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-pink-400 to-purple-500"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="w-full mt-2 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           Awesome!
         </button>

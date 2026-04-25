@@ -37,22 +37,20 @@ export default function StreakCounter({ kid }) {
 
   return (
     <div
-      className="rounded-2xl p-3 flex items-center gap-3 h-full bg-white shadow-card"
-      style={{
-        border: `1px solid ${theme.accent}33`,
-      }}
+      className="rounded-2xl p-3 flex items-center gap-3 h-full shadow-earthy-card font-jakarta"
+      style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
     >
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shrink-0"
-        style={{ background: `${theme.accent}33` }}
+        style={{ background: `${theme.accent}38`, border: `1px solid ${theme.accent}55` }}
       >
         {streak > 0 ? <span className="flame-flicker" key={`emoji-${pulseKey}`}>🔥</span> : <span key={`emoji-${pulseKey}`}>💤</span>}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-black font-display text-gray-700" key={`label-${pulseKey}`}>
+        <div className="text-base font-extrabold text-earthy-cocoa" key={`label-${pulseKey}`}>
           {streak > 0 ? `${streak}-day streak!` : 'No streak yet'}
         </div>
-        <div className="text-[11px] font-bold mt-0.5" style={{ color: theme.deeper, opacity: 0.85 }}>
+        <div className="text-[11px] font-bold mt-0.5" style={{ color: theme.deeper }}>
           Complete all tasks in a day
         </div>
       </div>

@@ -4,6 +4,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import QRCode from 'react-qr-code'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
+import LogoLoader from '../components/LogoLoader'
 import {
   THEMES,
   PET_CHAINS,
@@ -296,11 +297,7 @@ export default function PrintSheet() {
   const hatchPercent = Math.min(100, (totalStars / HATCH_GOAL) * 100)
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center font-body text-gray-500">
-        Loading sheet…
-      </div>
-    )
+    return <LogoLoader label="Loading sheet..." />
   }
   if (error) {
     return (

@@ -164,12 +164,24 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         tabIndex={0}
         onClick={openGallery}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGallery() } }}
-        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-card"
-        style={{
-          border: `1px solid ${theme.accent}33`,
-        }}
+        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
+        style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
       >
-        <div className={`shrink-0 ${levelUp ? 'level-up-burst' : ''}`}>
+        <div
+          className={`relative shrink-0 flex items-center justify-center overflow-hidden ${levelUp ? 'level-up-burst' : ''}`}
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: 22,
+            backgroundColor: `${theme.accent}22`,
+            border: `1px solid ${theme.accent}44`,
+          }}
+        >
+          <div
+            aria-hidden
+            className="absolute left-[-14px] right-[-14px] bottom-[-20px] h-[38px] rounded-full"
+            style={{ backgroundColor: `${theme.accent}33` }}
+          />
           <Egg
             themeKey={kid.theme || 'dinosaur'}
             accent={theme.accent}
@@ -178,12 +190,19 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
             petEmoji={petEmoji}
             size={64}
           />
+          <span
+            aria-hidden
+            className="absolute right-2 top-1.5 text-xs"
+            style={{ color: theme.deeper }}
+          >
+            ✦
+          </span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] font-bold" style={{ color: theme.deeper }}>
+          <div className="text-[11px] font-bold uppercase" style={{ color: theme.deeper }}>
             {kid.name}'s Mystery Pet
           </div>
-          <div className="text-sm font-black font-display truncate text-gray-700">
+          <div className="text-base font-extrabold truncate text-earthy-cocoa">
             {stageTitle(stage, petDisplayName, eggName, kid.name, petName)}
           </div>
           <div className="text-[11px] italic mt-0.5 truncate" style={{ color: theme.deeper, opacity: 0.85 }}>
@@ -258,7 +277,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />
           )}
-          <div className="text-center mt-3 text-gray-700 font-bold">
+          <div className="text-center mt-3 text-earthy-cocoa font-bold">
             {evolution?.kind === 'hatch'
               ? `Meet your baby ${evolution?.to} ${evolution?.emoji || ''}`
               : evolution?.kind === 'adult'
@@ -268,7 +287,8 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         </div>
         <button
           onClick={() => setEvolution(null)}
-          className="w-full py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-pink-400 to-purple-500"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           Yay!
         </button>

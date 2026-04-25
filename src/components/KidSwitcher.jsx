@@ -49,7 +49,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
   }
 
   return (
-    <div className="flex gap-3 justify-center mb-4 overflow-x-auto pb-1 -mx-3 px-3 flex-wrap">
+    <div className="flex gap-3 justify-center mb-4 overflow-x-auto pb-1 -mx-3 px-3 flex-wrap font-jakarta">
       {kids.map((kid) => {
         const theme = THEMES[kid.theme] || THEMES.football
         const isActive = kid.id === activeKidId
@@ -62,19 +62,19 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
             <div
               className="transition-all"
               style={{
-                boxShadow: isActive ? `0 4px 14px ${theme.accent}44` : 'none',
+                boxShadow: isActive ? `0 4px 14px ${theme.deeper}33` : 'none',
                 borderRadius: '999px',
               }}
             >
               <KidAvatar
                 kid={kid}
                 size={64}
-                borderColor={isActive ? theme.accent : 'transparent'}
+                borderColor={isActive ? theme.deeper : 'transparent'}
               />
             </div>
             <span
               className="text-xs font-bold truncate max-w-[4.5rem]"
-              style={{ color: isActive ? theme.accent : '#9CA3AF' }}
+              style={{ color: isActive ? theme.deeper : '#8B6651' }}
             >
               {kid.name}
             </span>
@@ -85,10 +85,10 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         onClick={() => setPromptOpen(true)}
         className="flex flex-col items-center gap-1.5 shrink-0"
       >
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-gray-300 text-gray-500">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-earthy-divider text-earthy-cocoaSoft hover:border-earthy-terracotta hover:text-earthy-terracotta transition-colors bg-[#FFFDF7] shadow-earthy-card">
           +
         </div>
-        <span className="text-xs font-bold text-gray-500">Add</span>
+        <span className="text-xs font-bold text-earthy-cocoaSoft">Add</span>
       </button>
 
       <PromptModal

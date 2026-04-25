@@ -28,16 +28,16 @@ export default function Modal({ open, onClose, title, emoji, children }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-5 fade-in"
+      className="fixed inset-0 z-50 bg-white/80 backdrop-blur-md flex items-center justify-center px-5 fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl modal-in"
+        className="relative bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta"
       >
         {(title || emoji) && (
           <div className="text-center mb-4">
             {emoji && <div className="text-4xl mb-2">{emoji}</div>}
-            {title && <h2 className="text-lg font-black font-display">{title}</h2>}
+            {title && <h2 className="text-lg font-extrabold text-earthy-cocoa">{title}</h2>}
           </div>
         )}
         {children}
