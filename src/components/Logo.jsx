@@ -1,7 +1,8 @@
 // Winking Star — the brand mark for "Winking Star".
-// Inline SVG so it scales crisply at any size. Path is constructed within
-// viewBox 0 0 200 200 with comfortable breathing room around all 5 points
-// — no clipping at small sizes, regardless of container shape.
+// Inline SVG so it scales crisply at any size. Path is sized to fill the
+// viewBox tightly (~85%) so the star reads clearly even at 16×16 favicon
+// scale — the previous version left too much empty space inside the box
+// and the star looked tiny / squashed at small sizes.
 export default function Logo({ size = 32, className = '', title = 'Winking Star' }) {
   return (
     <svg
@@ -14,33 +15,34 @@ export default function Logo({ size = 32, className = '', title = 'Winking Star'
       aria-label={title}
       className={className}
       style={{ flexShrink: 0 }}
+      preserveAspectRatio="xMidYMid meet"
     >
       <path
-        d="M123.5 76.7
-           L176.1 80.3
-           L133.3 116.4
-           L147 169.1
-           L100 140
-           L53 169.1
-           L66.7 116.4
-           L23.9 80.3
-           L76.5 76.7
-           Q88 32 110 18
-           Q132 30 123.5 76.7 Z"
+        d="M122.3 69.3
+           L178 74.7
+           L136.1 111.7
+           L148.2 167.7
+           L100 138
+           L51.8 167.7
+           L63.9 111.7
+           L22 74.7
+           L77.7 69.3
+           Q88 22 115 8
+           Q130 22 122.3 69.3 Z"
         fill="#F5C72C"
       />
-      <ellipse cx="82" cy="100" rx="6" ry="10" fill="white" />
+      <ellipse cx="80" cy="98" rx="7" ry="12" fill="white" />
       <path
-        d="M114 96 Q128 108 144 96"
+        d="M112 95 Q128 108 144 95"
         stroke="white"
-        strokeWidth="6"
+        strokeWidth="7"
         strokeLinecap="round"
         fill="none"
       />
       <path
-        d="M86 124 Q108 140 130 124"
+        d="M84 122 Q108 142 132 122"
         stroke="white"
-        strokeWidth="6"
+        strokeWidth="7"
         strokeLinecap="round"
         fill="none"
       />
