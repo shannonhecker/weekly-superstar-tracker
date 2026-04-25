@@ -309,15 +309,42 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="rounded-3xl p-3 sm:p-4"
-                style={{ background: `linear-gradient(180deg, ${activeTheme.accent}1F 0%, ${activeTheme.accent}08 100%)` }}
+                className="relative overflow-hidden rounded-3xl p-3 sm:p-4"
+                style={{
+                  background: `radial-gradient(140% 90% at 50% 0%, ${activeTheme.accent}33 0%, ${activeTheme.accent}10 45%, ${activeTheme.accent}05 100%)`,
+                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}22`,
+                }}
               >
+                {/* Floating theme-emoji backdrop — reinforces the kid's chosen
+                    identity without competing for attention. Pure decorative,
+                    aria-hidden, low opacity, gentle sway. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -top-4 -right-4 sm:-top-6 sm:-right-6 opacity-[0.07]"
+                >
+                  <span className="text-[8rem] sm:text-[11rem] leading-none block pet-sway">
+                    {activeTheme.emoji}
+                  </span>
+                </div>
+
+                <div className="relative">
                 <BirthdayBanner kid={activeKid} />
                 {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <KidAvatar kid={activeKid} size={40} />
-                    <h2 className="text-lg sm:text-xl font-black font-display truncate">{activeKid.name}</h2>
+                    <h2
+                      className="text-xl sm:text-2xl font-black font-display truncate"
+                      style={{
+                        background: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        color: activeTheme.deeper,
+                      }}
+                    >
+                      {activeKid.name}
+                    </h2>
                     <button
                       onClick={() => setEditKidOpen(true)}
                       aria-label={`Edit ${activeKid.name}`}
@@ -396,6 +423,7 @@ export default function Board() {
 
                 {/* Activity grid */}
                 <ActivityGrid kid={activeKid} boardId={boardId} />
+                </div>
               </div>
             )}
           </>
