@@ -60,7 +60,8 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         tabIndex={0}
         onClick={openDetails}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails() } }}
-        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-earthy-card font-jakarta"
+        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
+        style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
       >
         <div className="flex items-center justify-between mb-1 gap-2">
           <div className="text-xs font-bold truncate" style={{ color: theme.deeper }}>
@@ -72,7 +73,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         </div>
 
         {!anyStarBadge && !anyAchievement ? (
-          <div className="text-[11px] font-bold" style={{ color: theme.deeper, opacity: 0.7 }}>
+          <div className="text-[12px] font-bold" style={{ color: theme.deeper, opacity: 0.7 }}>
             Earn 15+ stars for a badge!
           </div>
         ) : (

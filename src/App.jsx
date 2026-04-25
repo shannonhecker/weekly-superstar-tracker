@@ -7,23 +7,13 @@ import ForgotPassword from './pages/ForgotPassword'
 import Join from './pages/Join'
 import Board from './pages/Board'
 import PrintSheet from './pages/PrintSheet'
-import Logo from './components/Logo'
+import LogoLoader from './components/LogoLoader'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <FullPageSpinner />
+  if (loading) return <LogoLoader />
   if (!user) return <Navigate to="/signin" replace />
   return children
-}
-
-function FullPageSpinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-earthy-ivory">
-      <div className="animate-pulse">
-        <Logo size={56} />
-      </div>
-    </div>
-  )
 }
 
 export default function App() {

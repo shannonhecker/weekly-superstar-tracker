@@ -85,7 +85,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         onClick={() => setPromptOpen(true)}
         className="flex flex-col items-center gap-1.5 shrink-0"
       >
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-earthy-divider text-earthy-cocoaSoft hover:border-earthy-terracotta hover:text-earthy-terracotta transition-colors">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-earthy-divider text-earthy-cocoaSoft hover:border-earthy-terracotta hover:text-earthy-terracotta transition-colors bg-[#FFFDF7] shadow-earthy-card">
           +
         </div>
         <span className="text-xs font-bold text-earthy-cocoaSoft">Add</span>

@@ -54,7 +54,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
           onClick={() => setOpen(true)}
           className="w-full h-full text-left rounded-2xl p-3 font-bold text-xs font-jakarta"
           style={{
-            background: 'transparent',
+            background: '#FFFDF7',
             border: `2px dashed ${theme.accent}99`,
             color: theme.deeper,
           }}
@@ -69,13 +69,14 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
   const pct = Math.min(100, Math.round((totalStars / reward.goal) * 100))
   return (
     <div
-      className="rounded-2xl p-3 h-full bg-white shadow-earthy-card font-jakarta"
+      className="rounded-2xl p-3 h-full shadow-earthy-card font-jakarta"
+      style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
     >
       <div className="flex items-center justify-between mb-1.5">
         <div className="font-bold text-xs truncate text-earthy-cocoa">🎁 {reward.label}</div>
         <button onClick={() => setOpen(true)} className="text-[10px] font-bold shrink-0 ml-2" style={{ color: theme.deeper }}>Edit</button>
       </div>
-      <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E0D5' }}>
+      <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
       </div>
       <div className="text-[10px] font-bold mt-1 flex justify-between" style={{ color: theme.deeper }}>

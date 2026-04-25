@@ -92,11 +92,14 @@ export default function ActivityGrid({ kid, boardId }) {
   return (
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
-    <div className="bg-white rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-4">
+    <div
+      className="rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-3"
+      style={{ backgroundColor: '#FFFDF7', border: '1px solid #F0E1C8' }}
+    >
       <table className="w-full text-center text-xs">
-        <thead className="bg-earthy-ivory rounded-xl">
+        <thead>
           <tr className="text-earthy-cocoaSoft">
-            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-ivory z-10 uppercase tracking-wide rounded-l-xl">Activity</th>
+            <th className="text-left pl-3 py-3 font-bold sticky left-0 z-10 uppercase tracking-wide rounded-l-2xl bg-[#FFF4DF]">Activity</th>
             {days.map((d) => {
               const isToday =
                 d.date.toDateString() === today.toDateString()
@@ -104,7 +107,7 @@ export default function ActivityGrid({ kid, boardId }) {
               return (
                 <th
                   key={d.key}
-                  className="px-1 py-3 font-bold relative"
+                  className="px-1 py-3 font-bold relative bg-[#FFF4DF]"
                   style={isWeekend ? { background: weekendTint } : undefined}
                 >
                   <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{d.label}</div>
@@ -115,20 +118,25 @@ export default function ActivityGrid({ kid, boardId }) {
                 </th>
               )
             })}
-            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-xl">Total</th>
+            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-2xl bg-[#FFF4DF]">Total</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="[&_tr:first-child_td]:pt-3">
           {activities.map((a, idx) => {
             const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
-            const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-earthy-ivory'
+            const rowBg = idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'
             return (
               <tr key={a.id} className={rowBg}>
                 <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white' : 'bg-earthy-ivory'}`}
+                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'}`}
                 >
                   <div className="flex items-center gap-1.5">
-                    <span className="text-lg">{a.emoji}</span>
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0"
+                      style={{ backgroundColor: `${a.color || '#A8E6C1'}33` }}
+                    >
+                      {a.emoji}
+                    </span>
                     <span className="font-bold text-earthy-cocoa text-xs">{a.label}</span>
                   </div>
                 </td>
@@ -144,9 +152,9 @@ export default function ActivityGrid({ kid, boardId }) {
                       <button
                         onClick={() => toggle(a.id, d.key)}
                         aria-label={checked ? 'Uncheck activity' : 'Check activity'}
-                        className="w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
+                        className="activity-check-cell w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
                         style={{
-                          background: checked ? `${a.color}33` : 'transparent',
+                          background: checked ? `${a.color}33` : '#FFFDF7',
                           border: checked ? `2px solid ${a.color}` : '2px solid #E8DCC4',
                         }}
                       >

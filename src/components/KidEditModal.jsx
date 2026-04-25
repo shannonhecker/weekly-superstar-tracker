@@ -4,7 +4,6 @@ import { db } from '../lib/firebase'
 import { THEMES, KID_AVATARS } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
-import ActivitiesModal from './ActivitiesModal'
 import { KidAvatar } from './KidAvatar'
 import { uploadKidAvatar, deleteKidAvatar } from '../lib/avatarUpload'
 
@@ -14,7 +13,6 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleteTyped, setDeleteTyped] = useState('')
   const [busy, setBusy] = useState(false)
-  const [tasksOpen, setTasksOpen] = useState(false)
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
@@ -26,7 +24,6 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     setTheme(kid?.theme || 'football')
     setConfirmingDelete(false)
     setDeleteTyped('')
-    setTasksOpen(false)
     setEmojiPickerOpen(false)
   }, [open, kid?.id])
 
@@ -254,20 +251,6 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
           </button>
         </div>
 
-        {/* Edit tasks */}
-        <button
-          type="button"
-          onClick={() => setTasksOpen(true)}
-          className="w-full mt-4 py-3 px-3 rounded-xl bg-earthy-ivory hover:bg-earthy-terracottaSoft/40 border border-earthy-divider flex items-center gap-2 text-left active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
-        >
-          <span className="text-lg">📝</span>
-          <span className="font-bold flex-1 text-earthy-cocoa">Edit tasks</span>
-          <span className="text-xs font-bold text-earthy-cocoaSoft mr-1">
-            {(kid.activities?.length ?? 0)} of 10
-          </span>
-          <span className="text-earthy-cocoaSoft">›</span>
-        </button>
-
         {/* Delete confirmation — only renders once the corner trash icon is tapped */}
         {confirmingDelete && (
           <div className="mt-6">
@@ -313,12 +296,6 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         Done
       </button>
 
-      <ActivitiesModal
-        open={tasksOpen}
-        onClose={() => setTasksOpen(false)}
-        kid={kid}
-        boardId={boardId}
-      />
     </Modal>
   )
 }

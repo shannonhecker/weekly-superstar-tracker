@@ -8,6 +8,7 @@ import { THEMES } from '../lib/themes'
 import { getCurrentWeek, formatWeekRange, getWeekKey } from '../lib/week'
 import KidSwitcher from '../components/KidSwitcher'
 import ActivityGrid from '../components/ActivityGrid'
+import ActivitiesModal from '../components/ActivitiesModal'
 import ShareModal from '../components/ShareModal'
 import MysteryPet from '../components/MysteryPet'
 import StreakCounter from '../components/StreakCounter'
@@ -22,6 +23,7 @@ import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 import Logo from '../components/Logo'
+import LogoLoader from '../components/LogoLoader'
 import ThemeScene from '../components/ThemeScene'
 import EmptyStateScene from '../components/EmptyStateScene'
 
@@ -70,6 +72,7 @@ export default function Board() {
   const [loading, setLoading] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
   const [editKidOpen, setEditKidOpen] = useState(false)
+  const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
@@ -224,7 +227,7 @@ export default function Board() {
     setSummary({ kid: activeKid, archive, weekKey, replay: true })
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse"><Logo size={48} /></div></div>
+  if (loading) return <LogoLoader label="Loading board..." />
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
@@ -283,6 +286,18 @@ export default function Board() {
                     </button>
                   )}
                   {activeKid && (
+                    <button
+                      onClick={() => { setMenuOpen(false); setTasksOpen(true) }}
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
+                    >
+                      <span>📝</span>
+                      <span className="flex-1">Edit tasks</span>
+                      <span className="text-xs text-earthy-cocoaSoft">
+                        {(activeKid.activities?.length ?? 0)} of 10
+                      </span>
+                    </button>
+                  )}
+                  {activeKid && (
                     <Link
                       to={`/board/${boardId}/print/${activeKid.id}`}
                       onClick={() => setMenuOpen(false)}
@@ -324,60 +339,55 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="relative overflow-hidden rounded-3xl bg-earthy-cream"
+                className="relative rounded-3xl shadow-earthy-card"
                 style={{
-                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}55`,
+                  backgroundColor: '#FFFDF7',
+                  border: `1px solid ${activeTheme.accent}66`,
                 }}
               >
-                {/* Per-theme illustrated scene — flat, rounded, soft palette
-                    art (style references: Indonesian earthy mood board +
-                    Learning Animals app). Sits at the top of the card as an
-                    ambient backdrop for the kid's identity. */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none w-full"
-                  style={{ aspectRatio: '24 / 5' }}
-                >
-                  <ThemeScene themeKey={activeKid.theme || 'football'} />
+                <div className="relative p-3 sm:p-4">
+                <div className="mb-3 overflow-hidden rounded-[24px]">
+                  <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(136px, 22vw, 188px)" />
                 </div>
 
-                <div className="relative p-3 sm:p-4 pt-2 sm:pt-2">
-                <BirthdayBanner kid={activeKid} />
-                {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <KidAvatar kid={activeKid} size={40} />
-                    <h2
-                      className="text-xl sm:text-2xl font-extrabold truncate text-earthy-cocoa tracking-tight"
-                    >
-                      {activeKid.name}
-                    </h2>
-                    <button
-                      onClick={() => setEditKidOpen(true)}
-                      aria-label={`Edit ${activeKid.name}`}
-                      className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory text-xs hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center"
-                      style={{ border: `1px solid ${activeTheme.deeper}66` }}
-                    >
-                      ✏️
-                    </button>
-                    {activeKid.custodyLabel && (
-                      <span
-                        className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
-                        style={{
-                          backgroundColor: `${activeTheme.accent}33`,
-                          color: activeTheme.deeper,
-                        }}
-                        aria-label={`At ${activeKid.custodyLabel} this week`}
+                <div className="mb-3">
+                  <BirthdayBanner kid={activeKid} />
+                  {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <KidAvatar kid={activeKid} size={46} />
+                      <h2
+                        className="text-2xl sm:text-3xl font-extrabold truncate text-earthy-cocoa"
                       >
-                        <span className="text-[12px]" aria-hidden>🏠</span>
-                        <span className="text-[11px] font-bold truncate max-w-[120px]">
-                          {activeKid.custodyLabel}
+                        {activeKid.name}
+                      </h2>
+                      <button
+                        onClick={() => setEditKidOpen(true)}
+                        aria-label={`Edit ${activeKid.name}`}
+                        className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory text-xs hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center"
+                        style={{ border: `1px solid ${activeTheme.deeper}66` }}
+                      >
+                        ✏️
+                      </button>
+                      {activeKid.custodyLabel && (
+                        <span
+                          className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: `${activeTheme.accent}33`,
+                            color: activeTheme.deeper,
+                          }}
+                          aria-label={`At ${activeKid.custodyLabel} this week`}
+                        >
+                          <span className="text-[12px]" aria-hidden>🏠</span>
+                          <span className="text-[11px] font-bold truncate max-w-[120px]">
+                            {activeKid.custodyLabel}
+                          </span>
                         </span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
-                    📅 {formatWeekRange(monday, sunday)}
+                      )}
+                    </div>
+                    <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
+                      📅 {formatWeekRange(monday, sunday)}
+                    </div>
                   </div>
                 </div>
 
@@ -435,6 +445,13 @@ export default function Board() {
             setSearchParams({}, { replace: true })
           }
         }}
+      />
+
+      <ActivitiesModal
+        open={tasksOpen}
+        onClose={() => setTasksOpen(false)}
+        kid={activeKid}
+        boardId={boardId}
       />
 
       <WeeklySummary

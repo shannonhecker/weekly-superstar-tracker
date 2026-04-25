@@ -4,6 +4,163 @@
 
 html, body, #root { height: 100%; }
 
+@keyframes logo-loader-wink-bounce {
+  0%, 100% { transform: translateY(0) rotate(-3deg) scale(1); }
+  42% { transform: translateY(-6px) rotate(3deg) scale(1.07); }
+  68% { transform: translateY(2px) rotate(-1deg) scale(1.01); }
+}
+
+@keyframes logo-loader-sparkle {
+  0%, 100% { opacity: 0.16; transform: scale(0.58); }
+  45% { opacity: 0.95; transform: scale(1.16); }
+  72% { opacity: 0.22; transform: scale(0.74); }
+}
+
+@keyframes logo-loader-shadow {
+  0%, 100% { opacity: 0.18; transform: translateX(-50%) scaleX(1); }
+  42% { opacity: 0.1; transform: translateX(-50%) scaleX(0.82); }
+  68% { opacity: 0.15; transform: translateX(-50%) scaleX(0.94); }
+}
+
+.logo-loader-stage {
+  position: relative;
+  width: 9.5rem;
+  height: 8.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-loader-mark {
+  position: relative;
+  z-index: 2;
+  animation: logo-loader-wink-bounce 1.7s ease-in-out infinite;
+  filter: drop-shadow(0 14px 18px rgba(90, 58, 46, 0.18));
+  transform-origin: center 70%;
+}
+
+.logo-loader-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  z-index: 1;
+  width: 4.5rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: #5A3A2E;
+  opacity: 0.18;
+  transform: translateX(-50%) scaleX(1);
+  animation: logo-loader-shadow 1.7s ease-in-out infinite;
+}
+
+.logo-loader-sparkle {
+  position: absolute;
+  z-index: 0;
+  border-radius: 999px;
+  animation: logo-loader-sparkle 1.6s ease-in-out infinite;
+}
+
+.logo-loader-sparkle-one {
+  top: 1.5rem;
+  left: 1.55rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  background: #F6C86F;
+}
+
+.logo-loader-sparkle-two {
+  top: 2.2rem;
+  right: 1.4rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #BEE8D5;
+  animation-delay: 0.28s;
+}
+
+.logo-loader-sparkle-three {
+  left: 2.2rem;
+  bottom: 2.2rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  background: #C9DFFF;
+  animation-delay: 0.54s;
+}
+
+@keyframes theme-card-mascot-float {
+  0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+  50% { transform: translateY(-3px) rotate(0.4deg); }
+}
+
+@keyframes theme-card-sparkle-twinkle {
+  0%, 100% { opacity: 0.26; transform: scale(0.94); }
+  50% { opacity: 0.54; transform: scale(1.04); }
+}
+
+@keyframes score-number-pop {
+  0% { transform: scale(0.96); }
+  48% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.theme-card-art-banner {
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.theme-card-mascot-float {
+  animation: theme-card-mascot-float 3.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.theme-card-sparkle-twinkle {
+  animation: theme-card-sparkle-twinkle 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.activity-check-cell {
+  transition: transform 160ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.score-number-pop {
+  animation: score-number-pop 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-loader-mark,
+  .logo-loader-shadow,
+  .logo-loader-sparkle,
+  .theme-card-mascot-float,
+  .theme-card-sparkle-twinkle,
+  .score-number-pop,
+  .egg-float,
+  .sparkle,
+  .pop-in,
+  .hatch-reveal,
+  .avatar-bounce,
+  .flame-flicker,
+  .badge-flash,
+  .box-jitter,
+  .today-pulse,
+  .pet-dance,
+  .pet-sway,
+  .pet-wiggle,
+  .bg-rainbow,
+  .level-up-burst,
+  .pet-grow-bob,
+  .pet-hop,
+  .pet-excited,
+  .pet-strut,
+  .emotion-bob {
+    animation: none;
+  }
+
+  .activity-check-cell {
+    transition: none;
+  }
+}
+
 @keyframes egg-wobble {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-3deg); }
