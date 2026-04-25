@@ -206,7 +206,8 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
 
       <button
         onClick={onClose}
-        className="w-full py-3 rounded-pill text-earthy-ivory font-bold bg-earthy-cocoa hover:bg-[#4A2E25] shadow-earthy-soft active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
+        style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+        className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] shadow-earthy-soft active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
       >
         Yay!
       </button>

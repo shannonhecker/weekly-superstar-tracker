@@ -264,7 +264,8 @@ export default function Board() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="More options"
               aria-expanded={menuOpen}
-              className="w-9 h-9 rounded-full bg-earthy-cocoa text-earthy-ivory text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-9 h-9 rounded-full text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
             >
               ⋯
             </button>

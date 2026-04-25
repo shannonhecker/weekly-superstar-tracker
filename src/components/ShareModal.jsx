@@ -33,7 +33,8 @@ export default function ShareModal({ open, onClose, shareCode }) {
         </div>
         <button
           onClick={copy}
-          className="w-full py-3 rounded-pill text-earthy-ivory font-bold bg-earthy-cocoa hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           {copied ? 'Copied!' : 'Copy link'}
         </button>

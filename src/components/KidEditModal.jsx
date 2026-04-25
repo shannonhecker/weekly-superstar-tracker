@@ -289,7 +289,8 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
                 <button
                   onClick={handleDelete}
                   disabled={!canDelete || busy}
-                  className="flex-1 py-2 rounded-pill text-earthy-ivory font-bold bg-[#B85450] disabled:opacity-40"
+                  style={{ color: '#FFFAF0', backgroundColor: '#B85450' }}
+                  className="flex-1 py-2 rounded-pill font-bold disabled:opacity-40"
                 >
                   {busy ? 'Deleting…' : 'Delete forever'}
                 </button>

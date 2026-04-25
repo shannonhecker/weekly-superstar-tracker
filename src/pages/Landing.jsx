@@ -46,13 +46,15 @@ export default function Landing() {
         </p>
         <Link
           to="/signup"
-          className="block w-full mb-3 px-6 py-4 rounded-pill font-bold text-earthy-ivory text-base bg-earthy-cocoa hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="block w-full mb-3 px-6 py-4 rounded-pill font-bold text-base hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           Create a family board
         </Link>
         <Link
           to="/signin"
-          className="block w-full px-6 py-4 rounded-pill font-bold text-earthy-cocoa text-base bg-earthy-terracottaSoft hover:bg-[#EAB892] active:scale-[0.99] transition-all"
+          style={{ color: '#5A3A2E', backgroundColor: '#F4C8A8' }}
+          className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-[#EAB892] active:scale-[0.99] transition-all"
         >
           Sign in
         </Link>
