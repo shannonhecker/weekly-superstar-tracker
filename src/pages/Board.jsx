@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { doc, onSnapshot, collection, query, orderBy, updateDoc } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { auth, db } from '../lib/firebase'
@@ -276,6 +276,16 @@ export default function Board() {
                       <span>🏆</span>
                       <span>Pet collection</span>
                     </button>
+                  )}
+                  {activeKid && (
+                    <Link
+                      to={`/board/${boardId}/print/${activeKid.id}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <span>🖨️</span>
+                      <span>Print this week's sheet</span>
+                    </Link>
                   )}
                   <button
                     onClick={() => { setMenuOpen(false); toggleMute() }}
