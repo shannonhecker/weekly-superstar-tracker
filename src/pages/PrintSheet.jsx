@@ -48,9 +48,17 @@ function weekKeyToDays(weekKey) {
   })
 }
 
+// QR payload — uses the live https URL of the print page itself so any
+// camera or scanner shows a clickable, human-readable target. The previous
+// custom `weeklysuperstar://` scheme failed in generic camera apps (they
+// reported "no data") because the OS can't open an unknown scheme. The CV
+// pipeline parses boardId / kidId / weekKey out of the URL path + query,
+// so functionality is preserved while gaining universal scannability.
+const PRINT_SHEET_BASE_URL = 'https://weekly-superstar-tracker.web.app'
+
 function buildSheetUrl(boardId, kidId, weekKey) {
-  const params = new URLSearchParams({ board: boardId, kid: kidId, week: weekKey })
-  return `weeklysuperstar://sheet?${params.toString()}`
+  const params = new URLSearchParams({ week: weekKey })
+  return `${PRINT_SHEET_BASE_URL}/board/${boardId}/print/${kidId}?${params.toString()}`
 }
 
 function Header({ kid, theme, weekRange, hatchPercent, sheetUrl }) {
