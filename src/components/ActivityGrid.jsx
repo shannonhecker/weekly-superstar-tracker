@@ -92,7 +92,7 @@ export default function ActivityGrid({ kid, boardId }) {
   return (
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
-    <div className="bg-white rounded-2xl shadow-earthy-soft ring-1 ring-earthy-divider overflow-x-auto font-jakarta p-2 sm:p-4">
+    <div className="bg-white rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-4">
       <table className="w-full text-center text-xs">
         <thead className="bg-earthy-ivory rounded-xl">
           <tr className="text-earthy-cocoaSoft">

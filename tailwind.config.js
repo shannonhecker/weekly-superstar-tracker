@@ -31,6 +31,11 @@ export default {
         'earthy-flat': shadowsCss.earthyFlat,
         'earthy-soft': shadowsCss.earthySoft,
         'earthy-lifted': shadowsCss.earthyLifted,
+        // Two-layer drop shadow for floating surfaces (modals, dropdowns) —
+        // tight lower layer for definition, wide soft layer for lift.
+        'earthy-pop': '0 2px 6px rgba(90, 58, 46, 0.07), 0 14px 32px rgba(90, 58, 46, 0.14)',
+        // Subtler tier for cards that sit inside the active-kid surface.
+        'earthy-card': '0 1px 2px rgba(90, 58, 46, 0.04), 0 6px 16px rgba(90, 58, 46, 0.08)',
       },
       transitionTimingFunction: {
         spring: motion.springCss,

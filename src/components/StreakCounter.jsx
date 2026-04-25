@@ -37,10 +37,7 @@ export default function StreakCounter({ kid }) {
 
   return (
     <div
-      className="rounded-2xl p-3 flex items-center gap-3 h-full bg-white shadow-earthy-soft font-jakarta"
-      style={{
-        border: `1px solid ${theme.accent}55`,
-      }}
+      className="rounded-2xl p-3 flex items-center gap-3 h-full bg-white shadow-earthy-card font-jakarta"
     >
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shrink-0"

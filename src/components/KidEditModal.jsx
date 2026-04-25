@@ -122,6 +122,17 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
 
   return (
     <Modal open={open} onClose={busy ? undefined : onClose} emoji="✏️" title={`Edit ${kid.name}`}>
+      {!confirmingDelete && (
+        <button
+          type="button"
+          onClick={() => setConfirmingDelete(true)}
+          aria-label="Delete this superstar"
+          title="Delete this superstar"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full text-earthy-cocoaSoft hover:text-[#B85450] hover:bg-[#B85450]/10 flex items-center justify-center text-base transition-colors"
+        >
+          🗑
+        </button>
+      )}
       <div className="max-h-[65vh] overflow-y-auto">
         {/* Avatar */}
         <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">Avatar</label>
@@ -257,16 +268,9 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
           <span className="text-earthy-cocoaSoft">›</span>
         </button>
 
-        {/* Delete */}
-        <div className="mt-6 pt-4 border-t border-earthy-divider">
-          {!confirmingDelete ? (
-            <button
-              onClick={() => setConfirmingDelete(true)}
-              className="w-full py-3 rounded-pill border-2 border-[#B85450]/40 text-[#B85450] font-bold hover:bg-[#B85450]/05"
-            >
-              🗑 Delete this superstar
-            </button>
-          ) : (
+        {/* Delete confirmation — only renders once the corner trash icon is tapped */}
+        {confirmingDelete && (
+          <div className="mt-6">
             <div className="bg-[#B85450]/10 rounded-xl p-3">
               <p className="text-sm font-bold text-[#B85450] mb-2">
                 This cannot be undone. Type <span className="font-extrabold">{kid.name}</span> to confirm.
@@ -296,14 +300,15 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
                 </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <button
         onClick={onClose}
         disabled={busy}
-        className="w-full mt-4 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
+        style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+        className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all disabled:opacity-50"
       >
         Done
       </button>

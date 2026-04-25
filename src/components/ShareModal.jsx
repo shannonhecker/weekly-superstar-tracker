@@ -22,7 +22,7 @@ export default function ShareModal({ open, onClose, shareCode }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-earthy-lifted ring-1 ring-earthy-divider modal-in font-jakarta"
+        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta"
       >
         <div className="text-center mb-4">
           <div className="text-4xl mb-2">🔗</div>
