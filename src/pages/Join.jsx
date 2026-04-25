@@ -5,6 +5,7 @@ import { collection, query, where, getDocs, doc, updateDoc, arrayUnion } from 'f
 import { useAuth } from '../contexts/AuthContext'
 import { auth, db } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
+import EmptyStateScene from '../components/EmptyStateScene'
 
 export default function Join() {
   const { code } = useParams()
@@ -45,12 +46,19 @@ export default function Join() {
   }, [loading, user, code, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-center px-5">
-      <div>
-        <div className="text-5xl mb-3">🎉</div>
-        {error
-          ? <p className="text-red-500 font-bold">{error}</p>
-          : <p className="text-gray-500 font-bold">Joining the board…</p>}
+    <div className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
+      <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full overflow-hidden">
+        <div className="bg-earthy-ivory">
+          <EmptyStateScene variant="joining" />
+        </div>
+        <div className="p-8 pt-6">
+          {error
+            ? <p className="text-earthy-cocoa font-extrabold text-lg">{error}</p>
+            : <>
+                <p className="text-earthy-cocoa font-extrabold text-lg mb-1">Joining the board…</p>
+                <p className="text-earthy-cocoaSoft text-sm font-bold">Hang tight, we're getting you in.</p>
+              </>}
+        </div>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { useAuth } from '../contexts/AuthContext'
 import { db } from '../lib/firebase'
 import Logo from '../components/Logo'
+import EmptyStateScene from '../components/EmptyStateScene'
 
 export default function Landing() {
   const { user, loading } = useAuth()
@@ -28,9 +29,13 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory">
-      <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted p-8 max-w-md w-full text-center font-jakarta">
-        <div className="flex justify-center mb-4">
-          <Logo size={80} />
+      <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center font-jakarta overflow-hidden">
+        <div className="bg-earthy-ivory">
+          <EmptyStateScene variant="welcome" />
+        </div>
+        <div className="p-8 pt-6">
+        <div className="flex justify-center mb-3">
+          <Logo size={56} />
         </div>
         <h1 className="text-3xl font-extrabold text-earthy-cocoa mb-2 tracking-tight">
           Winking Star
@@ -54,6 +59,7 @@ export default function Landing() {
         <p className="mt-5 text-xs text-earthy-cocoaSoft/70">
           Got an invite link? Just tap it — no account needed.
         </p>
+        </div>
       </div>
     </div>
   )

@@ -23,6 +23,7 @@ import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 import Logo from '../components/Logo'
 import ThemeScene from '../components/ThemeScene'
+import EmptyStateScene from '../components/EmptyStateScene'
 
 const HATCH_GOAL = 50
 
@@ -460,12 +461,15 @@ export default function Board() {
 
 function EmptyState({ boardId }) {
   return (
-    <div className="text-center py-10">
-      <div className="flex justify-center mb-3">
-        <Logo size={64} />
+    <div className="text-center py-6">
+      <div className="max-w-md mx-auto mb-4 rounded-3xl overflow-hidden ring-1 ring-earthy-divider bg-earthy-cream">
+        <EmptyStateScene variant="no-kids" />
       </div>
-      <p className="text-earthy-cocoaSoft font-bold mb-4">
-        No superstars yet — add your first one above using the “+ Add” button.
+      <p className="text-earthy-cocoa font-extrabold text-lg mb-1">
+        No superstars yet
+      </p>
+      <p className="text-earthy-cocoaSoft font-bold mb-5 text-sm">
+        Add your first one above using the “+ Add” button.
       </p>
       <KidSwitcher kids={[]} activeKidId={null} boardId={boardId} />
     </div>

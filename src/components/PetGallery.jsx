@@ -4,6 +4,7 @@ import { PET_ASSET, PET_CHAINS, THEMES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
 import Modal from './Modal'
 import Egg from './Egg'
+import EmptyStateScene from './EmptyStateScene'
 
 const RARE_STICKERS = new Set(['🌈', '🦄', '🧚', '🪄', '🎆', '💎', '🎇', '🌠'])
 
@@ -187,9 +188,12 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         })()}
 
         {entries.length === 0 && (
-          <p className="text-xs text-earthy-cocoaSoft font-bold py-2">
-            No past weeks yet.
-          </p>
+          <div className="rounded-2xl overflow-hidden bg-earthy-ivory ring-1 ring-earthy-divider mb-2">
+            <EmptyStateScene variant="no-weeks" />
+            <p className="text-xs text-earthy-cocoaSoft font-bold text-center py-3">
+              No past weeks yet — finish this week to start your collection.
+            </p>
+          </div>
         )}
 
         {entries.map(([weekKey, archive]) => {
