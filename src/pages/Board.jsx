@@ -21,6 +21,7 @@ import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import Logo from '../components/Logo'
 
 const HATCH_GOAL = 50
 
@@ -221,7 +222,7 @@ export default function Board() {
     setSummary({ kid: activeKid, archive, weekKey, replay: true })
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-3xl animate-pulse">⭐</div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse"><Logo size={48} /></div></div>
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
@@ -235,8 +236,8 @@ export default function Board() {
       <OfflineBanner />
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
-        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-1.5 min-w-0">
-          <span className="text-xl sm:text-2xl shrink-0">⭐</span>
+        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-2 min-w-0">
+          <Logo size={28} className="shrink-0" />
           <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent truncate">
             {board.name}
           </span>
@@ -453,7 +454,9 @@ export default function Board() {
 function EmptyState({ boardId }) {
   return (
     <div className="text-center py-10">
-      <div className="text-5xl mb-3">⭐</div>
+      <div className="flex justify-center mb-3">
+        <Logo size={56} />
+      </div>
       <p className="text-gray-500 font-bold mb-4">
         No superstars yet — add your first one above using the “+ Add” button.
       </p>
