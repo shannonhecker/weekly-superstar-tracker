@@ -7,6 +7,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import Join from './pages/Join'
 import Board from './pages/Board'
 import PrintSheet from './pages/PrintSheet'
+import StyleGuide from './pages/StyleGuide'
 import Logo from './components/Logo'
 
 function ProtectedRoute({ children }) {
@@ -50,6 +51,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/style-guide" element={<StyleGuide />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
