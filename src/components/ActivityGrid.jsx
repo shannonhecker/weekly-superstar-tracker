@@ -92,11 +92,11 @@ export default function ActivityGrid({ kid, boardId }) {
   return (
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
-    <div className="bg-earthy-ivory rounded-2xl shadow-earthy-soft overflow-x-auto font-jakarta">
+    <div className="bg-white rounded-2xl shadow-earthy-soft ring-1 ring-earthy-divider overflow-x-auto font-jakarta">
       <table className="w-full text-center text-xs">
-        <thead className="bg-earthy-cream">
+        <thead className="bg-earthy-ivory">
           <tr className="text-earthy-cocoaSoft">
-            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-cream z-10 uppercase tracking-wide">Activity</th>
+            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-ivory z-10 uppercase tracking-wide">Activity</th>
             {days.map((d) => {
               const isToday =
                 d.date.toDateString() === today.toDateString()
@@ -121,11 +121,11 @@ export default function ActivityGrid({ kid, boardId }) {
         <tbody>
           {activities.map((a, idx) => {
             const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
-            const rowBg = idx % 2 === 0 ? 'bg-earthy-ivory' : 'bg-earthy-cream/50'
+            const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-earthy-ivory'
             return (
               <tr key={a.id} className={rowBg}>
                 <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-ivory' : 'bg-earthy-cream'}`}
+                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white' : 'bg-earthy-ivory'}`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="text-lg">{a.emoji}</span>

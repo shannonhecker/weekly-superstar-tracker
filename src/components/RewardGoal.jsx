@@ -69,7 +69,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
   const pct = Math.min(100, Math.round((totalStars / reward.goal) * 100))
   return (
     <div
-      className="rounded-2xl p-3 h-full bg-earthy-ivory shadow-earthy-soft font-jakarta"
+      className="rounded-2xl p-3 h-full bg-white shadow-earthy-soft ring-1 ring-earthy-divider font-jakarta"
       style={{
         border: `1px solid ${theme.accent}55`,
       }}

@@ -164,7 +164,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         tabIndex={0}
         onClick={openGallery}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGallery() } }}
-        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-earthy-ivory shadow-earthy-soft font-jakarta"
+        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-earthy-soft font-jakarta"
         style={{
           border: `1px solid ${theme.accent}55`,
         }}

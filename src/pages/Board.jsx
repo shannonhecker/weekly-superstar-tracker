@@ -335,7 +335,7 @@ export default function Board() {
                 <div
                   aria-hidden
                   className="pointer-events-none w-full"
-                  style={{ height: 100 }}
+                  style={{ aspectRatio: '24 / 5' }}
                 >
                   <ThemeScene themeKey={activeKid.theme || 'football'} />
                 </div>

@@ -60,7 +60,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         tabIndex={0}
         onClick={openDetails}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails() } }}
-        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-earthy-ivory shadow-earthy-soft font-jakarta"
+        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-earthy-soft font-jakarta"
         style={{
           border: `1px solid ${theme.accent}55`,
         }}
