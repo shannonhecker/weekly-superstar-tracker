@@ -13,20 +13,21 @@ import {
 } from '../lib/themes'
 import { formatWeekRange, getWeekKey } from '../lib/week'
 
-// Fiducial-bounded canonical sheet padding. These percentages MUST match
-// GRID_TOP_PADDING / BOTTOM / LEFT / RIGHT in functions/src/sheet-scan.ts —
-// the CV pipeline uses them to crop each cell back out of a captured photo.
-// Change here ⇒ amend there in the same PR (or the same branch chain).
-const GRID_TOP_PCT = 12
+// Canonical sheet padding inside the printable page. These percentages MUST
+// match GRID_TOP_PADDING / BOTTOM / LEFT / RIGHT in functions/src/sheet-scan.ts
+// — the CV pipeline uses them to crop each cell back out of a captured photo.
+// Change here ⇒ amend there in the same branch chain.
+const GRID_TOP_PCT = 14
 const GRID_BOTTOM_PCT = 4
 const GRID_LEFT_PCT = 18
 const GRID_RIGHT_PCT = 4
 
-// Bounded box dimensions: 4 fiducial QR centres define the corners of the
-// canonical sheet area. The QRs themselves sit centred on those corners and
-// extend outward into the page margin so they don't eat into grid space.
-const FIDUCIAL_SIZE_MM = 18
-const FIDUCIAL_QUIET_MM = 1.5
+// Single metadata QR sized for reliable detection from a phone photo. Its
+// canonical position on the sheet (top-right corner of the header band) is
+// fixed so the CV pipeline can bootstrap the sheet's bounding box from the
+// QR's own four detected corners + this known position.
+const METADATA_QR_SIZE_MM = 24
+const METADATA_QR_QUIET_MM = 2
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -47,53 +48,25 @@ function weekKeyToDays(weekKey) {
   })
 }
 
-function buildFiducialUrl(corner) {
-  return `weeklysuperstar://fiducial?corner=${corner}`
-}
-
 function buildSheetUrl(boardId, kidId, weekKey) {
   const params = new URLSearchParams({ board: boardId, kid: kidId, week: weekKey })
   return `weeklysuperstar://sheet?${params.toString()}`
 }
 
-function FiducialQR({ corner }) {
-  const url = buildFiducialUrl(corner)
-  // Each fiducial sits offset so its centre lands on the canonical-sheet
-  // corner. The page padding accounts for the half-fiducial overhang into
-  // the printable margin.
-  const offset = `-${FIDUCIAL_SIZE_MM / 2}mm`
-  const positions = {
-    tl: { top: offset, left: offset },
-    tr: { top: offset, right: offset },
-    bl: { bottom: offset, left: offset },
-    br: { bottom: offset, right: offset },
-  }
+function Header({ kid, theme, weekRange, hatchPercent, sheetUrl }) {
   return (
     <div
-      className="absolute bg-white"
-      style={{
-        width: `${FIDUCIAL_SIZE_MM}mm`,
-        height: `${FIDUCIAL_SIZE_MM}mm`,
-        padding: `${FIDUCIAL_QUIET_MM}mm`,
-        ...positions[corner],
-      }}
-    >
-      <QRCode value={url} size={256} style={{ height: '100%', width: '100%' }} />
-    </div>
-  )
-}
-
-function Header({ kid, theme, weekKey, weekRange, hatchPercent, sheetUrl }) {
-  return (
-    <div
-      className="absolute left-0 right-0 top-0 flex items-center gap-[4mm] px-[4mm]"
+      className="absolute left-0 right-0 top-0 flex items-stretch gap-[4mm] px-[4mm] pt-[3mm]"
       style={{ height: `${GRID_TOP_PCT}%` }}
     >
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div
           className="font-display text-[28pt] leading-none truncate"
           style={{
-            background: `linear-gradient(90deg, #F59E0B 0%, ${theme.deeper} 60%, #EC4899 100%)`,
+            // backgroundImage (NOT background shorthand) — the shorthand
+            // resets background-clip, which silently kills the text mask
+            // and leaves the heading invisible.
+            backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${theme.deeper} 60%, #EC4899 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -113,9 +86,17 @@ function Header({ kid, theme, weekKey, weekRange, hatchPercent, sheetUrl }) {
           </span>
         </div>
       </div>
+      {/* Single metadata QR — encodes board / kid / week. The CV pipeline
+          (functions/src/sheet-scan.ts) uses jsqr's location.{topLeft,topRight,
+          bottomLeft,bottomRight}Corner from this one QR + its known canonical
+          position to bootstrap the sheet's bounding box. No corner fiducials. */}
       <div
-        className="bg-white flex flex-col items-center justify-center"
-        style={{ width: '14mm', height: '14mm', padding: '1mm' }}
+        className="bg-white flex flex-col items-center justify-center shrink-0"
+        style={{
+          width: `${METADATA_QR_SIZE_MM}mm`,
+          height: `${METADATA_QR_SIZE_MM}mm`,
+          padding: `${METADATA_QR_QUIET_MM}mm`,
+        }}
       >
         <QRCode value={sheetUrl} size={256} style={{ height: '100%', width: '100%' }} />
       </div>
@@ -360,19 +341,13 @@ export default function PrintSheet() {
         style={{
           width: '210mm',
           height: '297mm',
-          padding: `${FIDUCIAL_SIZE_MM / 2}mm`,
+          padding: '8mm',
         }}
       >
         <div className="relative w-full h-full">
-          <FiducialQR corner="tl" />
-          <FiducialQR corner="tr" />
-          <FiducialQR corner="bl" />
-          <FiducialQR corner="br" />
-
           <Header
             kid={kid}
             theme={theme}
-            weekKey={weekKey}
             weekRange={weekRange}
             hatchPercent={hatchPercent}
             sheetUrl={sheetUrl}
