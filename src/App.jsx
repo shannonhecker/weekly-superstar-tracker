@@ -18,9 +18,9 @@ function ProtectedRoute({ children }) {
 
 function FullPageSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-earthy-ivory">
       <div className="animate-pulse">
-        <Logo size={48} />
+        <Logo size={56} />
       </div>
     </div>
   )

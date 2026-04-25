@@ -36,7 +36,9 @@ export default function ActivityGrid({ kid, boardId }) {
   const today = new Date()
   const toast = useToast()
   const theme = THEMES[kid.theme] || THEMES.football
-  const weekendTint = `${theme.accent}1A`
+  // Slightly stronger tint than previous (1A → 33) — earthy accents are
+  // softer than the legacy saturated palette, so we need more alpha to read.
+  const weekendTint = `${theme.accent}33`
   const [mysteryOpen, setMysteryOpen] = useState(false)
   const [mysteryPrize, setMysteryPrize] = useState(null)
 
@@ -90,11 +92,11 @@ export default function ActivityGrid({ kid, boardId }) {
   return (
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
-    <div className="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <div className="bg-earthy-ivory rounded-2xl shadow-earthy-soft overflow-x-auto font-jakarta">
       <table className="w-full text-center text-xs">
-        <thead className="bg-gray-50">
-          <tr className="text-gray-500">
-            <th className="text-left pl-3 py-2 font-bold sticky left-0 bg-gray-50 z-10">Activity</th>
+        <thead className="bg-earthy-cream">
+          <tr className="text-earthy-cocoaSoft">
+            <th className="text-left pl-3 py-3 font-bold sticky left-0 bg-earthy-cream z-10 uppercase tracking-wide">Activity</th>
             {days.map((d) => {
               const isToday =
                 d.date.toDateString() === today.toDateString()
@@ -102,31 +104,32 @@ export default function ActivityGrid({ kid, boardId }) {
               return (
                 <th
                   key={d.key}
-                  className="px-1 py-2 font-bold relative"
+                  className="px-1 py-3 font-bold relative"
                   style={isWeekend ? { background: weekendTint } : undefined}
                 >
-                  <div className={isToday ? 'text-emerald-600' : 'text-gray-600'}>{d.label}</div>
-                  <div className={`text-[11px] font-bold ${isToday ? 'text-emerald-600' : 'text-gray-500'}`}>
+                  <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{d.label}</div>
+                  <div className={`text-[11px] font-bold ${isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoaSoft'}`}>
                     {monthShort(d.date)} {d.date.getDate()}
                   </div>
-                  {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />}
+                  {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-earthy-terracotta rounded-full" />}
                 </th>
               )
             })}
-            <th className="pr-3 py-2 text-gray-700 font-bold">Total</th>
+            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide">Total</th>
           </tr>
         </thead>
         <tbody>
           {activities.map((a, idx) => {
             const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
+            const rowBg = idx % 2 === 0 ? 'bg-earthy-ivory' : 'bg-earthy-cream/50'
             return (
-              <tr key={a.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}>
+              <tr key={a.id} className={rowBg}>
                 <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-ivory' : 'bg-earthy-cream'}`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="text-lg">{a.emoji}</span>
-                    <span className="font-bold text-gray-700 text-xs">{a.label}</span>
+                    <span className="font-bold text-earthy-cocoa text-xs">{a.label}</span>
                   </div>
                 </td>
                 {days.map((d) => {
@@ -143,18 +146,18 @@ export default function ActivityGrid({ kid, boardId }) {
                         aria-label={checked ? 'Uncheck activity' : 'Check activity'}
                         className="w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
                         style={{
-                          background: checked ? `${a.color}22` : 'transparent',
-                          border: checked ? `2px solid ${a.color}` : '2px solid #E8E8E8',
+                          background: checked ? `${a.color}33` : 'transparent',
+                          border: checked ? `2px solid ${a.color}` : '2px solid #E8DCC4',
                         }}
                       >
                         {checked
                           ? <span key={stickers[`${a.id}-${d.key}`] || ''} className="pop-in inline-block">{stickers[`${a.id}-${d.key}`] || fallbackStickerFor(a)}</span>
-                          : <span className="text-gray-300 text-base">○</span>}
+                          : <span className="text-earthy-cocoaSoft/40 text-base">○</span>}
                       </button>
                     </td>
                   )
                 })}
-                <td className="pr-3 font-bold text-gray-500 text-xs">{rowTotal}/7</td>
+                <td className="pr-3 font-bold text-earthy-cocoaSoft text-xs">{rowTotal}/7</td>
               </tr>
             )
           })}

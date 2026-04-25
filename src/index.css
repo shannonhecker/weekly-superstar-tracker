@@ -214,13 +214,8 @@ html, body, #root { height: 100%; }
   }
 }
 body {
-  font-family: 'Nunito', system-ui, sans-serif;
-  background:
-    radial-gradient(at 0% 0%, #FFF0F8 0%, transparent 45%),
-    radial-gradient(at 100% 0%, #F0F4FF 0%, transparent 45%),
-    radial-gradient(at 50% 100%, #FFF8E0 0%, transparent 50%),
-    #FBF7FF;
-  background-attachment: fixed;
-  color: #4a4458;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #FFFAF0; /* earthy.ivory */
+  color: #5A3A2E; /* earthy.cocoa */
   -webkit-font-smoothing: antialiased;
 }

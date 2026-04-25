@@ -232,13 +232,13 @@ export default function Board() {
   const { monday, sunday } = getCurrentWeek()
 
   return (
-    <div className="min-h-screen px-3 sm:px-4 py-3 sm:py-4 pb-10">
+    <div className="min-h-screen bg-earthy-ivory px-3 sm:px-4 py-3 sm:py-4 pb-10 font-jakarta">
       <OfflineBanner />
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
-        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-2 min-w-0">
+        <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
           <Logo size={36} className="shrink-0" />
-          <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent truncate">
+          <span className="text-earthy-cocoa truncate">
             {board.name}
           </span>
         </h1>
@@ -246,7 +246,7 @@ export default function Board() {
           <button
             onClick={() => setShareOpen(true)}
             aria-label="Share"
-            className="px-3 sm:px-4 py-1.5 rounded-xl bg-white border border-purple-200 text-xs font-bold text-purple-600 hover:border-purple-400 active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-300"
+            className="px-3 sm:px-4 py-1.5 rounded-pill bg-earthy-cream border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:border-earthy-cocoaSoft active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
           >
             🔗<span className="hidden sm:inline"> Share</span>
           </button>
@@ -255,18 +255,18 @@ export default function Board() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="More options"
               aria-expanded={menuOpen}
-              className="w-8 h-8 rounded-xl bg-white border border-gray-200 text-sm font-bold text-gray-500 hover:border-gray-400 active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-300"
+              className="w-9 h-9 rounded-full bg-earthy-cocoa text-earthy-ivory text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
             >
               ⋯
             </button>
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[180px]">
+                <div className="absolute right-0 top-full mt-1 z-50 bg-earthy-cream rounded-2xl shadow-earthy-lifted border border-earthy-divider py-1 min-w-[200px]">
                   {activeKid && (
                     <button
                       onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
                     >
                       <span>🏆</span>
                       <span>Pet collection</span>
@@ -276,7 +276,7 @@ export default function Board() {
                     <Link
                       to={`/board/${boardId}/print/${activeKid.id}`}
                       onClick={() => setMenuOpen(false)}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
                     >
                       <span>🖨️</span>
                       <span>Print this week's sheet</span>
@@ -284,7 +284,7 @@ export default function Board() {
                   )}
                   <button
                     onClick={() => { setMenuOpen(false); toggleMute() }}
-                    className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
                   >
                     <span>{muted ? '🔇' : '🔊'}</span>
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
@@ -292,7 +292,7 @@ export default function Board() {
                   {user && !user.isAnonymous && (
                     <button
                       onClick={() => { setMenuOpen(false); onSignOut() }}
-                      className="w-full text-left px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-ivory flex items-center gap-2"
                     >
                       <span>↩︎</span>
                       <span>Sign out</span>
@@ -314,10 +314,9 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="relative overflow-hidden rounded-3xl p-3 sm:p-4"
+                className="relative overflow-hidden rounded-3xl p-3 sm:p-4 bg-earthy-cream"
                 style={{
-                  background: `radial-gradient(140% 90% at 50% 0%, ${activeTheme.accent}33 0%, ${activeTheme.accent}10 45%, ${activeTheme.accent}05 100%)`,
-                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}22`,
+                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}55`,
                 }}
               >
                 {/* Floating theme-emoji backdrop — reinforces the kid's chosen
@@ -339,26 +338,15 @@ export default function Board() {
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <KidAvatar kid={activeKid} size={40} />
                     <h2
-                      className="text-xl sm:text-2xl font-black font-display truncate"
-                      style={{
-                        // backgroundImage (NOT the `background` shorthand) —
-                        // the shorthand resets background-clip to border-box,
-                        // which kills the text mask and leaves the heading
-                        // invisible behind a solid gradient bar.
-                        backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        color: activeTheme.deeper,
-                      }}
+                      className="text-xl sm:text-2xl font-extrabold truncate text-earthy-cocoa tracking-tight"
                     >
                       {activeKid.name}
                     </h2>
                     <button
                       onClick={() => setEditKidOpen(true)}
                       aria-label={`Edit ${activeKid.name}`}
-                      className="shrink-0 w-7 h-7 rounded-full bg-white text-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center"
-                      style={{ border: `1px solid ${activeTheme.accent}55` }}
+                      className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory text-xs hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center"
+                      style={{ border: `1px solid ${activeTheme.deeper}66` }}
                     >
                       ✏️
                     </button>
@@ -378,7 +366,7 @@ export default function Board() {
                       </span>
                     )}
                   </div>
-                  <div className="px-2 py-1 rounded-lg bg-white text-xs font-bold text-gray-600 shrink-0">
+                  <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
                     📅 {formatWeekRange(monday, sunday)}
                   </div>
                 </div>
@@ -449,12 +437,12 @@ export default function Board() {
         onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
       />
 
-      <p className="text-center text-gray-500 text-[12px] mt-6 font-semibold">
+      <p className="text-center text-earthy-cocoaSoft text-[12px] mt-6 font-semibold">
         💡 Tap a sticker square to mark it. Switch kids with the avatars above.
       </p>
-      <p className="text-center text-gray-500 text-[11px] mt-1 font-semibold">
+      <p className="text-center text-earthy-cocoaSoft/70 text-[11px] mt-1 font-semibold">
         Pet art:{' '}
-        <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline">Microsoft Fluent Emoji</a>
+        <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noreferrer" className="underline hover:text-earthy-cocoa">Microsoft Fluent Emoji</a>
         {' '}(MIT)
       </p>
     </div>
@@ -465,9 +453,9 @@ function EmptyState({ boardId }) {
   return (
     <div className="text-center py-10">
       <div className="flex justify-center mb-3">
-        <Logo size={56} />
+        <Logo size={64} />
       </div>
-      <p className="text-gray-500 font-bold mb-4">
+      <p className="text-earthy-cocoaSoft font-bold mb-4">
         No superstars yet — add your first one above using the “+ Add” button.
       </p>
       <KidSwitcher kids={[]} activeKidId={null} boardId={boardId} />
