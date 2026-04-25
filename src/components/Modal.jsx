@@ -32,7 +32,7 @@ export default function Modal({ open, onClose, title, emoji, children }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta"
+        className="relative bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta"
       >
         {(title || emoji) && (
           <div className="text-center mb-4">
