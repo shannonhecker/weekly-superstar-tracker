@@ -60,9 +60,9 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         tabIndex={0}
         onClick={openDetails}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails() } }}
-        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-card"
+        className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-earthy-ivory shadow-earthy-soft font-jakarta"
         style={{
-          border: `1px solid ${theme.accent}33`,
+          border: `1px solid ${theme.accent}55`,
         }}
       >
         <div className="flex items-center justify-between mb-1 gap-2">
@@ -117,7 +117,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
       <Modal open={detailsOpen} onClose={() => setDetailsOpen(false)} emoji="🏅" title={`${kid?.name || ''}'s Badges`}>
         <div className="max-h-[65vh] overflow-y-auto">
           {/* Star tier badges */}
-          <div className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2">⭐ Star Badges</div>
+          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">⭐ Star Badges</div>
           {BADGE_TIERS.map((tier) => {
             const earned = totalStars >= tier.stars
             const remaining = Math.max(0, tier.stars - totalStars)
@@ -131,16 +131,16 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                   {tier.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-gray-700">{tier.label}</div>
-                  <div className="text-[11px] text-gray-500 font-bold truncate">
+                  <div className="font-bold text-sm text-earthy-cocoa">{tier.label}</div>
+                  <div className="text-[11px] text-earthy-cocoaSoft font-bold truncate">
                     {tier.description}
                   </div>
                   {!earned && (
                     <div className="mt-1">
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#EEE' }}>
+                      <div className="h-1.5 rounded-full overflow-hidden bg-earthy-divider">
                         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
                       </div>
-                      <div className="text-[11px] text-gray-500 font-bold mt-0.5">{remaining} more to go</div>
+                      <div className="text-[11px] text-earthy-cocoaSoft font-bold mt-0.5">{remaining} more to go</div>
                     </div>
                   )}
                 </div>
@@ -152,7 +152,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
           })}
 
           {/* Achievement badges */}
-          <div className="font-bold text-xs text-gray-500 uppercase tracking-wide mt-4 mb-2">🎯 Achievements</div>
+          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mt-4 mb-2">🎯 Achievements</div>
           {ACHIEVEMENTS.map((a) => {
             const earned = earnedIds.includes(a.id)
             return (
@@ -164,8 +164,8 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                   {a.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-gray-700">{a.label}</div>
-                  <div className="text-[11px] text-gray-500 font-bold">{a.description}</div>
+                  <div className="font-bold text-sm text-earthy-cocoa">{a.label}</div>
+                  <div className="text-[11px] text-earthy-cocoaSoft font-bold">{a.description}</div>
                 </div>
                 <div className="shrink-0 text-[10px] font-bold" style={{ color: earned ? theme.deeper : '#BBB' }}>
                   {earned ? '✓ Earned' : 'Locked'}
@@ -176,7 +176,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         </div>
         <button
           onClick={() => setDetailsOpen(false)}
-          className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
+          className="w-full mt-4 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
         >
           Close
         </button>

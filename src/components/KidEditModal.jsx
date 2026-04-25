@@ -74,17 +74,17 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     <Modal open={open} onClose={busy ? undefined : onClose} emoji="✏️" title={`Edit ${kid.name}`}>
       <div className="max-h-[65vh] overflow-y-auto">
         {/* Name */}
-        <label className="text-xs font-bold text-gray-500 mb-1 block">Name</label>
+        <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 block uppercase tracking-wide">Name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={saveName}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.currentTarget.blur() } }}
-          className="w-full px-3 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none text-base font-bold"
+          className="w-full px-3 py-3 rounded-xl border-2 border-earthy-divider bg-earthy-ivory focus:border-earthy-terracotta focus:outline-none text-base font-bold text-earthy-cocoa"
         />
 
         {/* Theme */}
-        <label className="text-xs font-bold text-gray-500 mb-1 mt-4 block">Theme</label>
+        <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 mt-4 block uppercase tracking-wide">Theme</label>
         <div className="flex gap-2 flex-wrap">
           {Object.entries(THEMES).map(([key, t]) => {
             const active = theme === key
@@ -95,9 +95,9 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
                 aria-label={t.label}
                 className="w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all"
                 style={{
-                  background: `${t.accent}33`,
-                  border: active ? `3px solid ${t.accent}` : '3px solid transparent',
-                  boxShadow: active ? `0 2px 8px ${t.accent}55` : 'none',
+                  background: `${t.accent}55`,
+                  border: active ? `3px solid ${t.deeper}` : '3px solid transparent',
+                  boxShadow: active ? `0 2px 8px ${t.deeper}33` : 'none',
                 }}
               >
                 {t.emoji}
@@ -107,19 +107,19 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         </div>
 
         {/* Reorder */}
-        <label className="text-xs font-bold text-gray-500 mb-1 mt-4 block">Position</label>
+        <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 mt-4 block uppercase tracking-wide">Position</label>
         <div className="flex gap-2">
           <button
             onClick={() => swapOrder('up')}
             disabled={isFirst}
-            className="flex-1 py-2 rounded-xl bg-purple-50 text-purple-600 font-bold disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-pill bg-earthy-terracottaSoft text-earthy-cocoa font-bold disabled:opacity-40"
           >
             ← Move left
           </button>
           <button
             onClick={() => swapOrder('down')}
             disabled={isLast}
-            className="flex-1 py-2 rounded-xl bg-purple-50 text-purple-600 font-bold disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-pill bg-earthy-terracottaSoft text-earthy-cocoa font-bold disabled:opacity-40"
           >
             Move right →
           </button>
@@ -129,49 +129,49 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         <button
           type="button"
           onClick={() => setTasksOpen(true)}
-          className="w-full mt-4 py-3 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 flex items-center gap-2 text-left active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-purple-300"
+          className="w-full mt-4 py-3 px-3 rounded-xl bg-earthy-ivory hover:bg-earthy-terracottaSoft/40 border border-earthy-divider flex items-center gap-2 text-left active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
         >
           <span className="text-lg">📝</span>
-          <span className="font-bold flex-1 text-gray-800">Edit tasks</span>
-          <span className="text-xs font-bold text-gray-500 mr-1">
+          <span className="font-bold flex-1 text-earthy-cocoa">Edit tasks</span>
+          <span className="text-xs font-bold text-earthy-cocoaSoft mr-1">
             {(kid.activities?.length ?? 0)} of 10
           </span>
-          <span className="text-gray-400">›</span>
+          <span className="text-earthy-cocoaSoft">›</span>
         </button>
 
         {/* Delete */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="mt-6 pt-4 border-t border-earthy-divider">
           {!confirmingDelete ? (
             <button
               onClick={() => setConfirmingDelete(true)}
-              className="w-full py-3 rounded-xl border-2 border-red-200 text-red-600 font-bold"
+              className="w-full py-3 rounded-pill border-2 border-[#B85450]/40 text-[#B85450] font-bold hover:bg-[#B85450]/05"
             >
               🗑 Delete this superstar
             </button>
           ) : (
-            <div className="bg-red-50 rounded-xl p-3">
-              <p className="text-sm font-bold text-red-700 mb-2">
-                This cannot be undone. Type <span className="font-bold font-display">{kid.name}</span> to confirm.
+            <div className="bg-[#B85450]/10 rounded-xl p-3">
+              <p className="text-sm font-bold text-[#B85450] mb-2">
+                This cannot be undone. Type <span className="font-extrabold">{kid.name}</span> to confirm.
               </p>
               <input
                 value={deleteTyped}
                 onChange={(e) => setDeleteTyped(e.target.value)}
                 placeholder={kid.name}
                 autoFocus
-                className="w-full px-3 py-2 rounded-lg border-2 border-red-200 focus:border-red-400 focus:outline-none font-bold"
+                className="w-full px-3 py-2 rounded-lg border-2 border-[#B85450]/30 focus:border-[#B85450] focus:outline-none font-bold bg-earthy-ivory text-earthy-cocoa"
               />
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => { setConfirmingDelete(false); setDeleteTyped('') }}
                   disabled={busy}
-                  className="flex-1 py-2 rounded-xl bg-white border-2 border-gray-200 font-bold text-gray-500"
+                  className="flex-1 py-2 rounded-pill bg-earthy-ivory border-2 border-earthy-divider font-bold text-earthy-cocoaSoft"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={!canDelete || busy}
-                  className="flex-1 py-2 rounded-xl text-white font-bold bg-red-500 disabled:opacity-40"
+                  className="flex-1 py-2 rounded-pill text-earthy-ivory font-bold bg-[#B85450] disabled:opacity-40"
                 >
                   {busy ? 'Deleting…' : 'Delete forever'}
                 </button>
@@ -184,7 +184,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
       <button
         onClick={onClose}
         disabled={busy}
-        className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
+        className="w-full mt-4 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
       >
         Done
       </button>

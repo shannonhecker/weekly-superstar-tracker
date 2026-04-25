@@ -52,10 +52,10 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
       <>
         <button
           onClick={() => setOpen(true)}
-          className="w-full h-full text-left rounded-2xl p-3 font-bold text-xs"
+          className="w-full h-full text-left rounded-2xl p-3 font-bold text-xs font-jakarta"
           style={{
-            background: `${theme.accent}10`,
-            border: `2px dashed ${theme.accent}88`,
+            background: 'transparent',
+            border: `2px dashed ${theme.accent}99`,
             color: theme.deeper,
           }}
         >
@@ -69,21 +69,21 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
   const pct = Math.min(100, Math.round((totalStars / reward.goal) * 100))
   return (
     <div
-      className="rounded-2xl p-3 h-full bg-white shadow-card"
+      className="rounded-2xl p-3 h-full bg-earthy-ivory shadow-earthy-soft font-jakarta"
       style={{
-        border: `1px solid ${theme.accent}33`,
+        border: `1px solid ${theme.accent}55`,
       }}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <div className="font-bold text-xs truncate text-gray-700">🎁 {reward.label}</div>
+        <div className="font-bold text-xs truncate text-earthy-cocoa">🎁 {reward.label}</div>
         <button onClick={() => setOpen(true)} className="text-[10px] font-bold shrink-0 ml-2" style={{ color: theme.deeper }}>Edit</button>
       </div>
-      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#FFFFFF' }}>
+      <div className="h-2.5 rounded-full overflow-hidden bg-earthy-divider">
         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
       </div>
-      <div className="text-[10px] font-bold mt-1 flex justify-between" style={{ color: theme.deeper, opacity: 0.85 }}>
+      <div className="text-[10px] font-bold mt-1 flex justify-between" style={{ color: theme.deeper }}>
         <span>{totalStars}/{reward.goal} stars</span>
-        <button onClick={clearReward}>Remove</button>
+        <button onClick={clearReward} className="hover:text-earthy-cocoa">Remove</button>
       </div>
       {modal}
     </div>

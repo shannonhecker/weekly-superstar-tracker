@@ -164,9 +164,9 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         tabIndex={0}
         onClick={openGallery}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGallery() } }}
-        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-white shadow-card"
+        className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer bg-earthy-ivory shadow-earthy-soft font-jakarta"
         style={{
-          border: `1px solid ${theme.accent}33`,
+          border: `1px solid ${theme.accent}55`,
         }}
       >
         <div className={`shrink-0 ${levelUp ? 'level-up-burst' : ''}`}>
@@ -183,7 +183,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
           <div className="text-[11px] font-bold" style={{ color: theme.deeper }}>
             {kid.name}'s Mystery Pet
           </div>
-          <div className="text-sm font-black font-display truncate text-gray-700">
+          <div className="text-sm font-extrabold truncate text-earthy-cocoa">
             {stageTitle(stage, petDisplayName, eggName, kid.name, petName)}
           </div>
           <div className="text-[11px] italic mt-0.5 truncate" style={{ color: theme.deeper, opacity: 0.85 }}>
@@ -258,7 +258,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />
           )}
-          <div className="text-center mt-3 text-gray-700 font-bold">
+          <div className="text-center mt-3 text-earthy-cocoa font-bold">
             {evolution?.kind === 'hatch'
               ? `Meet your baby ${evolution?.to} ${evolution?.emoji || ''}`
               : evolution?.kind === 'adult'
@@ -268,7 +268,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         </div>
         <button
           onClick={() => setEvolution(null)}
-          className="w-full py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-pink-400 to-purple-500"
+          className="w-full py-3 rounded-pill text-earthy-ivory font-bold bg-earthy-cocoa hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           Yay!
         </button>
