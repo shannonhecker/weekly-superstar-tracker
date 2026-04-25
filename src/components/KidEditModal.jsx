@@ -4,6 +4,7 @@ import { db } from '../lib/firebase'
 import { THEMES } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
+import ActivitiesModal from './ActivitiesModal'
 
 export default function KidEditModal({ open, onClose, kid, kids, boardId, onDeleted }) {
   const [name, setName] = useState(kid?.name || '')
@@ -11,6 +12,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleteTyped, setDeleteTyped] = useState('')
   const [busy, setBusy] = useState(false)
+  const [tasksOpen, setTasksOpen] = useState(false)
   const toast = useToast()
 
   useEffect(() => {
@@ -19,6 +21,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     setTheme(kid?.theme || 'football')
     setConfirmingDelete(false)
     setDeleteTyped('')
+    setTasksOpen(false)
   }, [open, kid?.id])
 
   if (!kid) return null
@@ -122,6 +125,20 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
           </button>
         </div>
 
+        {/* Edit tasks */}
+        <button
+          type="button"
+          onClick={() => setTasksOpen(true)}
+          className="w-full mt-4 py-3 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 flex items-center gap-2 text-left active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-purple-300"
+        >
+          <span className="text-lg">📝</span>
+          <span className="font-bold flex-1 text-gray-800">Edit tasks</span>
+          <span className="text-xs font-bold text-gray-500 mr-1">
+            {(kid.activities?.length ?? 0)} of 10
+          </span>
+          <span className="text-gray-400">›</span>
+        </button>
+
         {/* Delete */}
         <div className="mt-6 pt-4 border-t border-gray-200">
           {!confirmingDelete ? (
@@ -171,6 +188,13 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
       >
         Done
       </button>
+
+      <ActivitiesModal
+        open={tasksOpen}
+        onClose={() => setTasksOpen(false)}
+        kid={kid}
+        boardId={boardId}
+      />
     </Modal>
   )
 }

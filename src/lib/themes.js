@@ -16,6 +16,9 @@ export {
   petAtStage,
   adultPet,
   animatedFluentUrl,
+  ACTIVITY_COLORS,
+  ACTIVITY_EMOJIS,
+  ACTIVITY_PRESETS,
 } from '@weekly-superstar/shared/themes'
 
 export { isBirthdayWeek } from '@weekly-superstar/shared/week'

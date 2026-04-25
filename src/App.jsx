@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
 import Join from './pages/Join'
 import Board from './pages/Board'
+import PrintSheet from './pages/PrintSheet'
 import Logo from './components/Logo'
 
 function ProtectedRoute({ children }) {
@@ -38,6 +39,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Board />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/board/:boardId/print/:kidId"
+        element={
+          <ProtectedRoute>
+            <PrintSheet />
           </ProtectedRoute>
         }
       />
