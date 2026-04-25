@@ -237,7 +237,7 @@ export default function Board() {
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
         <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-2 min-w-0">
-          <Logo size={28} className="shrink-0" />
+          <Logo size={36} className="shrink-0" />
           <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent truncate">
             {board.name}
           </span>
