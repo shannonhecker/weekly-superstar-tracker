@@ -20,7 +20,8 @@ import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
-import { assignChainsForBoard, pickFreshChain, PET_ASSET, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import Logo from '../components/Logo'
 
 const HATCH_GOAL = 50
 
@@ -41,12 +42,6 @@ function emojiForStaged(chainKey, totalStars) {
   const stage = progressToStage(totalStars, HATCH_GOAL)
   const idx = stageToChainIdx(stage, chain.stages.length)
   return chain.stages[idx]
-}
-
-function favoriteBadgeUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
 }
 
 function totalStarsFor(kid) {
@@ -227,7 +222,7 @@ export default function Board() {
     setSummary({ kid: activeKid, archive, weekKey, replay: true })
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-3xl animate-pulse">⭐</div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse"><Logo size={48} /></div></div>
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
@@ -241,8 +236,8 @@ export default function Board() {
       <OfflineBanner />
       {/* Header */}
       <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
-        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-1.5 min-w-0">
-          <span className="text-xl sm:text-2xl shrink-0">⭐</span>
+        <h1 className="text-base sm:text-xl font-black font-display flex items-center gap-2 min-w-0">
+          <Logo size={36} className="shrink-0" />
           <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent truncate">
             {board.name}
           </span>
@@ -319,15 +314,46 @@ export default function Board() {
 
             {activeKid && (
               <div
-                className="rounded-3xl p-3 sm:p-4"
-                style={{ background: `linear-gradient(180deg, ${activeTheme.accent}1F 0%, ${activeTheme.accent}08 100%)` }}
+                className="relative overflow-hidden rounded-3xl p-3 sm:p-4"
+                style={{
+                  background: `radial-gradient(140% 90% at 50% 0%, ${activeTheme.accent}33 0%, ${activeTheme.accent}10 45%, ${activeTheme.accent}05 100%)`,
+                  boxShadow: `inset 0 0 0 1px ${activeTheme.accent}22`,
+                }}
               >
+                {/* Floating theme-emoji backdrop — reinforces the kid's chosen
+                    identity without competing for attention. Pure decorative,
+                    aria-hidden, low opacity, gentle sway. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -top-4 -right-4 sm:-top-6 sm:-right-6 opacity-[0.07]"
+                >
+                  <span className="text-[8rem] sm:text-[11rem] leading-none block pet-sway">
+                    {activeTheme.emoji}
+                  </span>
+                </div>
+
+                <div className="relative">
                 <BirthdayBanner kid={activeKid} />
                 {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <KidAvatar kid={activeKid} size={40} />
-                    <h2 className="text-lg sm:text-xl font-black font-display truncate">{activeKid.name}</h2>
+                    <h2
+                      className="text-xl sm:text-2xl font-black font-display truncate"
+                      style={{
+                        // backgroundImage (NOT the `background` shorthand) —
+                        // the shorthand resets background-clip to border-box,
+                        // which kills the text mask and leaves the heading
+                        // invisible behind a solid gradient bar.
+                        backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        color: activeTheme.deeper,
+                      }}
+                    >
+                      {activeKid.name}
+                    </h2>
                     <button
                       onClick={() => setEditKidOpen(true)}
                       aria-label={`Edit ${activeKid.name}`}
@@ -336,29 +362,6 @@ export default function Board() {
                     >
                       ✏️
                     </button>
-                    {activeKid.favoritePet?.emoji && (
-                      <button
-                        onClick={() => mysteryPetRef.current?.openGallery()}
-                        aria-label={`${activeKid.name}'s favorite pet — open collection`}
-                        className="shrink-0 inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-white border border-amber-200 hover:border-amber-400 active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-300"
-                      >
-                        {favoriteBadgeUrl(activeKid.favoritePet.emoji) ? (
-                          <img
-                            src={favoriteBadgeUrl(activeKid.favoritePet.emoji)}
-                            alt=""
-                            width={20}
-                            height={20}
-                            draggable={false}
-                            onError={(e) => { e.currentTarget.style.display = 'none' }}
-                          />
-                        ) : (
-                          <span className="text-base leading-none">{activeKid.favoritePet.emoji}</span>
-                        )}
-                        <span className="text-[11px] font-bold text-amber-700 truncate max-w-[96px]">
-                          ⭐ {activeKid.favoritePet.petName || activeKid.favoritePet.chainLabel || 'Favorite'}
-                        </span>
-                      </button>
-                    )}
                     {activeKid.custodyLabel && (
                       <span
                         className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
@@ -406,6 +409,7 @@ export default function Board() {
 
                 {/* Activity grid */}
                 <ActivityGrid kid={activeKid} boardId={boardId} />
+                </div>
               </div>
             )}
           </>
@@ -460,7 +464,9 @@ export default function Board() {
 function EmptyState({ boardId }) {
   return (
     <div className="text-center py-10">
-      <div className="text-5xl mb-3">⭐</div>
+      <div className="flex justify-center mb-3">
+        <Logo size={56} />
+      </div>
       <p className="text-gray-500 font-bold mb-4">
         No superstars yet — add your first one above using the “+ Add” button.
       </p>

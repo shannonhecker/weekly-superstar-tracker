@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { useAuth } from '../contexts/AuthContext'
 import { db } from '../lib/firebase'
+import Logo from '../components/Logo'
 
 export default function Landing() {
   const { user, loading } = useAuth()
@@ -28,9 +29,11 @@ export default function Landing() {
   return (
     <div className="min-h-screen flex items-center justify-center px-5">
       <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
-        <div className="text-6xl mb-2">⭐</div>
+        <div className="flex justify-center mb-3">
+          <Logo size={72} />
+        </div>
         <h1 className="text-3xl font-black font-display bg-gradient-to-br from-green-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent mb-2">
-          Superstar Tracker
+          Winking Star
         </h1>
         <p className="text-gray-500 text-sm mb-6">
           A weekly achievement tracker the whole family can share.<br/>

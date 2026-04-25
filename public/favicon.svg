@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">⭐</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="50%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <!-- Gradient app-icon background. Rounded corners follow the iOS app
+       icon ratio (~22% of side length). -->
+  <rect width="200" height="200" rx="44" fill="url(#bg)"/>
+  <!-- White winking star scaled up to fill ~90% of the icon area. Single
+       group transform — keeps the eye/smile coords in the same frame as
+       the star path so they don't drift on scale. The transform is
+       (scale, then translate) per SVG order: scale 1.125 then nudge
+       (-12.5, +1) to recentre the path's bounding box on (100, 100). -->
+  <g transform="translate(-12.5 1) scale(1.125)">
+    <path
+      d="M122.3 69.3
+         L178 74.7
+         L136.1 111.7
+         L148.2 167.7
+         L100 138
+         L51.8 167.7
+         L63.9 111.7
+         L22 74.7
+         L77.7 69.3
+         Q88 22 115 8
+         Q130 22 122.3 69.3 Z"
+      fill="white"
+    />
+    <ellipse cx="80" cy="98" rx="7" ry="12" fill="url(#bg)"/>
+    <path d="M112 95 Q128 108 144 95" stroke="url(#bg)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M84 122 Q108 142 132 122" stroke="url(#bg)" stroke-width="7" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

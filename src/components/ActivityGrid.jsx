@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { getCurrentWeek } from '../lib/week'
+import { THEMES } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
 import { celebrate } from '../lib/confetti'
 import { play } from '../lib/sounds'
@@ -34,6 +35,8 @@ export default function ActivityGrid({ kid, boardId }) {
   const activities = kid.activities || []
   const today = new Date()
   const toast = useToast()
+  const theme = THEMES[kid.theme] || THEMES.football
+  const weekendTint = `${theme.accent}1A`
   const [mysteryOpen, setMysteryOpen] = useState(false)
   const [mysteryPrize, setMysteryPrize] = useState(null)
 
@@ -95,8 +98,13 @@ export default function ActivityGrid({ kid, boardId }) {
             {days.map((d) => {
               const isToday =
                 d.date.toDateString() === today.toDateString()
+              const isWeekend = d.label === 'Sat' || d.label === 'Sun'
               return (
-                <th key={d.key} className="px-1 py-2 font-bold relative">
+                <th
+                  key={d.key}
+                  className="px-1 py-2 font-bold relative"
+                  style={isWeekend ? { background: weekendTint } : undefined}
+                >
                   <div className={isToday ? 'text-emerald-600' : 'text-gray-600'}>{d.label}</div>
                   <div className={`text-[11px] font-bold ${isToday ? 'text-emerald-600' : 'text-gray-500'}`}>
                     {monthShort(d.date)} {d.date.getDate()}
@@ -123,8 +131,13 @@ export default function ActivityGrid({ kid, boardId }) {
                 </td>
                 {days.map((d) => {
                   const checked = !!checks[`${a.id}-${d.key}`]
+                  const isWeekend = d.label === 'Sat' || d.label === 'Sun'
                   return (
-                    <td key={d.key} className="p-1">
+                    <td
+                      key={d.key}
+                      className="p-1"
+                      style={isWeekend ? { background: weekendTint } : undefined}
+                    >
                       <button
                         onClick={() => toggle(a.id, d.key)}
                         aria-label={checked ? 'Uncheck activity' : 'Check activity'}

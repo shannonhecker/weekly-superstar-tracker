@@ -7,6 +7,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import Join from './pages/Join'
 import Board from './pages/Board'
 import PrintSheet from './pages/PrintSheet'
+import Logo from './components/Logo'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -18,7 +19,9 @@ function ProtectedRoute({ children }) {
 function FullPageSpinner() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="text-3xl animate-pulse">⭐</div>
+      <div className="animate-pulse">
+        <Logo size={48} />
+      </div>
     </div>
   )
 }
