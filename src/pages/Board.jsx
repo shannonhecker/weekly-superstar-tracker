@@ -20,7 +20,7 @@ import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
-import { assignChainsForBoard, pickFreshChain, PET_ASSET, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
 
 const HATCH_GOAL = 50
 
@@ -41,12 +41,6 @@ function emojiForStaged(chainKey, totalStars) {
   const stage = progressToStage(totalStars, HATCH_GOAL)
   const idx = stageToChainIdx(stage, chain.stages.length)
   return chain.stages[idx]
-}
-
-function favoriteBadgeUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
 }
 
 function totalStarsFor(kid) {
@@ -357,29 +351,6 @@ export default function Board() {
                     >
                       ✏️
                     </button>
-                    {activeKid.favoritePet?.emoji && (
-                      <button
-                        onClick={() => mysteryPetRef.current?.openGallery()}
-                        aria-label={`${activeKid.name}'s favorite pet — open collection`}
-                        className="shrink-0 inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-white border border-amber-200 hover:border-amber-400 active:scale-[0.98] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-300"
-                      >
-                        {favoriteBadgeUrl(activeKid.favoritePet.emoji) ? (
-                          <img
-                            src={favoriteBadgeUrl(activeKid.favoritePet.emoji)}
-                            alt=""
-                            width={20}
-                            height={20}
-                            draggable={false}
-                            onError={(e) => { e.currentTarget.style.display = 'none' }}
-                          />
-                        ) : (
-                          <span className="text-base leading-none">{activeKid.favoritePet.emoji}</span>
-                        )}
-                        <span className="text-[11px] font-bold text-amber-700 truncate max-w-[96px]">
-                          ⭐ {activeKid.favoritePet.petName || activeKid.favoritePet.chainLabel || 'Favorite'}
-                        </span>
-                      </button>
-                    )}
                     {activeKid.custodyLabel && (
                       <span
                         className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
