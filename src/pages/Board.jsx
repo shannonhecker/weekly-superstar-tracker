@@ -336,7 +336,11 @@ export default function Board() {
                     <h2
                       className="text-xl sm:text-2xl font-black font-display truncate"
                       style={{
-                        background: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
+                        // backgroundImage (NOT the `background` shorthand) —
+                        // the shorthand resets background-clip to border-box,
+                        // which kills the text mask and leaves the heading
+                        // invisible behind a solid gradient bar.
+                        backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${activeTheme.deeper} 60%, #EC4899 100%)`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
