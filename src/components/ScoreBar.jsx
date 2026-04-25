@@ -14,7 +14,7 @@ export default function ScoreBar({ total, max, theme }) {
       >
         {theme.emoji}
       </div>
-      <div className="flex-1 h-3.5 rounded-full bg-earthy-divider overflow-hidden">
+      <div className="flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E0D5' }}>
         <div
           className="h-full transition-all"
           style={{

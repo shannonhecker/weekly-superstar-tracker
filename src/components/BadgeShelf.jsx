@@ -134,7 +134,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                   </div>
                   {!earned && (
                     <div className="mt-1">
-                      <div className="h-1.5 rounded-full overflow-hidden bg-earthy-divider">
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E0D5' }}>
                         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
                       </div>
                       <div className="text-[11px] text-earthy-cocoaSoft font-bold mt-0.5">{remaining} more to go</div>
