@@ -68,6 +68,27 @@ export default function AnimatedRasterBanner({
               />
             )
           })}
+          {profile.hero ? (() => {
+            const h = profile.hero
+            const heroShape = h.shape || profile.shape
+            const heroDims = shapeStyle(heroShape, h.position.size)
+            const heroColor = h.color(themeColors)
+            return (
+              <div
+                className={`ws-particle ws-hero ws-effect-${effect} ws-shape-${heroShape}`}
+                style={{
+                  left: `${h.position.left}%`,
+                  top: `${h.position.top}%`,
+                  ...heroDims,
+                  backgroundColor: isBubble ? 'rgba(255,255,255,0.18)' : heroColor,
+                  border: isBubble ? `2px solid rgba(255,255,255,0.92)` : 'none',
+                  '--ws-drift': `${h.position.drift}px`,
+                  '--ws-rise': `${h.position.rise}px`,
+                  '--ws-rotate': `${h.position.rotate}deg`,
+                }}
+              />
+            )
+          })() : null}
         </div>
       ) : null}
     </div>

@@ -26,6 +26,11 @@ export const EFFECT_PROFILES = {
     colorize: () => ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
     opacityCurve: DEFAULT_OPACITY,
     scaleCurve: DEFAULT_SCALE,
+    hero: {
+      position: { left: 50, top: 80, size: 18, drift: 4, rise: 70, rotate: 0 },
+      duration: 24000,
+      color: () => '#FFFFFF',
+    },
   },
 
   stars: {
@@ -40,6 +45,11 @@ export const EFFECT_PROFILES = {
     colorize: (theme) => ['#FFFFFF', theme.accent, theme.deeper, '#FFE08A', '#FFFFFF'],
     opacityCurve: DEFAULT_OPACITY,
     scaleCurve: DEFAULT_SCALE,
+    hero: {
+      position: { left: 60, top: 22, size: 14, drift: 2, rise: 4, rotate: 45 },
+      duration: 20000,
+      color: () => '#FFE08A',
+    },
   },
 
   confetti: {
@@ -54,6 +64,11 @@ export const EFFECT_PROFILES = {
     colorize: (theme) => [theme.accent, '#8DD7FF', theme.deeper, '#A7D676', '#FFB86B'],
     opacityCurve: DEFAULT_OPACITY,
     scaleCurve: DEFAULT_SCALE,
+    hero: {
+      position: { left: 42, top: 18, size: 16, drift: 6, rise: -38, rotate: 28 },
+      duration: 24000,
+      color: (theme) => theme.accent,
+    },
   },
 
   petals: {
@@ -68,6 +83,11 @@ export const EFFECT_PROFILES = {
     colorize: (theme) => [theme.accent, theme.deeper, '#FFFFFF', theme.accent, '#FFF7E6'],
     opacityCurve: { input: [0, 0.18, 0.78, 1], output: [0.05, 0.28, 0.22, 0.05] },
     scaleCurve: { input: [0, 0.5, 1], output: [0.92, 1.05, 0.94] },
+    hero: {
+      position: { left: 50, top: 30, size: 18, drift: 16, rise: -22, rotate: 30 },
+      duration: 24000,
+      color: (theme) => theme.accent,
+    },
   },
 
   steam: {
@@ -82,6 +102,11 @@ export const EFFECT_PROFILES = {
     colorize: () => ['#FFFFFF', '#F5F0E6', '#FFFFFF', '#F5F0E6', '#FFFFFF'],
     opacityCurve: { input: [0, 0.2, 0.6, 1], output: [0, 0.3, 0.16, 0] },
     scaleCurve: { input: [0, 0.5, 1], output: [1.0, 1.3, 1.6] },
+    hero: {
+      position: { left: 50, top: 60, size: 24, drift: 0, rise: -55, rotate: 0 },
+      duration: 22000,
+      color: () => '#FFFFFF',
+    },
   },
 
   embers: {
@@ -96,6 +121,11 @@ export const EFFECT_PROFILES = {
     colorize: () => ['#FF7B3A', '#FFB259', '#FF5236', '#FFC97A', '#FFA044'],
     opacityCurve: { input: [0, 0.15, 0.55, 1], output: [0, 0.42, 0.18, 0] },
     scaleCurve: { input: [0, 0.5, 1], output: [1.2, 0.85, 0.5] },
+    hero: {
+      position: { left: 50, top: 72, size: 12, drift: 0, rise: -55, rotate: 0 },
+      duration: 20000,
+      color: () => '#FF7B3A',
+    },
   },
 
   sparkles: {
@@ -113,6 +143,11 @@ export const EFFECT_PROFILES = {
       output: [0, 0, 0.4, 0.4, 0.05, 0.05, 0.45, 0],
     },
     scaleCurve: { input: [0, 0.5, 1], output: [0.9, 1.1, 0.9] },
+    hero: {
+      position: { left: 52, top: 38, size: 14, drift: 0, rise: 0, rotate: 45 },
+      duration: 22000,
+      color: () => '#FFE08A',
+    },
   },
 }
 

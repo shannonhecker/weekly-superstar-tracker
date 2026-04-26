@@ -12,6 +12,14 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  animation: ws-breathe 18s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@keyframes ws-breathe {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.02); }
 }
 
 .ws-particle-layer {
@@ -95,6 +103,81 @@
 .ws-particle.ws-effect-embers   { animation-name: ws-embers; }
 .ws-particle.ws-effect-sparkles { animation-name: ws-sparkles; }
 
+/* Hero particle — bigger, slower, more prominent. One per banner. */
+.ws-hero {
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  /* duration set per-effect below */
+}
+
+.ws-hero.ws-effect-bubbles  { animation: ws-hero-bubbles  24s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-stars    { animation: ws-hero-stars    20s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-confetti { animation: ws-hero-confetti 24s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-petals   { animation: ws-hero-petals   24s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-steam    { animation: ws-hero-steam    22s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-embers   { animation: ws-hero-embers   20s ease-in-out infinite alternate; }
+.ws-hero.ws-effect-sparkles { animation: ws-hero-sparkles 22s ease-in-out infinite alternate; }
+
+@keyframes ws-hero-bubbles {
+  0%   { transform: translate(0, 0) scale(0.95); opacity: 0; }
+  18%  { opacity: 0.42; }
+  50%  { transform: translate(var(--ws-drift, 0px), calc(var(--ws-rise, 0px) * -1)) scale(1.1); opacity: 0.42; }
+  70%  { opacity: 0.32; }
+  100% { transform: translate(var(--ws-drift, 0px), calc(var(--ws-rise, 0px) * -1)) scale(0.95); opacity: 0; }
+}
+
+@keyframes ws-hero-stars {
+  0%, 15%   { transform: translate(0, 0) rotate(45deg) scale(0.85); opacity: 0; }
+  16%, 45%  { transform: translate(0, 0) rotate(45deg) scale(1.15); opacity: 0.5; }
+  46%, 70%  { transform: translate(0, 0) rotate(45deg) scale(1.0);  opacity: 0.1; }
+  71%       { transform: translate(0, 0) rotate(45deg) scale(1.15); opacity: 0.5; }
+  100%      { transform: translate(0, 0) rotate(45deg) scale(0.85); opacity: 0; }
+}
+
+@keyframes ws-hero-confetti {
+  0%   { transform: translate(0, 0) rotate(28deg) scale(0.9); opacity: 0; }
+  18%  { opacity: 0.45; }
+  50%  { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) rotate(48deg) scale(1.05); opacity: 0.45; }
+  78%  { opacity: 0.35; }
+  100% { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) rotate(58deg) scale(0.9); opacity: 0; }
+}
+
+@keyframes ws-hero-petals {
+  0%   { transform: translate(0, 0) rotate(30deg) scale(0.9); opacity: 0; }
+  18%  { opacity: 0.42; }
+  50%  { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) rotate(45deg) scale(1.1); opacity: 0.42; }
+  78%  { opacity: 0.32; }
+  100% { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) rotate(55deg) scale(0.9); opacity: 0; }
+}
+
+@keyframes ws-hero-steam {
+  0%   { transform: translate(0, 0) scale(1.0); opacity: 0; }
+  18%  { opacity: 0.42; }
+  50%  { transform: translate(calc(var(--ws-drift, 0px) * 0.5), calc(var(--ws-rise, 0px) * 0.5)) scale(1.4); opacity: 0.32; }
+  78%  { opacity: 0.18; }
+  100% { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) scale(1.8); opacity: 0; }
+}
+
+@keyframes ws-hero-embers {
+  0%   { transform: translate(0, 0) scale(1.5); opacity: 0; }
+  15%  { opacity: 0.55; }
+  50%  { transform: translate(calc(var(--ws-drift, 0px) * 0.5), calc(var(--ws-rise, 0px) * 0.5)) scale(1.0); opacity: 0.35; }
+  60%  { opacity: 0.2; }
+  100% { transform: translate(var(--ws-drift, 0px), var(--ws-rise, 0px)) scale(0.4); opacity: 0; }
+}
+
+@keyframes ws-hero-sparkles {
+  0%, 18%   { transform: translate(0, 0) rotate(45deg) scale(0.85); opacity: 0; }
+  19%, 55%  { transform: translate(0, 0) rotate(45deg) scale(1.2);  opacity: 0.5; }
+  56%, 100% { transform: translate(0, 0) rotate(45deg) scale(0.85); opacity: 0; }
+}
+
+.ws-hero.ws-shape-puff {
+  filter: blur(0.5px);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.5);
+}
+
 .ws-particle.ws-shape-puff {
   filter: blur(0.5px);
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
@@ -109,4 +192,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ws-particle-layer { display: none; }
+  .ws-raster-banner > img { animation: none; }
 }
