@@ -27,7 +27,7 @@ import LogoLoader from '../components/LogoLoader'
 import ThemeScene from '../components/ThemeScene'
 import EmptyStateScene from '../components/EmptyStateScene'
 
-const HATCH_GOAL = 50
+const HATCH_GOAL = 60
 
 function progressToStage(stars, goal) {
   if (goal <= 0) return 0

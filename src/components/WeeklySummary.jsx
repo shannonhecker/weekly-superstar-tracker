@@ -172,7 +172,7 @@ export default function WeeklySummary({ open, onClose, kid, archive, weekKey, on
           {petName ? `${petName}` : `Your ${chainLabel.toLowerCase().replace(' family', '')}`}
         </div>
         <div className="text-xs font-bold text-earthy-cocoaSoft">
-          {totalStars >= 50 ? '🎉 Fully grown!' : `grew to ${totalStars} stars`}
+          {totalStars >= 60 ? '🎉 Fully grown!' : `grew to ${totalStars} stars`}
         </div>
       </div>
 

@@ -184,7 +184,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
               <button
                 type="button"
                 onClick={() => setView('preset')}
-                className="flex-1 py-3 rounded-pill bg-earthy-terracottaSoft text-earthy-cocoa font-bold flex items-center justify-center gap-1 active:scale-[0.98]"
+                className="flex-1 py-3 rounded-pill bg-earthy-ivory border border-earthy-divider text-earthy-cocoa font-bold flex items-center justify-center gap-1 active:scale-[0.98]"
               >
                 <span>✨</span>
                 <span>Apply preset</span>
@@ -195,7 +195,8 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="w-full py-2 rounded-pill mt-4 text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all disabled:opacity-50"
             >
               Done
             </button>
