@@ -4,6 +4,7 @@ import Landing from './pages/Landing'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
+import AuthAction from './pages/AuthAction'
 import Join from './pages/Join'
 import Board from './pages/Board'
 import PrintSheet from './pages/PrintSheet'
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/auth/action" element={<AuthAction />} />
       <Route path="/join/:code" element={<Join />} />
       <Route
         path="/board/:boardId"
