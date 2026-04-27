@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import LogoLoader from '../components/LogoLoader'
+import ThemeBannerArt from '../components/ThemeBannerArt'
 import {
   THEMES,
   PET_CHAINS,
@@ -62,20 +63,48 @@ function buildSheetUrl(boardId, kidId, weekKey) {
   return `${PRINT_SHEET_BASE_URL}/board/${boardId}/print/${kidId}?${params.toString()}`
 }
 
-function Header({ kid, theme, weekRange, hatchPercent, sheetUrl }) {
+function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
   return (
     <div
-      className="absolute left-0 right-0 top-0 flex items-stretch gap-[4mm] px-[4mm] pt-[3mm]"
+      className="absolute left-0 right-0 top-0 flex flex-col gap-[2mm] px-[4mm] pt-[3mm]"
       style={{ height: `${GRID_TOP_PCT}%` }}
     >
+      {/* Banner strip — full-bleed theme art, panoramic crop. Animated={false}
+          so the particle layer doesn't render at all in print, and the
+          @media print rule in AnimatedRasterBanner.css kills the breath
+          animation on the <img>. */}
+      <div className="flex items-stretch gap-[3mm] shrink-0" style={{ height: '14mm' }}>
+        <div className="flex-1 min-w-0 rounded-[3mm] overflow-hidden">
+          <ThemeBannerArt themeKey={themeKey} animated={false} height="100%" />
+        </div>
+        {/* Single metadata QR — encodes board / kid / week. The CV pipeline
+            (functions/src/sheet-scan.ts) uses jsqr's corner detection from
+            this one QR + its canonical position to bootstrap the sheet's
+            bounding box. No corner fiducials. Sized 24mm but reaches wider
+            via padding so it always sits flush right. */}
+        <div
+          className="bg-white flex flex-col items-center justify-center shrink-0 rounded-[2mm]"
+          style={{
+            width: `${METADATA_QR_SIZE_MM}mm`,
+            height: `${METADATA_QR_SIZE_MM}mm`,
+            padding: `${METADATA_QR_QUIET_MM}mm`,
+            border: '1px solid #E8DCC4', // earthy-divider
+          }}
+        >
+          <QRCode value={sheetUrl} size={256} style={{ height: '100%', width: '100%' }} />
+        </div>
+      </div>
+
+      {/* Title row beneath the banner — softer gradient (theme accent → deeper),
+          no amber/pink. Hatch progress sits inline with the week range. */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <div
-          className="font-display text-[28pt] leading-none truncate"
+          className="font-display text-[22pt] leading-none truncate"
           style={{
             // backgroundImage (NOT background shorthand) — the shorthand
             // resets background-clip, which silently kills the text mask
             // and leaves the heading invisible.
-            backgroundImage: `linear-gradient(90deg, #F59E0B 0%, ${theme.deeper} 60%, #EC4899 100%)`,
+            backgroundImage: `linear-gradient(90deg, ${theme.accent} 0%, ${theme.deeper} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -84,33 +113,26 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl }) {
         >
           {theme.emoji} {kid.name}
         </div>
-        <div className="font-body text-[10pt] text-gray-700 mt-[1.5mm] flex items-center gap-[3mm]">
+        <div className="font-body text-[9pt] mt-[1mm] flex items-center gap-[3mm]" style={{ color: '#5A3A2E' /* earthy-cocoa */ }}>
           <span>Week of {weekRange}</span>
-          <span className="text-gray-300">·</span>
+          <span style={{ color: '#E8DCC4' /* earthy-divider */ }}>·</span>
           <span>
             <span className="font-bold" style={{ color: theme.deeper }}>
               {Math.round(hatchPercent)}%
             </span>{' '}
-            of the way to a new pet
+            of the way to a new pet ({totalStarsCopy(hatchPercent)})
           </span>
         </div>
       </div>
-      {/* Single metadata QR — encodes board / kid / week. The CV pipeline
-          (functions/src/sheet-scan.ts) uses jsqr's location.{topLeft,topRight,
-          bottomLeft,bottomRight}Corner from this one QR + its known canonical
-          position to bootstrap the sheet's bounding box. No corner fiducials. */}
-      <div
-        className="bg-white flex flex-col items-center justify-center shrink-0"
-        style={{
-          width: `${METADATA_QR_SIZE_MM}mm`,
-          height: `${METADATA_QR_SIZE_MM}mm`,
-          padding: `${METADATA_QR_QUIET_MM}mm`,
-        }}
-      >
-        <QRCode value={sheetUrl} size={256} style={{ height: '100%', width: '100%' }} />
-      </div>
     </div>
   )
+}
+
+// Tiny helper so the copy reads "23 / 60 stars" alongside the percent. Pulls
+// HATCH_GOAL from shared so today's bump 50→60 reflects automatically.
+function totalStarsCopy(hatchPercent) {
+  const stars = Math.round((hatchPercent / 100) * HATCH_GOAL)
+  return `${stars} / ${HATCH_GOAL} stickers`
 }
 
 function ColumnHeaders({ days, theme }) {
@@ -128,7 +150,7 @@ function ColumnHeaders({ days, theme }) {
         <div
           key={d.key}
           className="flex-1 flex flex-col items-center justify-end pb-[1.5mm] font-body"
-          style={{ color: d.isWeekend ? theme.deeper : '#374151' }}
+          style={{ color: d.isWeekend ? theme.deeper : '#5A3A2E' /* earthy-cocoa */ }}
         >
           <span className="text-[9pt] font-bold leading-none">{d.label}</span>
           <span className="text-[7pt] leading-none mt-[0.5mm] opacity-70">{d.dayNumber}</span>
@@ -152,8 +174,8 @@ function RowLabels({ activities, theme }) {
       {activities.map((a) => (
         <div
           key={a.id}
-          className="flex-1 flex items-center gap-[1.5mm] px-[3mm] border-b border-gray-200"
-          style={{ minHeight: 0 }}
+          className="flex-1 flex items-center gap-[1.5mm] px-[3mm]"
+          style={{ minHeight: 0, borderBottom: '1px solid #E8DCC4' /* earthy-divider */ }}
         >
           <span className="text-[14pt] flex-shrink-0">{a.emoji || '⭐'}</span>
           <span
@@ -189,9 +211,11 @@ function CellGrid({ activities, days, theme }) {
             {days.map((d) => (
               <div
                 key={d.key}
-                className="border-b border-r border-gray-300 flex items-center justify-center"
+                className="flex items-center justify-center"
                 style={{
                   background: d.isWeekend ? `${theme.accent}22` : `${theme.accent}0A`,
+                  borderBottom: '1px solid #E8DCC4' /* earthy-divider */,
+                  borderRight: '1px solid #E8DCC4',
                 }}
               />
             ))}
@@ -209,10 +233,10 @@ function CellGrid({ activities, days, theme }) {
 function FootCaption() {
   return (
     <div
-      className="absolute left-0 right-0 flex items-center justify-center font-body text-[7pt] text-gray-400"
-      style={{ bottom: '0.5mm', height: '4mm' }}
+      className="absolute left-0 right-0 flex items-center justify-center font-body text-[7pt]"
+      style={{ bottom: '0.5mm', height: '4mm', color: '#8B6651' /* earthy-cocoaSoft */ }}
     >
-      Stick a sticker, draw a star, or colour the box — anything counts.
+      Stick a sticker, draw a star, or colour the box — every {HATCH_GOAL} earns a new pet.
     </div>
   )
 }
@@ -353,6 +377,7 @@ export default function PrintSheet() {
           <Header
             kid={kid}
             theme={theme}
+            themeKey={kid.theme || 'animals'}
             weekRange={weekRange}
             hatchPercent={hatchPercent}
             sheetUrl={sheetUrl}
@@ -366,12 +391,13 @@ export default function PrintSheet() {
             </>
           ) : (
             <div
-              className="absolute font-body text-gray-500 flex items-center justify-center"
+              className="absolute font-body flex items-center justify-center"
               style={{
                 top: `${GRID_TOP_PCT}%`,
                 left: `${GRID_LEFT_PCT}%`,
                 right: `${GRID_RIGHT_PCT}%`,
                 bottom: `${GRID_BOTTOM_PCT}%`,
+                color: '#8B6651' /* earthy-cocoaSoft */,
               }}
             >
               Add activities to {kid.name}'s board first.

@@ -194,3 +194,10 @@
   .ws-particle-layer { display: none; }
   .ws-raster-banner > img { animation: none; }
 }
+
+/* On print: same as reduce-motion. Prevents the breath animation from
+   capturing a mid-scale frame when the browser rasterises for PDF/print. */
+@media print {
+  .ws-particle-layer { display: none; }
+  .ws-raster-banner > img { animation: none !important; }
+}
