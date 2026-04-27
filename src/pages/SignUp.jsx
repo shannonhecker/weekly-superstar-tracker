@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import { generateShareCode } from '../lib/codes'
-import { formatAuthError } from '../lib/authErrors'
+import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
-import { useToast } from '../contexts/ToastContext'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -15,9 +20,51 @@ import { useToast } from '../contexts/ToastContext'
 // no extra routes — so back/next preserves selections without re-mounting.
 const TOTAL_STEPS = 4
 
+// Shared by every auth path on this page (email/password + Apple + Google).
+// The board+kid Firestore writes are identical regardless of how the user
+// authed — only the credential source changes. Keeping this in one place
+// means tweaks to the default kid shape can't drift between code paths.
+export async function createBoardForNewUser(user, { theme, kidName, birthday }) {
+  const trimmedKid = (kidName || '').trim()
+  // Display name falls back to the kid's name so the board feels personal even
+  // if we never collected an explicit parent name (we don't, in Direction B).
+  // Skip the update if Firebase already has a displayName from OAuth.
+  if (trimmedKid && !user.displayName) {
+    try { await updateProfile(user, { displayName: trimmedKid }) } catch { /* non-fatal */ }
+  }
+
+  const board = await addDoc(collection(db, 'boards'), {
+    name: trimmedKid ? `${trimmedKid}'s board` : 'Our Family',
+    adminId: user.uid,
+    memberIds: [user.uid],
+    shareCode: generateShareCode(),
+    createdAt: serverTimestamp(),
+  })
+
+  // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
+  await addDoc(collection(db, 'boards', board.id, 'kids'), {
+    name: trimmedKid || 'Superstar',
+    theme: theme || Object.keys(THEMES)[0],
+    order: 0,
+    birthday: birthday || null,
+    activities: DEFAULT_ACTIVITIES,
+    checks: {},
+    stickers: {},
+    badges: [],
+    petName: null,
+    reward: null,
+    weekKey: getWeekKey(),
+    weekHistory: {},
+    chainKey: null,
+    favoritePet: null,
+    createdAt: serverTimestamp(),
+  })
+
+  return board.id
+}
+
 export default function SignUp() {
   const navigate = useNavigate()
-  const toast = useToast()
 
   const [step, setStep] = useState(1)
   // Track previous step so we know whether to slide forwards or backwards.
@@ -51,39 +98,8 @@ export default function SignUp() {
     setLoading(true)
     try {
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
-      const trimmedKid = kidName.trim()
-      // Display name falls back to the kid's name so the board feels personal even
-      // if we never collected an explicit parent name (we don't, in Direction B).
-      if (trimmedKid) await updateProfile(cred.user, { displayName: trimmedKid })
-
-      const board = await addDoc(collection(db, 'boards'), {
-        name: trimmedKid ? `${trimmedKid}'s board` : 'Our Family',
-        adminId: cred.user.uid,
-        memberIds: [cred.user.uid],
-        shareCode: generateShareCode(),
-        createdAt: serverTimestamp(),
-      })
-
-      // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
-      await addDoc(collection(db, 'boards', board.id, 'kids'), {
-        name: trimmedKid || 'Superstar',
-        theme: theme || Object.keys(THEMES)[0],
-        order: 0,
-        birthday: birthday || null,
-        activities: DEFAULT_ACTIVITIES,
-        checks: {},
-        stickers: {},
-        badges: [],
-        petName: null,
-        reward: null,
-        weekKey: getWeekKey(),
-        weekHistory: {},
-        chainKey: null,
-        favoritePet: null,
-        createdAt: serverTimestamp(),
-      })
-
-      navigate(`/board/${board.id}`, { replace: true })
+      const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
+      navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
       setError(formatAuthError(err))
     } finally {
@@ -91,9 +107,33 @@ export default function SignUp() {
     }
   }
 
-  const oauthComingSoon = (provider) => {
-    toast.info(`${provider} sign-in is coming soon — set it up in Firebase Console.`)
+  // OAuth signups land here from screen 4, where theme + kid name are already
+  // collected from screens 2 & 3. We reuse the same board+kid creation as
+  // email so a Google/Apple user gets the same first-run board state.
+  const onOAuth = async (provider) => {
+    if (loading) return
+    setError('')
+    setLoading(true)
+    try {
+      const cred = await signInWithPopup(auth, provider)
+      const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
+      navigate(`/board/${boardId}`, { replace: true })
+    } catch (err) {
+      // Treat duplicate popup-request as a no-op — the user just clicked twice
+      // before the first popup resolved. No banner, just clear the spinner.
+      if (!isSilentAuthError(err)) setError(formatAuthError(err))
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const onApple = () => {
+    const provider = new OAuthProvider('apple.com')
+    provider.addScope('email')
+    provider.addScope('name')
+    onOAuth(provider)
+  }
+  const onGoogle = () => onOAuth(new GoogleAuthProvider())
 
   // Subtle slide+fade. Tailwind transition utilities on a key'd wrapper —
   // re-mount per step keeps each screen's enter animation predictable.
@@ -162,8 +202,8 @@ export default function SignUp() {
               error={error}
               loading={loading}
               onSubmit={onCreate}
-              onApple={() => oauthComingSoon('Apple')}
-              onGoogle={() => oauthComingSoon('Google')}
+              onApple={onApple}
+              onGoogle={onGoogle}
             />
           )}
         </div>
@@ -419,16 +459,18 @@ function StepAccount({
         <button
           type="button"
           onClick={onApple}
-          aria-label="Continue with Apple (coming soon)"
-          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft transition-colors flex items-center justify-center gap-2"
+          disabled={loading}
+          aria-label="Continue with Apple"
+          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
           <span aria-hidden="true"></span> Continue with Apple
         </button>
         <button
           type="button"
           onClick={onGoogle}
-          aria-label="Continue with Google (coming soon)"
-          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft transition-colors flex items-center justify-center gap-2"
+          disabled={loading}
+          aria-label="Continue with Google"
+          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
           <span aria-hidden="true">G</span> Continue with Google
         </button>
