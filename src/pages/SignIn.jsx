@@ -1,8 +1,31 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../lib/firebase'
-import { formatAuthError } from '../lib/authErrors'
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { auth, db } from '../lib/firebase'
+import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
+import { createBoardForNewUser } from './SignUp'
+
+// First-time OAuth users on the SignIn page have no board yet — give them
+// sensible defaults so they land on a working board instead of the marketing
+// Landing page. Theme + kid name can be edited from the board itself.
+// Tradeoff documented in PR description: brand-new OAuth-via-SignIn users
+// skip the theme picker and start with the first theme + their displayName.
+async function ensureBoardForOAuthUser(user) {
+  const q = query(collection(db, 'boards'), where('memberIds', 'array-contains', user.uid))
+  const snap = await getDocs(q)
+  if (!snap.empty) return snap.docs[0].id
+  return createBoardForNewUser(user, {
+    theme: null, // helper falls back to the first theme in THEMES
+    kidName: user.displayName || 'Your kid',
+    birthday: '',
+  })
+}
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -13,10 +36,13 @@ export default function SignIn() {
 
   const onSubmit = async (e) => {
     e.preventDefault()
+    if (loading) return
     setError('')
     setLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password)
+      // Existing email accounts always have a board (created at signup).
+      // Landing handles the redirect for us.
       navigate('/', { replace: true })
     } catch (err) {
       setError(formatAuthError(err))
@@ -25,53 +51,131 @@ export default function SignIn() {
     }
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center px-5">
-      <form onSubmit={onSubmit} className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
-        <h1 className="text-2xl font-black font-display mb-1">Welcome back</h1>
-        <p className="text-gray-400 mb-5 text-sm">Sign in to your board.</p>
+  const onOAuth = async (provider) => {
+    if (loading) return
+    setError('')
+    setLoading(true)
+    try {
+      const cred = await signInWithPopup(auth, provider)
+      const boardId = await ensureBoardForOAuthUser(cred.user)
+      navigate(`/board/${boardId}`, { replace: true })
+    } catch (err) {
+      if (!isSilentAuthError(err)) setError(formatAuthError(err))
+    } finally {
+      setLoading(false)
+    }
+  }
 
-        <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
+  const onApple = () => {
+    const provider = new OAuthProvider('apple.com')
+    provider.addScope('email')
+    provider.addScope('name')
+    onOAuth(provider)
+  }
+  const onGoogle = () => onOAuth(new GoogleAuthProvider())
+
+  return (
+    <div className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
+      <form
+        onSubmit={onSubmit}
+        className="bg-[#FFFDF7] rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full"
+      >
+        <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-1">
+          Welcome back
+        </h1>
+        <p className="text-earthy-cocoaSoft text-sm mb-6">Sign in to your board.</p>
+
+        <label htmlFor="signin-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Email
+        </label>
         <input
+          id="signin-email"
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 mb-4 rounded-xl bg-purple-50 outline-none font-bold text-gray-800"
+          className="w-full px-4 py-3 mb-4 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
         />
 
-        <label className="block text-xs font-bold text-gray-700 mb-1">Password</label>
+        <label htmlFor="signin-password" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Password
+        </label>
         <input
+          id="signin-password"
           type="password"
           autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 mb-1 rounded-xl bg-purple-50 outline-none font-bold text-gray-800"
+          className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
         />
 
         <div className="flex justify-end mb-2">
           <Link
             to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-            className="text-xs text-purple-600 font-bold"
+            className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
           >
             Forgot password?
           </Link>
         </div>
 
-        {error && <p className="text-red-500 text-sm font-bold mt-2">{error}</p>}
+        {error && (
+          <div role="alert" className="mb-3 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+            {error}
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-4 py-4 rounded-2xl text-white font-bold bg-gradient-to-r from-green-400 to-purple-500 disabled:opacity-60"
+          className="w-full mt-2 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 transition-all"
         >
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
 
-        <p className="text-center mt-4 text-sm text-gray-500">
-          No account? <Link to="/signup" className="text-purple-600 font-bold">Create one</Link>
+        {/* Divider — same rule as SignUp screen 4 so the two screens read as a pair. */}
+        <div className="flex items-center gap-3 my-6" role="presentation">
+          <span className="flex-1 h-px bg-earthy-divider" />
+          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">or</span>
+          <span className="flex-1 h-px bg-earthy-divider" />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={onApple}
+            disabled={loading}
+            aria-label="Continue with Apple"
+            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
+          >
+            <span aria-hidden="true"></span> Continue with Apple
+          </button>
+          <button
+            type="button"
+            onClick={onGoogle}
+            disabled={loading}
+            aria-label="Continue with Google"
+            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
+          >
+            <span aria-hidden="true">G</span> Continue with Google
+          </button>
+        </div>
+
+        <p className="text-center mt-6 text-sm text-earthy-cocoaSoft">
+          No account?{' '}
+          <Link to="/signup" className="text-earthy-cocoa font-bold underline underline-offset-2">
+            Create one
+          </Link>
+        </p>
+
+        <p className="text-center mt-3 text-xs text-earthy-cocoaSoft">
+          <a
+            href="mailto:hello@winkingstar.com?subject=Help%20signing%20in%20to%20Winking%20Star"
+            className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
+          >
+            Need help?
+          </a>
         </p>
       </form>
     </div>
