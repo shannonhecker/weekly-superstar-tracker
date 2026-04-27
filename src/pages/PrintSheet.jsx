@@ -19,7 +19,11 @@ import { formatWeekRange, getWeekKey } from '../lib/week'
 // match GRID_TOP_PADDING / BOTTOM / LEFT / RIGHT in functions/src/sheet-scan.ts
 // — the CV pipeline uses them to crop each cell back out of a captured photo.
 // Change here ⇒ amend there in the same branch chain.
-const GRID_TOP_PCT = 14
+//
+// GRID_TOP_PCT carries: banner (12mm) + title row + subtitle, plus a 6%
+// strip below for the day-of-week column headers (ColumnHeaders is absolutely
+// positioned at top: GRID_TOP_PCT - 6%).
+const GRID_TOP_PCT = 18
 const GRID_BOTTOM_PCT = 4
 const GRID_LEFT_PCT = 18
 const GRID_RIGHT_PCT = 4
@@ -67,13 +71,13 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
   return (
     <div
       className="absolute left-0 right-0 top-0 flex flex-col gap-[2mm] px-[4mm] pt-[3mm]"
-      style={{ height: `${GRID_TOP_PCT}%` }}
+      style={{ height: `${GRID_TOP_PCT - 6}%` }}
     >
       {/* Banner strip — full-bleed theme art, panoramic crop. Animated={false}
           so the particle layer doesn't render at all in print, and the
           @media print rule in AnimatedRasterBanner.css kills the breath
           animation on the <img>. */}
-      <div className="flex items-stretch gap-[3mm] shrink-0" style={{ height: '14mm' }}>
+      <div className="flex items-stretch gap-[3mm] shrink-0" style={{ height: '12mm' }}>
         <div className="flex-1 min-w-0 rounded-[3mm] overflow-hidden">
           <ThemeBannerArt themeKey={themeKey} animated={false} height="100%" />
         </div>
