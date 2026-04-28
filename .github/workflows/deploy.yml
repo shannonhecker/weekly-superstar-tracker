@@ -6,12 +6,16 @@ name: Deploy to Firebase Hosting
 # Why this exists: the local Firebase CLI hangs on this iCloud-synced
 # filesystem, blocking `npm run deploy` from a Claude Code session.
 # GitHub Actions runs in a clean Linux VM with no such issues.
+#
+# Why this checks out two repos: package.json depends on
+#   "@weekly-superstar/shared": "file:../weekly-superstar-shared"
+# so the sibling repo must be present and built before npm install
+# can resolve the link.
 
 on:
   push:
     branches: [main]
     paths:
-      # Only redeploy when something user-visible actually changed.
       - 'src/**'
       - 'public/**'
       - 'index.html'
@@ -32,17 +36,36 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout web app
+        uses: actions/checkout@v4
+        with:
+          path: weekly-superstar-tracker
+
+      - name: Checkout shared package (sibling)
+        uses: actions/checkout@v4
+        with:
+          repository: shannonhecker/weekly-superstar-shared
+          path: weekly-superstar-shared
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: weekly-superstar-tracker/package-lock.json
 
-      - name: Install dependencies
+      - name: Build shared package
+        working-directory: weekly-superstar-shared
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: Install web app dependencies
+        working-directory: weekly-superstar-tracker
         run: npm ci --legacy-peer-deps
 
-      - name: Build
+      - name: Build web app
+        working-directory: weekly-superstar-tracker
         run: npm run build
 
       - name: Deploy to Firebase Hosting
@@ -51,3 +74,4 @@ jobs:
           args: deploy --only hosting --project weekly-superstar-tracker
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_PATH: ./weekly-superstar-tracker
