@@ -19,6 +19,16 @@ function shapeStyle(shape, size) {
 
 export default function AnimatedRasterBanner({
   source,
+  // Optional WebP srcset for responsive serving. Format: "url 376w, url 768w, url 1500w".
+  // When present, renders <picture> with WebP <source> + PNG <img> fallback. When
+  // absent, renders a plain <img src={source}>.
+  webpSrcSet,
+  // sizes attribute paired with srcset. Should describe the rendered width per
+  // viewport so the browser picks the right variant.
+  sizes,
+  // <img loading="..."> — default 'eager' (matches previous behaviour). Pass
+  // 'lazy' for off-screen banners (theme-picker grids, PetGallery rows).
+  loading = 'eager',
   accessibilityLabel,
   height = 160,
   borderRadius = 24,
@@ -41,6 +51,19 @@ export default function AnimatedRasterBanner({
     ...style,
   }
 
+  // <picture> lets us serve WebP to ~98% of browsers and fall back to the
+  // original PNG everywhere else. WebP at quality 78 is ~98% smaller than the
+  // 1500w-wide PNG sources (~5 KB vs ~1.5 MB on mobile).
+  const imgEl = (
+    <img
+      src={source}
+      alt=""
+      loading={loading}
+      decoding="async"
+      style={{ objectPosition }}
+    />
+  )
+
   return (
     <div
       role="img"
@@ -48,7 +71,12 @@ export default function AnimatedRasterBanner({
       className="ws-raster-banner"
       style={wrapperStyle}
     >
-      <img src={source} alt="" style={{ objectPosition }} />
+      {webpSrcSet ? (
+        <picture>
+          <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
+          {imgEl}
+        </picture>
+      ) : imgEl}
       {animated ? (
         <div className="ws-particle-layer" aria-hidden="true">
           {profile.positions.map((p, i) => {

@@ -160,6 +160,8 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 alt=""
                 width={48}
                 height={48}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
               <div className="flex-1 min-w-0">
@@ -224,7 +226,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               style={isFav ? { background: '#FEF3C7' } : undefined}
             >
               {pet ? (
-                <img src={animatedUrl(pet)} alt="" width={48} height={48} onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                <img src={animatedUrl(pet)} alt="" width={48} height={48} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none' }} />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-earthy-divider flex items-center justify-center text-xl">🥚</div>
               )}
