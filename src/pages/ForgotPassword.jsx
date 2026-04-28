@@ -26,7 +26,25 @@ export default function ForgotPassword() {
       await sendPasswordResetEmail(auth, trimmed)
       setSent(true)
     } catch (err) {
-      setError(formatAuthError(err))
+      // Email enumeration mitigation (audit S8): when Firebase reports
+      // auth/user-not-found OR auth/invalid-email-against-database OR
+      // similar "no such user" codes, still show the success state so
+      // a malicious actor can't probe which emails are registered.
+      // Real network/quota/internal errors still bubble up.
+      const code = err?.code || err?.message || ''
+      const SILENCE = new Set([
+        'auth/user-not-found',
+        'auth/invalid-email-verified', // less common, defensive
+        'auth/email-not-found',
+      ])
+      if (SILENCE.has(code)) {
+        // Log to devtools so we still see signal during testing without
+        // leaking it to the page.
+        console.warn('[forgot-password] silenced enumeration probe:', code)
+        setSent(true)
+      } else {
+        setError(formatAuthError(err))
+      }
     } finally {
       setLoading(false)
     }
@@ -40,8 +58,8 @@ export default function ForgotPassword() {
             <div className="text-5xl text-center mb-3">✉️</div>
             <h1 className="text-2xl font-black font-display mb-1 text-center">Check your inbox</h1>
             <p className="text-gray-500 mb-5 text-sm text-center">
-              We sent a reset link to <span className="font-bold text-gray-700">{email.trim()}</span>.
-              Follow it to set a new password, then sign in again.
+              If we have an account for <span className="font-bold text-gray-700">{email.trim()}</span>,
+              the reset link is on its way. Follow it to set a new password.
             </p>
             <button
               onClick={() => navigate('/signin', { replace: true })}
