@@ -78,8 +78,13 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
           @media print rule in AnimatedRasterBanner.css kills the breath
           animation on the <img>. */}
       <div className="flex items-stretch gap-[3mm] shrink-0" style={{ height: '12mm' }}>
-        <div className="flex-1 min-w-0 rounded-[3mm] overflow-hidden">
-          <ThemeBannerArt themeKey={themeKey} animated={false} height="100%" />
+        <div className="flex-1 min-w-0 rounded-[1.5mm] overflow-hidden">
+          <ThemeBannerArt
+            themeKey={themeKey}
+            animated={false}
+            height="100%"
+            objectPosition="center top"
+          />
         </div>
         {/* Single metadata QR — encodes board / kid / week. The CV pipeline
             (functions/src/sheet-scan.ts) uses jsqr's corner detection from

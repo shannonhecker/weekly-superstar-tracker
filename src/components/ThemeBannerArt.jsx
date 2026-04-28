@@ -20,7 +20,17 @@ const BANNER_IMAGES = {
   bear: '/theme-banners/bear.png',
 }
 
-export default function ThemeBannerArt({ themeKey = 'animals', height, animated = true, favoritePet = null }) {
+export default function ThemeBannerArt({
+  themeKey = 'animals',
+  height,
+  animated = true,
+  favoritePet = null,
+  // Where the raster anchors when object-fit: cover crops vertically.
+  // 'center' (default) is fine for Board's tall aspect; PrintSheet's wide
+  // 14:1 strip cuts character heads, so it passes 'center top' to keep
+  // faces visible.
+  objectPosition,
+}) {
   const image = BANNER_IMAGES[themeKey]
   const theme = THEMES[themeKey] || THEMES.animals
   const label = theme?.label || 'Animals'
@@ -44,6 +54,7 @@ export default function ThemeBannerArt({ themeKey = 'animals', height, animated 
         effect={effect}
         themeColors={{ accent: theme.accent, deeper: theme.deeper }}
         accessibilityLabel={`${label} theme banner`}
+        objectPosition={objectPosition}
       />
       <BannerPet emoji={favoritePet?.emoji} animated={animated} />
     </div>
