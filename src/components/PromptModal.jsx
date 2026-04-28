@@ -10,6 +10,7 @@ export default function PromptModal({
   onSubmit,
   title,
   emoji,
+  emojiClassName,
   fields = [],
   submitLabel = 'Save',
   cancelLabel = 'Cancel',
@@ -30,7 +31,7 @@ export default function PromptModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={title} emoji={emoji}>
+    <Modal open={open} onClose={onClose} title={title} emoji={emoji} emojiClassName={emojiClassName}>
       <form onSubmit={submit}>
         {fields.map((f, idx) => (
           <div key={f.name} className={idx > 0 ? 'mt-3' : ''}>

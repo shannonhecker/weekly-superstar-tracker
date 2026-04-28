@@ -347,7 +347,7 @@ export default function Board() {
               >
                 <div className="relative p-3 sm:p-4">
                 <div className="mb-3 overflow-hidden rounded-[24px]">
-                  <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(136px, 22vw, 188px)" />
+                  <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(136px, 22vw, 188px)" favoritePet={activeKid?.favoritePet} />
                 </div>
 
                 <div className="mb-3">

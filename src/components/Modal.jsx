@@ -12,7 +12,7 @@ function unlockBody() {
   if (lockCount === 0) document.body.style.overflow = ''
 }
 
-export default function Modal({ open, onClose, title, emoji, children }) {
+export default function Modal({ open, onClose, title, emoji, emojiClassName, children }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
@@ -36,7 +36,7 @@ export default function Modal({ open, onClose, title, emoji, children }) {
       >
         {(title || emoji) && (
           <div className="text-center mb-4">
-            {emoji && <div className="text-4xl mb-2">{emoji}</div>}
+            {emoji && <div className={emojiClassName || 'text-4xl mb-2'}>{emoji}</div>}
             {title && <h2 className="text-lg font-extrabold text-earthy-cocoa">{title}</h2>}
           </div>
         )}

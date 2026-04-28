@@ -13,6 +13,7 @@ import { generateShareCode } from '../lib/codes'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
+import HeroStar from '../components/HeroStar'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -226,7 +227,9 @@ export default function SignUp() {
 function StepIntro({ onStart }) {
   return (
     <div className="text-center pt-6">
-      <div className="text-5xl mb-6" aria-hidden="true">✨</div>
+      <div className="flex justify-center mb-6">
+        <HeroStar size={88} />
+      </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
         meet your<br />weekly superstar.
       </h1>

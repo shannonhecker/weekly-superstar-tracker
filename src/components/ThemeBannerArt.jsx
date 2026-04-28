@@ -1,5 +1,6 @@
 import { THEMES } from '../lib/themes'
 import AnimatedRasterBanner from './AnimatedRasterBanner'
+import BannerPet from './BannerPet'
 import { EFFECT_BY_THEME } from './banner-effects'
 
 const BANNER_IMAGES = {
@@ -19,7 +20,7 @@ const BANNER_IMAGES = {
   bear: '/theme-banners/bear.png',
 }
 
-export default function ThemeBannerArt({ themeKey = 'animals', height, animated = true }) {
+export default function ThemeBannerArt({ themeKey = 'animals', height, animated = true, favoritePet = null }) {
   const image = BANNER_IMAGES[themeKey]
   const theme = THEMES[themeKey] || THEMES.animals
   const label = theme?.label || 'Animals'
@@ -27,15 +28,24 @@ export default function ThemeBannerArt({ themeKey = 'animals', height, animated 
 
   if (!image) return null
 
+  // BannerPet wants to anchor to the bottom-right of the banner — wrap in a
+  // relative container so absolute positioning is scoped to this banner only.
+  // height is sometimes a CSS clamp string (e.g. "clamp(136px, 22vw, 188px)"),
+  // so we can't reliably parse a numeric height to gate showing the pet on
+  // tiny banners. Instead, BannerPet itself bails on size<32 and we never
+  // pass a tiny size from here.
   return (
-    <AnimatedRasterBanner
-      source={image}
-      height={height ?? 160}
-      borderRadius={24}
-      animated={animated}
-      effect={effect}
-      themeColors={{ accent: theme.accent, deeper: theme.deeper }}
-      accessibilityLabel={`${label} theme banner`}
-    />
+    <div className="relative">
+      <AnimatedRasterBanner
+        source={image}
+        height={height ?? 160}
+        borderRadius={24}
+        animated={animated}
+        effect={effect}
+        themeColors={{ accent: theme.accent, deeper: theme.deeper }}
+        accessibilityLabel={`${label} theme banner`}
+      />
+      <BannerPet emoji={favoritePet?.emoji} animated={animated} />
+    </div>
   )
 }
