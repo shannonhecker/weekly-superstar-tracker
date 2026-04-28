@@ -25,6 +25,10 @@ export default function AnimatedRasterBanner({
   animated = true,
   effect = 'petals',
   themeColors = NEUTRAL_THEME,
+  // Where the source image anchors when object-fit: cover crops it.
+  // Default 'center' keeps Board behaviour. PrintSheet passes 'center top'
+  // so character heads stay visible when vertical cropping happens.
+  objectPosition = 'center',
   style,
 }) {
   const profile = EFFECT_PROFILES[effect] || EFFECT_PROFILES.petals
@@ -44,7 +48,7 @@ export default function AnimatedRasterBanner({
       className="ws-raster-banner"
       style={wrapperStyle}
     >
-      <img src={source} alt="" />
+      <img src={source} alt="" style={{ objectPosition }} />
       {animated ? (
         <div className="ws-particle-layer" aria-hidden="true">
           {profile.positions.map((p, i) => {
