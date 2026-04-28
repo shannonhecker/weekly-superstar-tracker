@@ -7,7 +7,7 @@ import {
   OAuthProvider,
   signInWithPopup,
 } from 'firebase/auth'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { addDoc, collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import { generateShareCode } from '../lib/codes'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
@@ -109,14 +109,36 @@ export default function SignUp() {
   }
 
   // OAuth signups land here from screen 4, where theme + kid name are already
-  // collected from screens 2 & 3. We reuse the same board+kid creation as
-  // email so a Google/Apple user gets the same first-run board state.
+  // collected from screens 2 & 3. Critical: a returning user (already has an
+  // account + board) must NOT get a brand-new board created on top of their
+  // existing data. Without this guard, signing in via Google/Apple from the
+  // /signup flow orphans the original board and the user perceives data loss.
+  // (One real user lost visibility of "The Hecker Family" board this way on
+  // 2026-04-28 — board still in Firestore but app routed to a fresh duplicate.)
   const onOAuth = async (provider) => {
     if (loading) return
     setError('')
     setLoading(true)
     try {
       const cred = await signInWithPopup(auth, provider)
+      // Existing-user guard: if Firestore has any board where this user is a
+      // member (admin or family member), route to it instead of creating a new
+      // one. We pick the earliest board by createdAt so the user lands on
+      // their original family board, not a stray test/duplicate.
+      const existing = await getDocs(
+        query(collection(db, 'boards'), where('memberIds', 'array-contains', cred.user.uid)),
+      )
+      if (!existing.empty) {
+        const sorted = existing.docs
+          .map((d) => ({ id: d.id, createdAt: d.data().createdAt }))
+          .sort((a, b) => {
+            const ta = a.createdAt?.toMillis?.() ?? 0
+            const tb = b.createdAt?.toMillis?.() ?? 0
+            return ta - tb
+          })
+        navigate(`/board/${sorted[0].id}`, { replace: true })
+        return
+      }
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
