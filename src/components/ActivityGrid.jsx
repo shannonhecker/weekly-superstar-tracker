@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { getCurrentWeek } from '../lib/week'
@@ -29,7 +29,11 @@ function fallbackStickerFor(activity) {
 }
 
 export default function ActivityGrid({ kid, boardId }) {
-  const { days } = useMemo(() => getCurrentWeek(), [])
+  // Call fresh on every render — `getCurrentWeek()` is cheap date math, and the
+  // previous `useMemo(..., [])` froze `days` at first render so post-midnight
+  // writes could land under a different `dayKey` than StreakCounter reads.
+  // Both READ (StreakCounter) and WRITE (this file) now share the same fresh keys.
+  const { days } = getCurrentWeek()
   const checks = kid.checks || {}
   const stickers = kid.stickers || {}
   const activities = kid.activities || []

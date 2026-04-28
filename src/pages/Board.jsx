@@ -169,7 +169,7 @@ export default function Board() {
           petEmoji: emojiForStaged(oldChainKey, oldStars),
           chainKey: oldChainKey,
         }
-        updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
+        const rolloverFields = {
           [`weekHistory.${oldKey}`]: archive,
           checks: {},
           stickers: {},
@@ -178,7 +178,27 @@ export default function Board() {
           petNameDeclined: false,
           weekKey: thisWeekKey,
           chainKey: picked,
-        }).catch(() => {})
+        }
+        // Defensive log so we can confirm in browser devtools that a chain
+        // transition actually writes `petName: null` + `petNameDeclined: false`
+        // to Firestore. If the naming modal fails to re-fire after rollover,
+        // check this log first — both fields must appear in the write.
+        // Fires once per kid per week-change, so noise is minimal.
+        // eslint-disable-next-line no-console
+        console.log('[Board] rollover update', {
+          kidId: kid.id,
+          fromWeekKey: oldKey,
+          toWeekKey: thisWeekKey,
+          fromChainKey: oldChainKey,
+          toChainKey: picked,
+          fieldsWritten: {
+            petName: rolloverFields.petName,
+            petNameDeclined: rolloverFields.petNameDeclined,
+            chainKey: rolloverFields.chainKey,
+            weekKey: rolloverFields.weekKey,
+          },
+        })
+        updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), rolloverFields).catch(() => {})
       } else {
         updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
           chainKey: picked,
