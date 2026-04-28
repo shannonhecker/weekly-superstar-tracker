@@ -151,7 +151,8 @@ export default function ActivityGrid({ kid, boardId }) {
                     >
                       <button
                         onClick={() => toggle(a.id, d.key)}
-                        aria-label={checked ? 'Uncheck activity' : 'Check activity'}
+                        aria-label={`${checked ? 'Uncheck' : 'Check'} ${a.label} for ${d.label}${checked ? ' (currently completed)' : ''}`}
+                        aria-pressed={checked}
                         className="activity-check-cell w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
                         style={{
                           background: checked ? `${a.color}33` : '#FFFDF7',
