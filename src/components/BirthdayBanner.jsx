@@ -12,7 +12,7 @@ export function BirthdayBanner({ kid }) {
       borderRadius={16}
       effect="confetti"
       accessibilityLabel={`Birthday week for ${kid?.name || 'someone'}.`}
-      style={{ margin: '0 12px 8px' }}
+      style={{ marginBottom: 8 }}
     />
   )
 }

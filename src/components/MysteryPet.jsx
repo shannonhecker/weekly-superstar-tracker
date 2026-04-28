@@ -221,7 +221,8 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         open={modalOpen}
         onClose={dismissModal}
         onSubmit={submitName}
-        emoji="🎉"
+        emoji={petEmoji}
+        emojiClassName="text-7xl mb-3 leading-none"
         title={`${kid.name}'s pet hatched!`}
         submitLabel="Name it"
         cancelLabel="Skip"

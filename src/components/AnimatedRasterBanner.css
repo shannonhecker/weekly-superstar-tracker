@@ -193,6 +193,18 @@
 @media (prefers-reduced-motion: reduce) {
   .ws-particle-layer { display: none; }
   .ws-raster-banner > img { animation: none; }
+  .ws-banner-pet { animation: none; }
+}
+
+/* Favorite-pet overlay — gentle vertical bob, single axis so it reads as
+   "alive" without competing with the banner's particle motion. */
+@keyframes ws-pet-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.ws-banner-pet {
+  animation: ws-pet-bob 3s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* On print: same as reduce-motion. Prevents the breath animation from
@@ -200,4 +212,5 @@
 @media print {
   .ws-particle-layer { display: none; }
   .ws-raster-banner > img { animation: none !important; }
+  .ws-banner-pet { animation: none !important; }
 }
