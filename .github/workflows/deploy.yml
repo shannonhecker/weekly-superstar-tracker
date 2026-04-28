@@ -1,0 +1,53 @@
+name: Deploy to Firebase Hosting
+
+# Auto-deploys winkingstar.com on every push to main, plus a manual
+# "Run workflow" trigger so you can re-deploy without a code change.
+#
+# Why this exists: the local Firebase CLI hangs on this iCloud-synced
+# filesystem, blocking `npm run deploy` from a Claude Code session.
+# GitHub Actions runs in a clean Linux VM with no such issues.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Only redeploy when something user-visible actually changed.
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'firebase.json'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: firebase-hosting-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        uses: w9jds/firebase-action@v14.10.1
+        with:
+          args: deploy --only hosting --project weekly-superstar-tracker
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
