@@ -7,7 +7,8 @@ import {
   OAuthProvider,
   signInWithPopup,
 } from 'firebase/auth'
-import { addDoc, collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { findUserBoards } from '../lib/boards'
 import { auth, db } from '../lib/firebase'
 import { generateShareCode } from '../lib/codes'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
@@ -122,21 +123,12 @@ export default function SignUp() {
     try {
       const cred = await signInWithPopup(auth, provider)
       // Existing-user guard: if Firestore has any board where this user is a
-      // member (admin or family member), route to it instead of creating a new
-      // one. We pick the earliest board by createdAt so the user lands on
-      // their original family board, not a stray test/duplicate.
-      const existing = await getDocs(
-        query(collection(db, 'boards'), where('memberIds', 'array-contains', cred.user.uid)),
-      )
-      if (!existing.empty) {
-        const sorted = existing.docs
-          .map((d) => ({ id: d.id, createdAt: d.data().createdAt }))
-          .sort((a, b) => {
-            const ta = a.createdAt?.toMillis?.() ?? 0
-            const tb = b.createdAt?.toMillis?.() ?? 0
-            return ta - tb
-          })
-        navigate(`/board/${sorted[0].id}`, { replace: true })
+      // member (admin or family member), route to their original — earliest
+      // by createdAt — so a returning user doesn't get a fresh duplicate
+      // board on top of their existing data. (See PR #30 incident.)
+      const existing = await findUserBoards(cred.user.uid)
+      if (existing.length > 0) {
+        navigate(`/board/${existing[0].id}`, { replace: true })
         return
       }
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
