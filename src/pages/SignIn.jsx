@@ -6,8 +6,8 @@ import {
   OAuthProvider,
   signInWithPopup,
 } from 'firebase/auth'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase'
+import { auth } from '../lib/firebase'
+import { findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { createBoardForNewUser } from './SignUp'
 
@@ -17,9 +17,8 @@ import { createBoardForNewUser } from './SignUp'
 // Tradeoff documented in PR description: brand-new OAuth-via-SignIn users
 // skip the theme picker and start with the first theme + their displayName.
 async function ensureBoardForOAuthUser(user) {
-  const q = query(collection(db, 'boards'), where('memberIds', 'array-contains', user.uid))
-  const snap = await getDocs(q)
-  if (!snap.empty) return snap.docs[0].id
+  const boards = await findUserBoards(user.uid)
+  if (boards.length > 0) return boards[0].id
   return createBoardForNewUser(user, {
     theme: null, // helper falls back to the first theme in THEMES
     kidName: user.displayName || 'Your kid',
@@ -78,7 +77,7 @@ export default function SignIn() {
     <div className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
       <form
         onSubmit={onSubmit}
-        className="bg-[#FFFDF7] rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full"
+        className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full"
       >
         <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-1">
           Welcome back

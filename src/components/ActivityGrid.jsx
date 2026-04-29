@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { getCurrentWeek } from '../lib/week'
@@ -29,7 +29,11 @@ function fallbackStickerFor(activity) {
 }
 
 export default function ActivityGrid({ kid, boardId }) {
-  const { days } = useMemo(() => getCurrentWeek(), [])
+  // Call fresh on every render — `getCurrentWeek()` is cheap date math, and the
+  // previous `useMemo(..., [])` froze `days` at first render so post-midnight
+  // writes could land under a different `dayKey` than StreakCounter reads.
+  // Both READ (StreakCounter) and WRITE (this file) now share the same fresh keys.
+  const { days } = getCurrentWeek()
   const checks = kid.checks || {}
   const stickers = kid.stickers || {}
   const activities = kid.activities || []
@@ -124,11 +128,11 @@ export default function ActivityGrid({ kid, boardId }) {
         <tbody className="[&_tr:first-child_td]:pt-3">
           {activities.map((a, idx) => {
             const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
-            const rowBg = idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'
+            const rowBg = idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'
             return (
               <tr key={a.id} className={rowBg}>
                 <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'}`}
+                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'}`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span
@@ -151,7 +155,8 @@ export default function ActivityGrid({ kid, boardId }) {
                     >
                       <button
                         onClick={() => toggle(a.id, d.key)}
-                        aria-label={checked ? 'Uncheck activity' : 'Check activity'}
+                        aria-label={`${checked ? 'Uncheck' : 'Check'} ${a.label} for ${d.label}${checked ? ' (currently completed)' : ''}`}
+                        aria-pressed={checked}
                         className="activity-check-cell w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
                         style={{
                           background: checked ? `${a.color}33` : '#FFFDF7',

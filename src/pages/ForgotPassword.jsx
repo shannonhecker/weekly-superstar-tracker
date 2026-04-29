@@ -4,6 +4,11 @@ import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 
+// Migrated to the earthy palette to match SignIn / SignUp / AuthAction.
+// The legacy purple/grey treatment was the only auth screen still on
+// the pre-Direction-B colours — visually jarring after sign-in shipped
+// in the new tokens. Audit A3.
+
 export default function ForgotPassword() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -27,19 +32,18 @@ export default function ForgotPassword() {
       setSent(true)
     } catch (err) {
       // Email enumeration mitigation (audit S8): when Firebase reports
-      // auth/user-not-found OR auth/invalid-email-against-database OR
-      // similar "no such user" codes, still show the success state so
-      // a malicious actor can't probe which emails are registered.
-      // Real network/quota/internal errors still bubble up.
+      // auth/user-not-found OR similar "no such user" codes, still show
+      // the success state so a malicious actor can't probe which emails
+      // are registered. Real network/quota errors still bubble up.
       const code = err?.code || err?.message || ''
       const SILENCE = new Set([
         'auth/user-not-found',
-        'auth/invalid-email-verified', // less common, defensive
+        'auth/invalid-email-verified',
         'auth/email-not-found',
       ])
       if (SILENCE.has(code)) {
-        // Log to devtools so we still see signal during testing without
-        // leaking it to the page.
+        // Devtools signal during testing; doesn't leak to the page.
+        // eslint-disable-next-line no-console
         console.warn('[forgot-password] silenced enumeration probe:', code)
         setSent(true)
       } else {
@@ -51,28 +55,31 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5">
-      <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full">
+    <div className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
+      <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full">
         {sent ? (
           <>
-            <div className="text-5xl text-center mb-3">✉️</div>
-            <h1 className="text-2xl font-black font-display mb-1 text-center">Check your inbox</h1>
-            <p className="text-gray-500 mb-5 text-sm text-center">
-              If we have an account for <span className="font-bold text-gray-700">{email.trim()}</span>,
+            <div className="text-5xl text-center mb-3" aria-hidden="true">✉️</div>
+            <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-2 text-center">
+              Check your inbox
+            </h1>
+            <p className="text-earthy-cocoaSoft text-sm font-bold mb-6 text-center">
+              If we have an account for <span className="text-earthy-cocoa">{email.trim()}</span>,
               the reset link is on its way. Follow it to set a new password.
             </p>
             <button
+              type="button"
               onClick={() => navigate('/signin', { replace: true })}
-              className="w-full py-4 rounded-2xl text-white font-bold bg-gradient-to-r from-green-400 to-purple-500"
+              className="w-full py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
               Back to sign in
             </button>
-            <p className="text-center mt-4 text-xs text-gray-400">
+            <p className="text-center mt-4 text-xs text-earthy-cocoaSoft font-bold">
               Didn't get it? Check spam, or{' '}
               <button
                 type="button"
                 onClick={() => { setSent(false) }}
-                className="text-purple-600 font-bold"
+                className="text-earthy-cocoa font-bold underline underline-offset-2 hover:text-earthy-cocoa/80 transition-colors"
               >
                 try a different email
               </button>
@@ -80,35 +87,65 @@ export default function ForgotPassword() {
             </p>
           </>
         ) : (
-          <form onSubmit={onSubmit}>
-            <h1 className="text-2xl font-black font-display mb-1">Reset your password</h1>
-            <p className="text-gray-400 mb-5 text-sm">
+          <form onSubmit={onSubmit} noValidate>
+            <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-1">
+              Reset your password
+            </h1>
+            <p className="text-earthy-cocoaSoft text-sm mb-6">
               Enter your email and we'll send you a link to reset it.
             </p>
 
-            <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
+            <label
+              htmlFor="forgot-email"
+              className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2"
+            >
+              Email
+            </label>
             <input
+              id="forgot-email"
               type="email"
               autoComplete="email"
               required
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 mb-2 rounded-xl bg-purple-50 outline-none font-bold text-gray-800"
+              className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
             />
 
-            {error && <p className="text-red-500 text-sm font-bold mt-2">{error}</p>}
+            {error && (
+              <div role="alert" className="mb-3 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 py-4 rounded-2xl text-white font-bold bg-gradient-to-r from-green-400 to-purple-500 disabled:opacity-60"
+              className="w-full mt-4 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 transition-all"
             >
               {loading ? 'Sending…' : 'Send reset link'}
             </button>
 
-            <p className="text-center mt-4 text-sm text-gray-500">
-              Remembered it? <Link to="/signin" className="text-purple-600 font-bold">Sign in</Link>
+            <p className="text-center mt-4 text-sm text-earthy-cocoaSoft">
+              Remembered it?{' '}
+              <Link
+                to="/signin"
+                className="text-earthy-cocoa font-bold underline underline-offset-2"
+              >
+                Sign in
+              </Link>
+            </p>
+
+            {/* Need-help mailto matches the rest of the auth surface so the
+                experience reads as a coherent set across SignIn, SignUp,
+                AuthAction, and now ForgotPassword. */}
+            <p className="text-center mt-3 text-xs text-earthy-cocoaSoft">
+              <a
+                href="mailto:hello@winkingstar.com?subject=Help%20resetting%20my%20Winking%20Star%20password"
+                className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
+              >
+                Need help?
+              </a>
             </p>
           </form>
         )}
