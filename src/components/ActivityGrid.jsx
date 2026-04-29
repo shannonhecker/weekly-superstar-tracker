@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { db } from '../lib/firebase'
 import { getCurrentWeek } from '../lib/week'
 import { THEMES } from '../lib/themes'
@@ -97,8 +98,8 @@ export default function ActivityGrid({ kid, boardId }) {
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
     <div
-      className="rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-3"
-      style={{ backgroundColor: '#FFFDF7', border: '1px solid #F0E1C8' }}
+      className="rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-3 bg-earthy-card"
+      style={{ border: '1px solid #F0E1C8' }}
     >
       <table className="w-full text-center text-xs">
         <thead>
@@ -159,8 +160,8 @@ export default function ActivityGrid({ kid, boardId }) {
                         aria-pressed={checked}
                         className="activity-check-cell w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
                         style={{
-                          background: checked ? `${a.color}33` : '#FFFDF7',
-                          border: checked ? `2px solid ${a.color}` : '2px solid #E8DCC4',
+                          background: checked ? `${a.color}33` : colors.earthy.card,
+                          border: checked ? `2px solid ${a.color}` : `2px solid ${colors.earthy.divider}`,
                         }}
                       >
                         {checked

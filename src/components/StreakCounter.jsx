@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCurrentWeek } from '../lib/week'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
 
 function calculateStreak(kid, days) {
@@ -47,7 +48,7 @@ export default function StreakCounter({ kid }) {
   return (
     <div
       className="rounded-2xl p-3 flex items-center gap-3 h-full shadow-earthy-card font-jakarta"
-      style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
+      style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
     >
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shrink-0"

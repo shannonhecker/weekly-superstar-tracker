@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES, EGG_NAMES, PET_CHAINS, PET_ASSET, chainFor, petAtStage, stageToChainIdx, progressToStage, HATCH_GOAL } from '../lib/themes'
 import Modal from './Modal'
 import { getWeekKey } from '../lib/week'
@@ -174,7 +175,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         onClick={openGallery}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGallery() } }}
         className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
-        style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
+        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
       >
         <div
           className={`relative shrink-0 flex items-center justify-center overflow-hidden ${levelUp ? 'level-up-burst' : ''}`}
