@@ -5,7 +5,20 @@
   background-color: #F7F0E6;
 }
 
-.ws-raster-banner > img {
+/* PR #36 wraps <img> in <picture> when WebP variants ship. The
+   <picture> element becomes the direct child of .ws-raster-banner,
+   so we size both the picture box AND its inner img. The plain-img
+   fallback (no webpSrcSet) is still a direct child and keeps working
+   via the descendant selector below. */
+.ws-raster-banner > picture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ws-raster-banner img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -192,7 +205,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ws-particle-layer { display: none; }
-  .ws-raster-banner > img { animation: none; }
+  .ws-raster-banner img { animation: none; }
   .ws-banner-pet { animation: none; }
 }
 
@@ -211,6 +224,6 @@
    capturing a mid-scale frame when the browser rasterises for PDF/print. */
 @media print {
   .ws-particle-layer { display: none; }
-  .ws-raster-banner > img { animation: none !important; }
+  .ws-raster-banner img { animation: none !important; }
   .ws-banner-pet { animation: none !important; }
 }
