@@ -1,38 +1,17 @@
 import { doc, updateDoc, deleteField } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { PET_ASSET, PET_CHAINS, THEMES, petAtStage } from '../lib/themes'
-import { getWeekKey } from '../lib/week'
+import { PET_CHAINS, THEMES, petAtStage, animatedFluentUrl } from '../lib/themes'
+import { getWeekKey, formatWeekKey } from '../lib/week'
+import { RARE_STICKERS } from '../lib/stickers'
 import Modal from './Modal'
 import Egg from './Egg'
 import EmptyStateScene from './EmptyStateScene'
-
-const RARE_STICKERS = new Set(['🌈', '🦄', '🧚', '🪄', '🎆', '💎', '🎇', '🌠'])
-
-function animatedUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
-}
-
-function formatWeekKey(key) {
-  if (!key) return ''
-  try {
-    const d = new Date(key + 'T00:00:00')
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-    const sun = new Date(d)
-    sun.setDate(d.getDate() + 6)
-    const m1 = months[d.getMonth()]
-    const m2 = months[sun.getMonth()]
-    if (m1 === m2) return `${m1} ${d.getDate()}–${sun.getDate()}`
-    return `${m1} ${d.getDate()} – ${m2} ${sun.getDate()}`
-  } catch { return key }
-}
 
 function collectRareStickers(kid) {
   const map = kid?.stickers || {}
   const counts = {}
   for (const emoji of Object.values(map)) {
-    if (RARE_STICKERS.has(emoji)) {
+    if (RARE_STICKERS.includes(emoji)) {
       counts[emoji] = (counts[emoji] || 0) + 1
     }
   }
@@ -156,7 +135,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
           return (
             <div className="flex items-center gap-3 p-2 rounded-xl bg-earthy-ivory border border-earthy-divider mb-2">
               <img
-                src={animatedUrl(pet)}
+                src={animatedFluentUrl(pet)}
                 alt=""
                 width={48}
                 height={48}
@@ -226,7 +205,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               style={isFav ? { background: '#FEF3C7' } : undefined}
             >
               {pet ? (
-                <img src={animatedUrl(pet)} alt="" width={48} height={48} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                <img src={animatedFluentUrl(pet)} alt="" width={48} height={48} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none' }} />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-earthy-divider flex items-center justify-center text-xl">🥚</div>
               )}

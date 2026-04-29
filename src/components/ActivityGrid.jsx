@@ -4,6 +4,7 @@ import { colors } from '@weekly-superstar/shared/tokens'
 import { db } from '../lib/firebase'
 import { getCurrentWeek } from '../lib/week'
 import { THEMES } from '../lib/themes'
+import { RARE_STICKERS } from '../lib/stickers'
 import { useToast } from '../contexts/ToastContext'
 import { celebrate } from '../lib/confetti'
 import { play } from '../lib/sounds'
@@ -14,8 +15,6 @@ import MysteryBox from './MysteryBox'
 // never rewards you with an ice cream cone. Rare stickers stay separate and drop
 // only via mystery boxes.
 const CELEBRATION_STICKERS = ['⭐', '🌟', '✨', '💫', '🎉', '👏', '💪', '🏆']
-
-const RARE_STICKERS = ['🌈', '🦄', '🧚', '🪄', '🎆', '💎', '🎇', '🌠']
 
 function stickerFor(activity) {
   // 50% the activity's own emoji (contextual), 50% a celebration emoji (varied).

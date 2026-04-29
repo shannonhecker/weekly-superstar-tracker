@@ -1,13 +1,7 @@
 import { useState } from 'react'
 
 import { colors } from '@weekly-superstar/shared/tokens'
-import { PET_ASSET, THEMES } from '../lib/themes'
-
-function fluentUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
-}
+import { THEMES, animatedFluentUrl } from '../lib/themes'
 
 /**
  * Web mirror of iOS components/KidAvatar.tsx. Priority:
@@ -67,7 +61,7 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
   }
 
   if (kid?.avatarKind === 'preset' && kid.avatarEmoji) {
-    const url = fluentUrl(kid.avatarEmoji)
+    const url = animatedFluentUrl(kid.avatarEmoji)
     if (url && !presetFailed) {
       return (
         <div style={containerStyle}>

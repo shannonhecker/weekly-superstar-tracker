@@ -1,21 +1,14 @@
 import { useEffect } from 'react'
 import Modal from './Modal'
-import { THEMES, PET_ASSET, PET_CHAINS } from '../lib/themes'
+import { THEMES, PET_CHAINS, animatedFluentUrl } from '../lib/themes'
 import { BADGE_TIERS } from './BadgeShelf'
 import { ACHIEVEMENTS, evaluateAchievements } from '../lib/achievements'
 import { celebrate } from '../lib/confetti'
 import { play } from '../lib/sounds'
-
-const RARE_STICKERS = new Set(['🌈', '🦄', '🧚', '🪄', '🎆', '💎', '🎇', '🌠'])
+import { RARE_STICKERS } from '../lib/stickers'
 
 // Mirror of week.js day labels — the archive's checks map is keyed by label ("Mon"…"Sun").
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-function animatedFluentUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
-}
 
 // Best streak during the archived week: longest consecutive run of "all activities done" days.
 function bestStreak(archive, activities) {
@@ -39,7 +32,7 @@ function countRareStickers(archive) {
   const stickers = archive?.stickers || {}
   let count = 0
   for (const emoji of Object.values(stickers)) {
-    if (RARE_STICKERS.has(emoji)) count++
+    if (RARE_STICKERS.includes(emoji)) count++
   }
   return count
 }
