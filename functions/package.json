@@ -27,5 +27,12 @@
     "@types/node": "^20.17.10",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "uuid": "^11.0.0",
+    "gaxios": "^7.0.0",
+    "google-gax": "^5.0.0",
+    "retry-request": "^8.0.0",
+    "teeny-request": "^10.0.0"
   }
 }
