@@ -268,7 +268,7 @@ export default function Board() {
       <div className="relative z-10">
       <OfflineBanner />
       {/* Header */}
-      <div className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
+      <header className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
         <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
           <Logo size={36} className="shrink-0" />
           <span className="text-earthy-cocoa truncate">
@@ -349,9 +349,9 @@ export default function Board() {
             )}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-2xl lg:max-w-4xl mx-auto">
+      <main id="main" className="max-w-2xl lg:max-w-4xl mx-auto">
         {kids.length === 0 ? (
           <EmptyState boardId={boardId} />
         ) : (
@@ -443,7 +443,7 @@ export default function Board() {
             )}
           </>
         )}
-      </div>
+      </main>
 
       <ShareModal
         open={shareOpen}

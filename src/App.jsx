@@ -33,6 +33,15 @@ export default function App() {
     // gate uses, so the transition between "checking auth" and "loading
     // route chunk" feels continuous instead of flashing.
     <Suspense fallback={<LogoLoader />}>
+      {/* Skip-to-main link — visually hidden until focused. Pages that
+          want to be a target for it wrap their primary content in
+          `<main id="main">`. Audit A5. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1000] focus:px-4 focus:py-2 focus:bg-earthy-cocoa focus:text-earthy-cream focus:rounded-pill focus:font-bold focus:shadow-earthy-pop"
+      >
+        Skip to main content
+      </a>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/signin" element={<SignIn />} />
