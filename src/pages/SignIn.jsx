@@ -10,6 +10,7 @@ import { auth } from '../lib/firebase'
 import { findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { createBoardForNewUser } from './SignUp'
+import PrimaryButton from '../components/PrimaryButton'
 
 // First-time OAuth users on the SignIn page have no board yet — give them
 // sensible defaults so they land on a working board instead of the marketing
@@ -125,13 +126,9 @@ export default function SignIn() {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-2 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 transition-all"
-        >
+        <PrimaryButton type="submit" disabled={loading} className="mt-2">
           {loading ? 'Signing in…' : 'Sign in'}
-        </button>
+        </PrimaryButton>
 
         {/* Divider — same rule as SignUp screen 4 so the two screens read as a pair. */}
         <div className="flex items-center gap-3 my-6" role="presentation">

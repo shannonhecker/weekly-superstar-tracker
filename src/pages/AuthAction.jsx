@@ -9,6 +9,7 @@ import {
 import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 import Logo from '../components/Logo'
+import PrimaryButton from '../components/PrimaryButton'
 
 // Branded handler for Firebase email-action links (?mode=...&oobCode=...).
 // Replaces Firebase's stock Material card so the user lands on something
@@ -415,27 +416,6 @@ function EarthyInput(props) {
         className,
       ].join(' ')}
     />
-  )
-}
-
-// Polymorphic primary CTA — same visual as the onboarding cocoa pill.
-// `as` lets us swap to a Link without duplicating the styles.
-function PrimaryButton({ as: Tag = 'button', className = '', children, ...rest }) {
-  return (
-    <Tag
-      {...(Tag === 'button' ? { type: rest.type || 'button' } : null)}
-      {...rest}
-      className={[
-        'w-full inline-flex items-center justify-center py-4 rounded-pill',
-        'bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft',
-        'hover:-translate-y-0.5 active:translate-y-0',
-        'disabled:opacity-60 disabled:hover:translate-y-0 disabled:cursor-not-allowed',
-        'transition-all',
-        className,
-      ].join(' ')}
-    >
-      {children}
-    </Tag>
   )
 }
 

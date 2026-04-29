@@ -13,6 +13,7 @@ import { auth, db } from '../lib/firebase'
 import { generateShareCode } from '../lib/codes'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
+import PrimaryButton from '../components/PrimaryButton'
 import { getWeekKey } from '../lib/week'
 import HeroStar from '../components/HeroStar'
 
@@ -457,13 +458,9 @@ function StepAccount({
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 transition-all"
-      >
+      <PrimaryButton type="submit" disabled={loading}>
         {loading ? 'Creating…' : 'Create →'}
-      </button>
+      </PrimaryButton>
 
       {/* Divider */}
       <div className="flex items-center gap-3 my-6" role="presentation">
