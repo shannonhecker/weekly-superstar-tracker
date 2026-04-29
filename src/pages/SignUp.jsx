@@ -159,7 +159,7 @@ export default function SignUp() {
       : 'animate-[onb-slide-in-left_220ms_ease-out]'
 
   return (
-    <div className="min-h-screen bg-earthy-cream flex flex-col px-5 py-6">
+    <main id="main" className="min-h-screen bg-earthy-cream flex flex-col px-5 py-6">
       {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
           Scoped to (prefers-reduced-motion: no-preference) so reduced-motion users
           get no enter animation: the .animate-[...] class still applies but the
@@ -240,7 +240,7 @@ export default function SignUp() {
           Sign in
         </Link>
       </p>
-    </div>
+    </main>
   )
 }
 

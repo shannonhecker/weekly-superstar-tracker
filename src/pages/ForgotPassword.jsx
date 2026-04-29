@@ -56,7 +56,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
+    <main id="main" className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
       <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full">
         {sent ? (
           <>
@@ -143,6 +143,6 @@ export default function ForgotPassword() {
           </form>
         )}
       </div>
-    </div>
+    </main>
   )
 }

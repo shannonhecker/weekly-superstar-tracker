@@ -355,7 +355,7 @@ export default function PrintSheet() {
   const sheetUrl = buildSheetUrl(boardId, kidId, weekKey)
 
   return (
-    <div className="print-shell bg-gray-100 min-h-screen flex flex-col items-center gap-6 py-8">
+    <main id="main" className="print-shell bg-gray-100 min-h-screen flex flex-col items-center gap-6 py-8">
       {/* Toolbar — hidden on print */}
       <div className="print-hide flex items-center gap-3 text-sm font-body">
         <button
@@ -416,6 +416,6 @@ export default function PrintSheet() {
           <FootCaption />
         </div>
       </div>
-    </div>
+    </main>
   )
 }

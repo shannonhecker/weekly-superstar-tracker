@@ -75,7 +75,7 @@ export default function SignIn() {
   const onGoogle = () => onOAuth(new GoogleAuthProvider())
 
   return (
-    <div className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
+    <main id="main" className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
       <form
         onSubmit={onSubmit}
         className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full"
@@ -174,6 +174,6 @@ export default function SignIn() {
           </a>
         </p>
       </form>
-    </div>
+    </main>
   )
 }
