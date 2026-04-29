@@ -164,11 +164,15 @@ function ResetPassword({ oobCode }) {
   }
 
   // phase === 'form'
+  // Don't reveal the verified email back to the page. The user knows
+  // which account they're resetting (they clicked the link from their
+  // own inbox), and surfacing it here turns a stolen oobCode into a
+  // mini email-enumeration primitive. Audit S7.
   return (
     <form onSubmit={onSubmit} noValidate>
       <CardHeader
         title="Set a new password"
-        subtitle={email ? <>for <span className="font-bold text-earthy-cocoa">{email}</span></> : 'for your Winking Star account'}
+        subtitle="for your Winking Star account"
       />
 
       <FieldLabel htmlFor="auth-new-password">New password</FieldLabel>

@@ -10,6 +10,17 @@
     <link rel="icon" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Cross-origin preconnects — start the TCP+TLS handshake to these
+         hosts in parallel with HTML parsing, before the JS bundle even
+         requests them. Saves ~150-300 ms on first paint of any page that
+         loads a Google Font or an animated pet emoji. crossorigin is
+         required for fonts (CORS-fetched). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
     <title>Winking Star</title>
   </head>

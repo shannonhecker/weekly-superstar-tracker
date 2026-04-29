@@ -61,14 +61,22 @@ export default function ThemeBannerArt({
   // so we can't reliably parse a numeric height to gate showing the pet on
   // tiny banners. Instead, BannerPet itself bails on size<32 and we never
   // pass a tiny size from here.
+  //
+  // CRITICAL: the relative wrapper must own the height. PrintSheet places
+  // this component in a `flex items-stretch` row with a fixed mm height,
+  // and a wrapper without an inline height collapses to 0 inside that
+  // flex parent — which makes the entire banner disappear from the print
+  // sheet. Pass `height` through to the wrapper, then tell AnimatedRasterBanner
+  // to fill 100% of it.
+  const resolvedHeight = height ?? 160
   return (
-    <div className="relative">
+    <div className="relative w-full" style={{ height: resolvedHeight }}>
       <AnimatedRasterBanner
         source={image}
         webpSrcSet={buildWebpSrcSet(themeKey)}
         sizes={BANNER_SIZES}
         loading={loading}
-        height={height ?? 160}
+        height="100%"
         borderRadius={24}
         animated={animated}
         effect={effect}
