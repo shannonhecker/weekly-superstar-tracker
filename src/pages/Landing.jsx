@@ -1,8 +1,7 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { useAuth } from '../contexts/AuthContext'
-import { db } from '../lib/firebase'
+import { findUserBoards } from '../lib/boards'
 import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
 import ThemeCardArt from '../components/ThemeCardArt'
@@ -16,10 +15,11 @@ export default function Landing() {
     if (!user) { setChecking(false); return }
     let cancelled = false
     ;(async () => {
-      const q = query(collection(db, 'boards'), where('memberIds', 'array-contains', user.uid))
-      const snap = await getDocs(q)
+      const boards = await findUserBoards(user.uid)
       if (cancelled) return
-      if (!snap.empty) setBoardId(snap.docs[0].id)
+      // Earliest-by-createdAt — the user's original board, not a stray
+      // duplicate. findUserBoards already sorts that way.
+      if (boards.length > 0) setBoardId(boards[0].id)
       setChecking(false)
     })()
     return () => { cancelled = true }
@@ -30,7 +30,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory">
-      <div className="bg-[#FFFDF7] rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center font-jakarta overflow-hidden">
+      <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center font-jakarta overflow-hidden">
         <div className="w-[82%] mx-auto mt-6 mb-2">
           <ThemeCardArt themeKey="animals" />
         </div>

@@ -128,11 +128,11 @@ export default function ActivityGrid({ kid, boardId }) {
         <tbody className="[&_tr:first-child_td]:pt-3">
           {activities.map((a, idx) => {
             const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
-            const rowBg = idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'
+            const rowBg = idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'
             return (
               <tr key={a.id} className={rowBg}>
                 <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-[#FFFDF7]' : 'bg-earthy-ivory'}`}
+                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'}`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span

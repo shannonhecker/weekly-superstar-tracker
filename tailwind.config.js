@@ -19,7 +19,11 @@ export default {
         brand: colors.brand,
         fav: colors.fav,
         surface: colors.surface,
-        earthy: colors.earthy,
+        // Spread the shared earthy palette and add a local `card` token —
+        // #FFFDF7 was hardcoded in 15 surfaces (audit Q5). Promoting it
+        // here removes the literal repetition. When the shared package
+        // adds `earthy.card`, drop this override and let it flow through.
+        earthy: { ...colors.earthy, card: '#FFFDF7' },
         semantic: colors.semantic,
       },
       borderRadius: {
