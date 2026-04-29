@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { colors } from '@weekly-superstar/shared/tokens'
 import { PET_ASSET, THEMES } from '../lib/themes'
 
 function fluentUrl(emoji) {
@@ -26,13 +27,17 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
     width: size,
     height: size,
     borderRadius: size / 2,
-    backgroundColor: '#FFFDF7',
+    backgroundColor: colors.earthy.card,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 3,
     borderStyle: 'solid',
+    // Note: this is `#F0E1C8`, not the `#E8DCC4` earthy.divider token —
+    // a slightly warmer hairline that reads as a soft frame around the
+    // kid avatar. Out of Q5 scope; keep as a literal until the token
+    // system grows a `dividerWarm` or similar.
     borderColor: borderColor ?? '#F0E1C8',
     flexShrink: 0,
     boxShadow: '0 6px 16px rgba(90, 58, 46, 0.10)',

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
 import { celebrate } from '../lib/confetti'
 import { play } from '../lib/sounds'
@@ -61,7 +62,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         onClick={openDetails}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails() } }}
         className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
-        style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
+        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
       >
         <div className="flex items-center justify-between mb-1 gap-2">
           <div className="text-xs font-bold truncate" style={{ color: theme.deeper }}>

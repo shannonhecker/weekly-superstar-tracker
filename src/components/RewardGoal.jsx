@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
 import PromptModal from './PromptModal'
@@ -54,7 +55,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
           onClick={() => setOpen(true)}
           className="w-full h-full text-left rounded-2xl p-3 font-bold text-xs font-jakarta"
           style={{
-            background: '#FFFDF7',
+            background: colors.earthy.card,
             border: `2px dashed ${theme.accent}99`,
             color: theme.deeper,
           }}
@@ -70,7 +71,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
   return (
     <div
       className="rounded-2xl p-3 h-full shadow-earthy-card font-jakarta"
-      style={{ backgroundColor: '#FFFDF7', border: `1px solid ${theme.accent}55` }}
+      style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
     >
       <div className="flex items-center justify-between mb-1.5">
         <div className="font-bold text-xs truncate text-earthy-cocoa">🎁 {reward.label}</div>

@@ -6,8 +6,8 @@ export default function ScoreBar({ total, max, theme }) {
   const pct = max > 0 ? Math.min(100, (total / max) * 100) : 0
   return (
     <div
-      className="rounded-2xl p-3 sm:p-4 mb-4 flex items-center gap-3 shadow-earthy-card font-jakarta"
-      style={{ backgroundColor: '#FFFDF7', border: '1px solid #F0E1C8' }}
+      className="rounded-2xl p-3 sm:p-4 mb-4 flex items-center gap-3 shadow-earthy-card font-jakarta bg-earthy-card"
+      style={{ border: '1px solid #F0E1C8' }}
     >
       <div
         className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"

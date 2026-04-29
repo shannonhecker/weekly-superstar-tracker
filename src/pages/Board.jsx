@@ -4,6 +4,7 @@ import { doc, onSnapshot, collection, query, orderBy, updateDoc } from 'firebase
 import { signOut } from 'firebase/auth'
 import { auth, db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
 import { getCurrentWeek, formatWeekRange, getWeekKey } from '../lib/week'
 import KidSwitcher from '../components/KidSwitcher'
@@ -361,7 +362,7 @@ export default function Board() {
               <div
                 className="relative rounded-3xl shadow-earthy-card"
                 style={{
-                  backgroundColor: '#FFFDF7',
+                  backgroundColor: colors.earthy.card,
                   border: `1px solid ${activeTheme.accent}66`,
                 }}
               >
