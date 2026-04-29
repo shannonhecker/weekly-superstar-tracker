@@ -126,12 +126,21 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
 
   // Open the naming prompt when the egg FIRST cracks open (stage 1), not at full grown.
   // Gated on !evolution so the growth-celebration popup shows first.
+  //
+  // `chainKey` is in the deps so a chain transition (Monday rollover →
+  // pickFreshChain assigns a new species) re-evaluates whether the modal should
+  // fire. Suspected race: if Board.jsx's rollover write sets `chainKey: picked`
+  // but `petName: null` doesn't land (or arrives in a separate snapshot), this
+  // effect would skip on the stale `petName`. Don't auto-clear `petName` here
+  // — that could overwrite a legitimate name. If the modal fails to re-fire on
+  // chain transition, check the `[Board] rollover update` console log to verify
+  // the rollover write succeeded.
   const hasHatched = stage >= 1
   useEffect(() => {
     if (!hasHatched || petName || petNameDeclined || evolution) return
     const t = setTimeout(() => setModalOpen(true), 900)
     return () => clearTimeout(t)
-  }, [hasHatched, petName, petNameDeclined, evolution])
+  }, [hasHatched, petName, petNameDeclined, evolution, chainKey])
 
   const submitName = async (name) => {
     setModalOpen(false)

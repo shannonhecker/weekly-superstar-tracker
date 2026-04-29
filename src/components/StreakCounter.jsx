@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getCurrentWeek } from '../lib/week'
 import { THEMES } from '../lib/themes'
 
 function calculateStreak(kid, days) {
   const checks = kid.checks || {}
   const activities = kid.activities || []
+  // Note: predicate requires EVERY activity to have a check entry for the day.
+  // If a parent adds a NEW activity mid-day, that activity has no `checks[id-day]`
+  // entry yet, so today's day reads incomplete and the streak appears to break.
+  // This is intentional UX (the day is genuinely incomplete) — don't change the
+  // predicate. See plan: floofy-moseying-widget.md fix #6 secondary edge case.
   let streak = 0
   for (let i = days.length - 1; i >= 0; i--) {
     const day = days[i]
@@ -17,11 +22,15 @@ function calculateStreak(kid, days) {
 }
 
 export default function StreakCounter({ kid }) {
-  const days = useMemo(() => getCurrentWeek().days, [])
-  const streak = useMemo(
-    () => calculateStreak(kid, days),
-    [kid.checks, kid.activities, days],
-  )
+  // Don't memoize `days` — `getCurrentWeek()` is cheap date math (no Firestore
+  // read), and an empty-deps `useMemo` froze the reference at first render.
+  // After midnight rollover the cached `day.key` could drift from what
+  // ActivityGrid writes into `kid.checks`, making a fully-ticked day read as
+  // empty. Both READ (this file) and WRITE (ActivityGrid) now call fresh.
+  const { days } = getCurrentWeek()
+  // No useMemo here — `days` is a fresh array each render so the memo would
+  // never hit anyway. `calculateStreak` is a 7-iteration loop, no perf concern.
+  const streak = calculateStreak(kid, days)
   const theme = THEMES[kid.theme] || THEMES.football
 
   // Re-mount the streak text via key when the number changes so it pulses
