@@ -160,15 +160,21 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-earthy-cream flex flex-col px-5 py-6">
-      {/* Inline keyframes — keeps the file self-contained without touching tailwind config. */}
+      {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
+          Scoped to (prefers-reduced-motion: no-preference) so reduced-motion users
+          get no enter animation: the .animate-[...] class still applies but the
+          referenced keyframes don't exist for them, so each step renders immediately
+          without the slide-fade. Audit A6. */}
       <style>{`
-        @keyframes onb-slide-in-right {
-          from { opacity: 0; transform: translate3d(16px, 0, 0); }
-          to   { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-        @keyframes onb-slide-in-left {
-          from { opacity: 0; transform: translate3d(-16px, 0, 0); }
-          to   { opacity: 1; transform: translate3d(0, 0, 0); }
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes onb-slide-in-right {
+            from { opacity: 0; transform: translate3d(16px, 0, 0); }
+            to   { opacity: 1; transform: translate3d(0, 0, 0); }
+          }
+          @keyframes onb-slide-in-left {
+            from { opacity: 0; transform: translate3d(-16px, 0, 0); }
+            to   { opacity: 1; transform: translate3d(0, 0, 0); }
+          }
         }
       `}</style>
 
