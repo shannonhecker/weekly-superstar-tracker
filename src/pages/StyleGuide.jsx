@@ -82,10 +82,15 @@ function HexBadge({ tier = 4, size = 80 }) {
 }
 
 function Button({ variant = 'primary', children }) {
+  // The previous `secondary` variant was `bg-earthy-terracotta text-earthy-ivory`
+  // — 2.92:1, fails WCAG AA across the board (audit A4). Solid terracotta is
+  // an accent surface, not a text-bearing surface; no light text colour
+  // passes AA at normal size on it. Secondary now uses the same cocoa-on-
+  // terracottaSoft pair the production buttons in KidEditModal already use
+  // (6.58:1 ✓). The old `tertiary` was the same pair so it's been folded in.
   const styles = {
     primary: 'bg-earthy-cocoa text-earthy-ivory hover:bg-[#4A2E25]',
-    secondary: 'bg-earthy-terracotta text-earthy-ivory hover:bg-[#C66A38]',
-    tertiary: 'bg-earthy-terracottaSoft text-earthy-cocoa hover:bg-[#EAB892]',
+    secondary: 'bg-earthy-terracottaSoft text-earthy-cocoa hover:bg-[#EAB892]',
     ghost: 'bg-transparent text-earthy-cocoa hover:bg-earthy-cream border border-earthy-divider',
   }
   return (
@@ -177,11 +182,10 @@ export default function StyleGuide() {
           </div>
         </Section>
 
-        <Section title="Buttons" description="Pill shape, 24px horizontal padding. Primary (cocoa) is the strongest CTA; terracotta is secondary; soft is tertiary.">
+        <Section title="Buttons" description="Pill shape, 24px horizontal padding. Primary (cocoa-on-cream, 12.4:1) is the strongest CTA; secondary uses the soft terracotta chip surface (cocoa, 6.58:1) — the bold-terracotta solid was retired because no light-text colour passes AA on it; ghost is the outlined-cream variant.">
           <div className="flex flex-wrap gap-3 items-center">
             <Button variant="primary">Continue</Button>
             <Button variant="secondary">Add task</Button>
-            <Button variant="tertiary">Apply preset</Button>
             <Button variant="ghost">Cancel</Button>
           </div>
         </Section>
