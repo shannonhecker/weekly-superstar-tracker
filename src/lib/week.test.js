@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getCurrentWeek, getWeekKey } from './week'
+import { getCurrentWeek, getWeekKey, formatWeekKey } from './week'
 
 // Week math is the foundation of the streak counter, the activity grid,
 // and the per-week pet history. Per audit P5, the streak bug from PR
@@ -68,5 +68,26 @@ describe('getWeekKey', () => {
     const { monday } = getCurrentWeek()
     const expected = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
     expect(getWeekKey()).toBe(expected)
+  })
+})
+
+// formatWeekKey wraps the shared `formatWeekRange` so we can pass a
+// stored week key (the Monday's ISO date) and get back the same short
+// "Mon D–D" / "Mon D – Mon D" label PetGallery shows on archived weeks.
+describe('formatWeekKey', () => {
+  it('returns the empty string for falsy keys', () => {
+    expect(formatWeekKey(null)).toBe('')
+    expect(formatWeekKey(undefined)).toBe('')
+    expect(formatWeekKey('')).toBe('')
+  })
+
+  it('formats a same-month week as "Mon D–D"', () => {
+    // 2026-04-13 (Mon) → 2026-04-19 (Sun) — both in April.
+    expect(formatWeekKey('2026-04-13')).toBe('Apr 13–19')
+  })
+
+  it('formats a cross-month week as "Mon D – Mon D"', () => {
+    // 2026-03-30 (Mon) → 2026-04-05 (Sun) — March → April.
+    expect(formatWeekKey('2026-03-30')).toBe('Mar 30 – Apr 5')
   })
 })
