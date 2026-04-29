@@ -119,14 +119,14 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
         <button
           type="button"
           onClick={() => setView('list')}
-          className="flex items-center text-sm font-bold text-gray-600 hover:text-gray-800 active:scale-[0.98]"
+          className="flex items-center text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa active:scale-[0.98]"
           aria-label="Back"
         >
           <span className="mr-1">←</span> Back
         </button>
       )}
       <h2
-        className="font-display text-lg flex-1 text-center"
+        className="font-extrabold text-lg flex-1 text-center text-earthy-cocoa"
         style={{ marginRight: showBack ? '56px' : 0 }}
       >
         {title}
@@ -163,7 +163,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                 />
               ))}
               {activities.length === 0 && (
-                <div className="text-center text-sm text-gray-500 py-6">
+                <div className="text-center text-sm text-earthy-cocoaSoft py-6">
                   No tasks yet. Add one or apply a preset to get started.
                 </div>
               )}
@@ -174,7 +174,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                 type="button"
                 onClick={addActivity}
                 disabled={activities.length >= MAX_ACTIVITIES || busy}
-                className="flex-1 py-3 rounded-xl bg-purple-50 text-purple-600 font-bold flex items-center justify-center gap-1 disabled:opacity-40 active:scale-[0.98]"
+                className="flex-1 py-3 rounded-pill bg-earthy-ivory border border-earthy-divider text-earthy-cocoa font-bold flex items-center justify-center gap-1 disabled:opacity-40 active:scale-[0.98]"
               >
                 <span>＋</span>
                 <span>
@@ -184,7 +184,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
               <button
                 type="button"
                 onClick={() => setView('preset')}
-                className="flex-1 py-3 rounded-xl bg-purple-100 text-purple-600 font-bold flex items-center justify-center gap-1 active:scale-[0.98]"
+                className="flex-1 py-3 rounded-pill bg-earthy-ivory border border-earthy-divider text-earthy-cocoa font-bold flex items-center justify-center gap-1 active:scale-[0.98]"
               >
                 <span>✨</span>
                 <span>Apply preset</span>
@@ -195,7 +195,8 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="w-full py-2 rounded-xl mt-4 text-gray-500 font-bold text-sm"
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all disabled:opacity-50"
             >
               Done
             </button>
@@ -214,7 +215,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                     if (editingId) updateActivity(editingId, { emoji: e })
                     setView('list')
                   }}
-                  className="w-12 h-12 rounded-full bg-purple-50 hover:bg-purple-100 flex items-center justify-center text-2xl active:scale-[0.94]"
+                  className="w-12 h-12 rounded-full bg-earthy-ivory border border-earthy-divider hover:bg-earthy-terracottaSoft/50 flex items-center justify-center text-2xl active:scale-[0.94]"
                 >
                   {e}
                 </button>
@@ -236,7 +237,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                     setView('list')
                   }}
                   aria-label={`Colour ${hex}`}
-                  className="w-12 h-12 rounded-full border-[3px] border-white shadow-sm active:scale-[0.94]"
+                  className="w-12 h-12 rounded-full border-[3px] border-earthy-cream shadow-earthy-soft active:scale-[0.94]"
                   style={{ background: hex }}
                 />
               ))}
@@ -247,7 +248,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
         {view === 'preset' && (
           <div>
             {renderHeader('Apply a preset', true)}
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-earthy-cocoaSoft mb-3">
               Adds the preset's tasks to the list. Existing tasks with the same id are
               kept as-is. Cap of {MAX_ACTIVITIES} tasks is respected.
             </p>
@@ -257,14 +258,14 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                   key={key}
                   type="button"
                   onClick={() => applyPreset(key)}
-                  className="rounded-2xl p-3 bg-purple-50 hover:bg-purple-100 text-left active:scale-[0.99] transition-all"
+                  className="rounded-2xl p-3 bg-earthy-ivory border border-earthy-divider hover:border-earthy-terracotta text-left active:scale-[0.99] transition-all"
                 >
-                  <div className="font-bold mb-1.5 text-gray-800">{preset.label}</div>
+                  <div className="font-bold mb-1.5 text-earthy-cocoa">{preset.label}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {preset.activities.map((a) => (
                       <span
                         key={a.id}
-                        className="inline-flex items-center rounded-full px-2 py-1 text-xs font-bold text-gray-800"
+                        className="inline-flex items-center rounded-full px-2 py-1 text-xs font-bold text-earthy-cocoa"
                         style={{ background: a.color }}
                       >
                         <span className="mr-1 text-base leading-none">{a.emoji}</span>

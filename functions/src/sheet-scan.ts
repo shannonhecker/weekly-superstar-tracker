@@ -51,7 +51,10 @@ const FIDUCIAL_PROTOCOL = 'weeklysuperstar:'
 const FIDUCIAL_HOST = 'fiducial'
 const SHEET_HOST = 'sheet'
 
-const GRID_TOP_PADDING = 0.12
+// MUST match GRID_*_PCT in src/pages/PrintSheet.jsx — the print sheet
+// is the authoritative source (empirical visual layout); CV pipeline crops
+// each cell back out using these same percentages.
+const GRID_TOP_PADDING = 0.18
 const GRID_BOTTOM_PADDING = 0.04
 const GRID_LEFT_PADDING = 0.18
 const GRID_RIGHT_PADDING = 0.04

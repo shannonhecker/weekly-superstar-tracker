@@ -1,9 +1,10 @@
 import { doc, updateDoc, deleteField } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { PET_ASSET, PET_CHAINS, THEMES } from '../lib/themes'
+import { PET_ASSET, PET_CHAINS, THEMES, petAtStage } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
 import Modal from './Modal'
 import Egg from './Egg'
+import EmptyStateScene from './EmptyStateScene'
 
 const RARE_STICKERS = new Set(['🌈', '🦄', '🧚', '🪄', '🎆', '💎', '🎇', '🌠'])
 
@@ -88,25 +89,25 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
       <div className="max-h-[65vh] overflow-y-auto">
         {/* Treasures section — rare stickers + bonus stars from mystery boxes */}
         <div className="mb-4">
-          <div className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2">🎁 Mystery Treasures</div>
+          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🎁 Mystery Treasures</div>
           {rareEntries.length === 0 && bonusStars === 0 ? (
-            <p className="text-xs text-gray-500 font-bold py-2">
+            <p className="text-xs text-earthy-cocoaSoft font-bold py-2">
               Keep tapping stickers — mystery boxes appear once in a while!
             </p>
           ) : (
-            <div className="bg-amber-50 rounded-xl p-3">
+            <div className="bg-earthy-terracottaSoft/40 rounded-xl p-3">
               {rareEntries.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
                   {rareEntries.map(([emoji, count]) => (
-                    <div key={emoji} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-amber-200">
+                    <div key={emoji} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-earthy-cream border border-earthy-terracotta/40">
                       <span className="text-xl">{emoji}</span>
-                      <span className="text-xs font-bold text-amber-700">× {count}</span>
+                      <span className="text-xs font-bold text-earthy-terracotta">× {count}</span>
                     </div>
                   ))}
                 </div>
               )}
               {bonusStars > 0 && (
-                <div className="text-xs font-bold text-amber-700">
+                <div className="text-xs font-bold text-earthy-terracotta">
                   ⭐ Bonus stars earned: {bonusStars}
                 </div>
               )}
@@ -115,13 +116,13 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         </div>
 
         {/* Pet history section */}
-        <div className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2">🐾 Pet History</div>
+        <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🐾 Pet History</div>
 
         {/* Current week */}
         {currentPet && currentStage === 0 && (() => {
           const kidTheme = THEMES[kid?.theme] || THEMES.football
           return (
-            <div className="flex items-center gap-3 p-2 rounded-xl bg-purple-50 mb-2">
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-earthy-ivory border border-earthy-divider mb-2">
               <div className="w-12 h-12 shrink-0 flex items-center justify-center">
                 <Egg
                   themeKey={kid?.theme || 'football'}
@@ -133,35 +134,40 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-gray-700">This week</div>
-                <div className="text-xs text-gray-500 font-bold truncate">
+                <div className="font-bold text-earthy-cocoa">This week</div>
+                <div className="text-xs text-earthy-cocoaSoft font-bold truncate">
                   {currentEggName} — earn 50 stars to hatch!
                 </div>
               </div>
             </div>
           )
         })()}
-        {currentPet && currentStage > 0 && (() => {
-          const currentFav = isFavoriteEntry(currentWeekKey, currentPet)
+        {currentStage > 0 && (() => {
+          // Fallback to petAtStage so we still render a thumbnail when
+          // currentPet is briefly undefined during chain assignment.
+          const pet = currentPet || petAtStage(kid?.chainKey || 'cats', currentStage).emoji
+          const currentFav = isFavoriteEntry(currentWeekKey, pet)
           const currentSnapshot = {
-            emoji: currentPet,
+            emoji: pet,
             chainLabel: PET_CHAINS[currentChainKey]?.label || 'Pet',
             petName: kid?.petName || null,
             weekKey: currentWeekKey,
           }
           return (
-            <div className="flex items-center gap-3 p-2 rounded-xl bg-purple-50 mb-2">
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-earthy-ivory border border-earthy-divider mb-2">
               <img
-                src={animatedUrl(currentPet)}
+                src={animatedUrl(pet)}
                 alt=""
                 width={48}
                 height={48}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-gray-700">This week</div>
-                <div className="text-xs text-gray-500 font-bold truncate">
-                  {kid?.petName || `Your ${currentPet} is still growing!`}
+                <div className="font-bold text-earthy-cocoa">This week</div>
+                <div className="text-xs text-earthy-cocoaSoft font-bold truncate">
+                  {kid?.petName || `Your ${pet} is still growing!`}
                 </div>
               </div>
               <button
@@ -177,7 +183,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 <button
                   onClick={(e) => { e.stopPropagation(); onClose?.(); onRename(); }}
                   aria-label="Rename pet"
-                  className="shrink-0 px-2 py-1 rounded-lg text-xs font-bold text-purple-600 bg-white border border-purple-200"
+                  className="shrink-0 px-2 py-1 rounded-lg text-xs font-bold text-earthy-cocoa bg-earthy-cream border border-earthy-divider"
                 >
                   ✏️ Rename
                 </button>
@@ -187,9 +193,12 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         })()}
 
         {entries.length === 0 && (
-          <p className="text-xs text-gray-500 font-bold py-2">
-            No past weeks yet.
-          </p>
+          <div className="rounded-2xl overflow-hidden bg-earthy-ivory ring-1 ring-earthy-divider mb-2">
+            <EmptyStateScene variant="no-weeks" />
+            <p className="text-xs text-earthy-cocoaSoft font-bold text-center py-3">
+              No past weeks yet — finish this week to start your collection.
+            </p>
+          </div>
         )}
 
         {entries.map(([weekKey, archive]) => {
@@ -213,17 +222,17 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               onClick={canOpen ? openRecap : undefined}
               onKeyDown={canOpen ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRecap() } } : undefined}
               aria-label={canOpen ? `Open ${formatWeekKey(weekKey)} recap` : undefined}
-              className={`flex items-center gap-3 p-2 rounded-xl ${canOpen ? 'hover:bg-gray-50 active:scale-[0.99] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-300' : 'hover:bg-gray-50'}`}
+              className={`flex items-center gap-3 p-2 rounded-xl ${canOpen ? 'hover:bg-earthy-cream active:scale-[0.99] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta' : 'hover:bg-earthy-cream'}`}
               style={isFav ? { background: '#FEF3C7' } : undefined}
             >
               {pet ? (
-                <img src={animatedUrl(pet)} alt="" width={48} height={48} onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                <img src={animatedUrl(pet)} alt="" width={48} height={48} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none' }} />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl">🥚</div>
+                <div className="w-12 h-12 rounded-full bg-earthy-divider flex items-center justify-center text-xl">🥚</div>
               )}
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-gray-700 truncate">{formatWeekKey(weekKey)}</div>
-                <div className="text-[11px] text-gray-500 font-bold truncate">
+                <div className="font-bold text-sm text-earthy-cocoa truncate">{formatWeekKey(weekKey)}</div>
+                <div className="text-[11px] text-earthy-cocoaSoft font-bold truncate">
                   {name ? `${name} · ` : ''}{stars} stars
                 </div>
               </div>
@@ -239,7 +248,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               <button
                 onClick={(e) => { e.stopPropagation(); deleteEntry(weekKey) }}
                 aria-label="Delete history entry"
-                className="shrink-0 text-gray-500 hover:text-red-400 text-lg px-2"
+                className="shrink-0 text-earthy-cocoaSoft hover:text-red-400 text-lg px-2"
               >
                 🗑
               </button>
@@ -249,7 +258,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
       </div>
       <button
         onClick={onClose}
-        className="w-full mt-4 py-2 rounded-xl text-gray-500 font-bold text-sm"
+        className="w-full mt-4 py-2 rounded-xl text-earthy-cocoaSoft font-bold text-sm"
       >
         Close
       </button>

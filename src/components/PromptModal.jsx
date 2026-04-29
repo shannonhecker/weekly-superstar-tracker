@@ -10,6 +10,7 @@ export default function PromptModal({
   onSubmit,
   title,
   emoji,
+  emojiClassName,
   fields = [],
   submitLabel = 'Save',
   cancelLabel = 'Cancel',
@@ -30,12 +31,12 @@ export default function PromptModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={title} emoji={emoji}>
+    <Modal open={open} onClose={onClose} title={title} emoji={emoji} emojiClassName={emojiClassName}>
       <form onSubmit={submit}>
         {fields.map((f, idx) => (
           <div key={f.name} className={idx > 0 ? 'mt-3' : ''}>
             {f.label && (
-              <label className="text-xs font-bold text-gray-500 mb-1 block">{f.label}</label>
+              <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 block uppercase tracking-wide">{f.label}</label>
             )}
             <input
               autoFocus={idx === 0}
@@ -44,20 +45,21 @@ export default function PromptModal({
               onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
               placeholder={f.placeholder}
               inputMode={f.type === 'number' ? 'numeric' : undefined}
-              className="w-full px-3 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none text-base font-bold"
+              className="w-full px-3 py-3 rounded-xl border-2 border-earthy-divider bg-earthy-ivory focus:border-earthy-terracotta focus:outline-none text-base font-bold text-earthy-cocoa"
             />
           </div>
         ))}
         <button
           type="submit"
-          className="w-full mt-4 py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-green-400 to-purple-500"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           {submitLabel}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="w-full mt-2 py-2 rounded-xl text-gray-500 font-bold text-sm"
+          className="w-full mt-2 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
         >
           {cancelLabel}
         </button>

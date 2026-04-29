@@ -18,7 +18,7 @@ function fluentUrl(emoji) {
  */
 export function KidAvatar({ kid, size = 48, borderColor }) {
   const theme = THEMES[kid?.theme || 'football'] || THEMES.football
-  const bg = `${theme.accent}33`
+  const bg = `${theme.accent}38`
   const [photoFailed, setPhotoFailed] = useState(false)
   const [presetFailed, setPresetFailed] = useState(false)
 
@@ -26,15 +26,26 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
     width: size,
     height: size,
     borderRadius: size / 2,
-    backgroundColor: bg,
+    backgroundColor: '#FFFDF7',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 3,
     borderStyle: 'solid',
-    borderColor: borderColor ?? 'transparent',
+    borderColor: borderColor ?? '#F0E1C8',
     flexShrink: 0,
+    boxShadow: '0 6px 16px rgba(90, 58, 46, 0.10)',
+  }
+
+  const stickerStyle = {
+    width: size * 0.78,
+    height: size * 0.78,
+    borderRadius: size * 0.39,
+    backgroundColor: bg,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 
   if (kid?.avatarKind === 'photo' && kid.avatarUrl && !photoFailed) {
@@ -55,25 +66,31 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
     if (url && !presetFailed) {
       return (
         <div style={containerStyle}>
-          <img
-            src={url}
-            alt=""
-            style={{ width: size * 0.75, height: size * 0.75 }}
-            onError={() => setPresetFailed(true)}
-          />
+          <div style={stickerStyle}>
+            <img
+              src={url}
+              alt=""
+              style={{ width: size * 0.66, height: size * 0.66 }}
+              onError={() => setPresetFailed(true)}
+            />
+          </div>
         </div>
       )
     }
     return (
       <div style={containerStyle}>
-        <span style={{ fontSize: size * 0.55 }}>{kid.avatarEmoji}</span>
+        <div style={stickerStyle}>
+          <span style={{ fontSize: size * 0.5 }}>{kid.avatarEmoji}</span>
+        </div>
       </div>
     )
   }
 
   return (
     <div style={containerStyle}>
-      <span style={{ fontSize: size * 0.55 }}>{theme.emoji}</span>
+      <div style={stickerStyle}>
+        <span style={{ fontSize: size * 0.5 }}>{theme.emoji}</span>
+      </div>
     </div>
   )
 }

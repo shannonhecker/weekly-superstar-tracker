@@ -18,31 +18,32 @@ export default function ShareModal({ open, onClose, shareCode }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-5"
+      className="fixed inset-0 z-50 bg-white/80 backdrop-blur-md flex items-center justify-center px-5 fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl"
+        className="bg-white rounded-3xl p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta"
       >
         <div className="text-center mb-4">
           <div className="text-4xl mb-2">🔗</div>
-          <h2 className="text-lg font-black font-display">Invite family with this link</h2>
+          <h2 className="text-lg font-extrabold text-earthy-cocoa">Invite family with this link</h2>
         </div>
-        <div className="bg-purple-50 rounded-xl p-3 text-sm font-bold text-purple-700 break-all mb-3">
+        <div className="bg-earthy-ivory border border-earthy-divider rounded-xl p-3 text-sm font-bold text-earthy-cocoa break-all mb-3">
           {url}
         </div>
         <button
           onClick={copy}
-          className="w-full py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-green-400 to-purple-500"
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
         >
           {copied ? 'Copied!' : 'Copy link'}
         </button>
-        <p className="text-center text-xs text-gray-500 mt-3 font-bold">
+        <p className="text-center text-xs text-earthy-cocoaSoft mt-3 font-bold">
           Code: {shareCode}
         </p>
         <button
           onClick={onClose}
-          className="w-full mt-2 py-2 rounded-xl text-gray-500 font-bold text-sm"
+          className="w-full mt-2 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
         >
           Close
         </button>
