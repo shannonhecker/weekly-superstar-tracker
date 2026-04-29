@@ -87,8 +87,14 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         avatarEmoji: null,
       })
       if (kid.avatarKind === 'photo') {
-        // best-effort cleanup of the storage object — failure is non-blocking
-        deleteKidAvatar({ boardId, kidId: kid.id }).catch(() => {})
+        // Best-effort cleanup of the orphaned storage object. Failure
+        // is non-blocking — the Firestore record already points away
+        // from the photo, so the UX is unaffected; the worst case is
+        // a stale jpeg sitting in Storage.
+        deleteKidAvatar({ boardId, kidId: kid.id }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[KidEditModal] deleteKidAvatar cleanup failed', err)
+        })
       }
       setEmojiPickerOpen(false)
     } catch { toast.error('Could not reset avatar') }

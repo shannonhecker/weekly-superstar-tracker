@@ -3,6 +3,7 @@ import { db } from '../lib/firebase'
 import { PET_CHAINS, THEMES, petAtStage, animatedFluentUrl } from '../lib/themes'
 import { getWeekKey, formatWeekKey } from '../lib/week'
 import { RARE_STICKERS } from '../lib/stickers'
+import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
 import Egg from './Egg'
 import EmptyStateScene from './EmptyStateScene'
@@ -24,6 +25,7 @@ function totalBonusStars(kid) {
 }
 
 export default function PetGallery({ open, onClose, kid, currentPet, currentChainKey, currentStage = 0, currentEggName = 'Mystery Egg', boardId, onRename, onOpenSummary }) {
+  const toast = useToast()
   const history = kid?.weekHistory || {}
   const favorite = kid?.favoritePet || null
   const isFavoriteEntry = (weekKey, emoji) =>
@@ -47,7 +49,11 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
       await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
         [`weekHistory.${weekKey}`]: deleteField(),
       })
-    } catch {}
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[PetGallery] deleteEntry failed', err)
+      toast.error('Could not remove that week — try again')
+    }
   }
 
   const toggleFavorite = async (snapshot) => {
@@ -60,7 +66,11 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
       await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
         favoritePet: same ? null : snapshot,
       })
-    } catch {}
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[PetGallery] toggleFavorite failed', err)
+      toast.error('Could not update favourite — try again')
+    }
   }
 
   return (

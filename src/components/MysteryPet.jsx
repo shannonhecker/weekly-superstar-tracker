@@ -162,7 +162,14 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
     setModalOpen(false)
     try {
       await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), { petNameDeclined: true })
-    } catch {}
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[MysteryPet] dismissModal — petNameDeclined write failed', err)
+      // Intentionally no toast: dismissing is a low-stakes UI action and
+      // failing to persist the "declined" flag just means the modal
+      // will re-fire later. Bothering the user with a toast would be
+      // worse than the silent retry.
+    }
   }
 
   const openGallery = () => setGalleryOpen(true)
