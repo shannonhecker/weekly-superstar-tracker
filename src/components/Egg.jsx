@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PET_ASSET } from '../lib/themes'
+import { PET_ASSET, animatedFluentUrl } from '../lib/themes'
 
 // Per-theme egg pattern (stage 0 only). Matches the original themed SVG egg design.
 const EGG_PATTERNS = {
@@ -132,12 +132,6 @@ function progressToStage(stars, goal) {
   if (pct >= 2 / 6) return 2
   if (pct >= 1 / 6) return 1
   return 0
-}
-
-function animatedFluentUrl(emoji) {
-  const asset = PET_ASSET[emoji]
-  if (!asset) return null
-  return `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${encodeURIComponent(asset[0])}/${encodeURIComponent(asset[1])}.png`
 }
 
 function emotionUrl(stage) {
