@@ -46,7 +46,7 @@ export default function Join() {
   }, [loading, user, code, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
+    <main id="main" className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
       <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full overflow-hidden">
         <div className="bg-earthy-ivory">
           <EmptyStateScene variant="joining" />
@@ -60,6 +60,6 @@ export default function Join() {
               </>}
         </div>
       </div>
-    </div>
+    </main>
   )
 }

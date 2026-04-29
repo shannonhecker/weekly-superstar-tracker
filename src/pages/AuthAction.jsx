@@ -353,7 +353,7 @@ function RecoverEmail({ oobCode }) {
 
 function PageShell({ children }) {
   return (
-    <div className="min-h-screen bg-earthy-cream flex flex-col items-center px-5 py-10">
+    <main id="main" className="min-h-screen bg-earthy-cream flex flex-col items-center px-5 py-10">
       <div className="flex items-center gap-2 mb-7">
         <Logo size={28} />
         <span className="font-display font-black text-earthy-cocoa text-base tracking-tight">
@@ -363,7 +363,7 @@ function PageShell({ children }) {
       <div className="flex-1 flex items-center justify-center w-full">
         {children}
       </div>
-    </div>
+    </main>
   )
 }
 

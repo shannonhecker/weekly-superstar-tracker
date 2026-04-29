@@ -29,7 +29,7 @@ export default function Landing() {
   if (user && boardId) return <Navigate to={`/board/${boardId}`} replace />
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory">
+    <main id="main" className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory">
       <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center font-jakarta overflow-hidden">
         <div className="w-[82%] mx-auto mt-6 mb-2">
           <ThemeCardArt themeKey="animals" />
@@ -64,6 +64,6 @@ export default function Landing() {
         </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

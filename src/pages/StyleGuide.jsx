@@ -150,7 +150,7 @@ export default function StyleGuide() {
         </div>
       </header>
 
-      <main className="px-6 sm:px-12 py-10 max-w-5xl mx-auto">
+      <main id="main" className="px-6 sm:px-12 py-10 max-w-5xl mx-auto">
         <Section title="Palette" description="Earthy primary palette. WCAG AA verified for the documented pairings.">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {earthyPalette.map((s) => (
