@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
+import PrimaryButton from '../components/PrimaryButton'
 
 // Migrated to the earthy palette to match SignIn / SignUp / AuthAction.
 // The legacy purple/grey treatment was the only auth screen still on
@@ -67,13 +68,9 @@ export default function ForgotPassword() {
               If we have an account for <span className="text-earthy-cocoa">{email.trim()}</span>,
               the reset link is on its way. Follow it to set a new password.
             </p>
-            <button
-              type="button"
-              onClick={() => navigate('/signin', { replace: true })}
-              className="w-full py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 transition-all"
-            >
+            <PrimaryButton onClick={() => navigate('/signin', { replace: true })}>
               Back to sign in
-            </button>
+            </PrimaryButton>
             <p className="text-center mt-4 text-xs text-earthy-cocoaSoft font-bold">
               Didn't get it? Check spam, or{' '}
               <button
@@ -118,13 +115,9 @@ export default function ForgotPassword() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 transition-all"
-            >
+            <PrimaryButton type="submit" disabled={loading} className="mt-4">
               {loading ? 'Sending…' : 'Send reset link'}
-            </button>
+            </PrimaryButton>
 
             <p className="text-center mt-4 text-sm text-earthy-cocoaSoft">
               Remembered it?{' '}
