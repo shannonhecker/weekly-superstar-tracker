@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import {
   PET_CHAINS,
+  PET_ASSET,
+  KID_AVATARS,
+  ACTIVE_CHAIN_KEYS,
   petAtStage,
   progressToStage,
   stageToChainIdx,
+  animatedFluentUrl,
   HATCH_GOAL,
 } from './themes'
 
@@ -119,5 +123,52 @@ describe('PET_CHAINS data integrity', () => {
         expect(typeof emoji).toBe('string')
       }
     }
+  })
+})
+
+// PET_ASSET coverage — these tests exist because shared#7 claimed to add
+// ⭐ and ✨ to PET_ASSET but the squash-merge dropped them, which silently
+// turned Nathan's favourite-pet overlay (and PetGallery thumbnail) into
+// empty boxes via the animatedFluentUrl null path. shared#10 restored
+// the entries on 2026-04-29; these assertions guard the contract so the
+// next squash-drop or chain addition fails CI instead of production.
+describe('PET_ASSET coverage', () => {
+  it('every active-chain stage emoji has a PET_ASSET entry', () => {
+    const missing = []
+    for (const chainKey of ACTIVE_CHAIN_KEYS) {
+      const chain = PET_CHAINS[chainKey]
+      if (!chain) continue
+      for (const emoji of chain.stages) {
+        if (!PET_ASSET[emoji]) missing.push(`${chainKey}: ${emoji}`)
+      }
+    }
+    expect(missing, 'unmapped chain-stage emojis (would render as empty box)').toEqual([])
+  })
+
+  it('every KID_AVATAR emoji has a PET_ASSET entry', () => {
+    const missing = (KID_AVATARS || []).filter((emoji) => !PET_ASSET[emoji])
+    expect(missing, 'unmapped kid-avatar emojis (would fall back to plain text)').toEqual([])
+  })
+
+  it('animatedFluentUrl returns a non-null URL for every active-chain stage', () => {
+    const broken = []
+    for (const chainKey of ACTIVE_CHAIN_KEYS) {
+      const chain = PET_CHAINS[chainKey]
+      if (!chain) continue
+      for (const emoji of chain.stages) {
+        const url = animatedFluentUrl(emoji)
+        if (!url) broken.push(`${chainKey}: ${emoji}`)
+      }
+    }
+    expect(broken, 'animatedFluentUrl returned null — BannerPet + PetGallery would render empty').toEqual([])
+  })
+
+  it('explicit regression guard: the stars chain (⭐ 🌟 ✨ 💫) is fully mapped', () => {
+    // Pin the exact emoji set from the bug report so a future "modernise
+    // the stars chain" PR notices if it removes one of these entries.
+    expect(PET_ASSET['⭐']).toBeDefined()
+    expect(PET_ASSET['🌟']).toBeDefined()
+    expect(PET_ASSET['✨']).toBeDefined()
+    expect(PET_ASSET['💫']).toBeDefined()
   })
 })
