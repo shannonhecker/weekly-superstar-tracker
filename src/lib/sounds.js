@@ -18,6 +18,9 @@ export function isMuted() {
 }
 
 export function setMuted(val) {
+  // localStorage can throw in private mode / quota-full — losing the mute
+  // preference is harmless (the toggle still mutes for this session), so
+  // swallow silently.
   try { localStorage.setItem(MUTE_KEY, val ? '1' : '0') } catch {}
 }
 

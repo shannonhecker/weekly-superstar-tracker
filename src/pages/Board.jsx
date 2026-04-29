@@ -199,12 +199,18 @@ export default function Board() {
             weekKey: rolloverFields.weekKey,
           },
         })
-        updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), rolloverFields).catch(() => {})
+        updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), rolloverFields).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[Board] rollover write failed (kid', kid.id + ')', err)
+        })
       } else {
         updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), {
           chainKey: picked,
           weekKey: thisWeekKey,
-        }).catch(() => {})
+        }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[Board] chain/week update failed (kid', kid.id + ')', err)
+        })
       }
     }
   }, [loading, kids, thisWeekKey, boardId])
@@ -226,6 +232,9 @@ export default function Board() {
     if (!mostRecent) return
     const storageKey = `summary-shown-${boardId}-${activeKid.id}`
     let alreadyShown = null
+    // localStorage can throw in private mode / quota-full — losing the
+    // "summary already shown" flag is harmless (worst case: the recap
+    // shows once more on the next visit), so swallow silently.
     try { alreadyShown = localStorage.getItem(storageKey) } catch {}
     if (alreadyShown === mostRecent) return
     setSummary({ kid: activeKid, archive: history[mostRecent], weekKey: mostRecent })
@@ -234,6 +243,7 @@ export default function Board() {
   const dismissSummary = () => {
     // Only record "already-shown" for the auto-fired recap (not replays).
     if (summary && !summary.replay && summary.kid && summary.weekKey) {
+      // Same fire-and-forget rationale as the corresponding getItem above.
       try {
         localStorage.setItem(`summary-shown-${boardId}-${summary.kid.id}`, summary.weekKey)
       } catch {}
