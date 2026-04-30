@@ -18,6 +18,7 @@ import RewardGoal from '../components/RewardGoal'
 import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
+import Modal from '../components/Modal'
 import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
@@ -75,6 +76,7 @@ export default function Board() {
   const [editKidOpen, setEditKidOpen] = useState(false)
   const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [signOutOpen, setSignOutOpen] = useState(false)
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { kid, archive, weekKey } or null
@@ -345,9 +347,9 @@ export default function Board() {
                     <span>{muted ? '🔇' : '🔊'}</span>
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
                   </button>
-                  {user && !user.isAnonymous && (
+                  {user && (
                     <button
-                      onClick={() => { setMenuOpen(false); onSignOut() }}
+                      onClick={() => { setMenuOpen(false); setSignOutOpen(true) }}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>↩︎</span>
@@ -494,6 +496,26 @@ export default function Board() {
         replay={!!summary?.replay}
         onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
       />
+
+      <Modal open={signOutOpen} onClose={() => setSignOutOpen(false)} emoji="↩︎" title="Sign out of Winking Star?">
+        <div className="flex flex-col gap-2 mt-2">
+          <button
+            type="button"
+            onClick={async () => { setSignOutOpen(false); await onSignOut() }}
+            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          >
+            Sign out
+          </button>
+          <button
+            type="button"
+            onClick={() => setSignOutOpen(false)}
+            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
 
       <p className="text-center text-earthy-cocoaSoft text-[12px] mt-6 font-semibold">
         💡 Tap a sticker square to mark it. Switch kids with the avatars above.
