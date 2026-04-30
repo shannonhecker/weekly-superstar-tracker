@@ -1,78 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
+  EmailAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
+  linkWithCredential,
+  linkWithPopup,
   signInWithPopup,
 } from 'firebase/auth'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
-import { findUserBoards } from '../lib/boards'
-import { auth, db } from '../lib/firebase'
-import { generateShareCode } from '../lib/codes'
+import { createBoardForNewUser, findUserBoards } from '../lib/boards'
+import { auth } from '../lib/firebase'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
-import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import PrimaryButton from '../components/PrimaryButton'
-import { getWeekKey } from '../lib/week'
 import HeroStar from '../components/HeroStar'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
 // generous breathing room, and one decision per screen. Step state is local —
 // no extra routes — so back/next preserves selections without re-mounting.
+//
+// `?upgrade=1` short-circuits the wizard: the user is already an anonymous
+// guest with a seeded board (from /try), so we skip theme + kid name and
+// jump straight to the credentials screen, then call linkWithCredential /
+// linkWithPopup to convert the anonymous account in place — UID and
+// memberIds are preserved.
 const TOTAL_STEPS = 4
-
-// Shared by every auth path on this page (email/password + Apple + Google).
-// The board+kid Firestore writes are identical regardless of how the user
-// authed — only the credential source changes. Keeping this in one place
-// means tweaks to the default kid shape can't drift between code paths.
-export async function createBoardForNewUser(user, { theme, kidName, birthday }) {
-  const trimmedKid = (kidName || '').trim()
-  // Display name falls back to the kid's name so the board feels personal even
-  // if we never collected an explicit parent name (we don't, in Direction B).
-  // Skip the update if Firebase already has a displayName from OAuth.
-  if (trimmedKid && !user.displayName) {
-    try { await updateProfile(user, { displayName: trimmedKid }) } catch { /* non-fatal */ }
-  }
-
-  const board = await addDoc(collection(db, 'boards'), {
-    name: trimmedKid ? `${trimmedKid}'s board` : 'Our Family',
-    adminId: user.uid,
-    memberIds: [user.uid],
-    shareCode: generateShareCode(),
-    createdAt: serverTimestamp(),
-  })
-
-  // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
-  await addDoc(collection(db, 'boards', board.id, 'kids'), {
-    name: trimmedKid || 'Superstar',
-    theme: theme || Object.keys(THEMES)[0],
-    order: 0,
-    birthday: birthday || null,
-    activities: DEFAULT_ACTIVITIES,
-    checks: {},
-    stickers: {},
-    badges: [],
-    petName: null,
-    reward: null,
-    weekKey: getWeekKey(),
-    weekHistory: {},
-    chainKey: null,
-    favoritePet: null,
-    createdAt: serverTimestamp(),
-  })
-
-  return board.id
-}
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isUpgrade = searchParams.get('upgrade') === '1'
 
-  const [step, setStep] = useState(1)
+  // Upgrade flow skips the wizard — the guest already has a seeded board
+  // from /try, so theme + kid name are already chosen. Drop straight to
+  // step 4 (the credentials screen).
+  const [step, setStep] = useState(isUpgrade ? TOTAL_STEPS : 1)
   // Track previous step so we know whether to slide forwards or backwards.
   const [direction, setDirection] = useState('forward')
-  const prevStepRef = useRef(1)
+  const prevStepRef = useRef(isUpgrade ? TOTAL_STEPS : 1)
 
   // Onboarding answers — preserved across step navigation.
   const [theme, setTheme] = useState(null)
@@ -100,6 +66,15 @@ export default function SignUp() {
     setError('')
     setLoading(true)
     try {
+      // Upgrade path: anonymous guest converting to email/password. Preserves
+      // UID + memberIds + the demo board they already seeded at /try.
+      if (isUpgrade && auth.currentUser?.isAnonymous) {
+        const credential = EmailAuthProvider.credential(email.trim(), password)
+        const linked = await linkWithCredential(auth.currentUser, credential)
+        const existing = await findUserBoards(linked.user.uid)
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
       navigate(`/board/${boardId}`, { replace: true })
@@ -122,6 +97,15 @@ export default function SignUp() {
     setError('')
     setLoading(true)
     try {
+      // Upgrade path: link the OAuth provider to the existing anonymous user
+      // so the UID survives. Skip the duplicate-board guard — by definition
+      // we already have a board (the demo seeded at /try).
+      if (isUpgrade && auth.currentUser?.isAnonymous) {
+        const linked = await linkWithPopup(auth.currentUser, provider)
+        const existing = await findUserBoards(linked.user.uid)
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
       const cred = await signInWithPopup(auth, provider)
       // Existing-user guard: if Firestore has any board where this user is a
       // member (admin or family member), route to their original — earliest
@@ -178,22 +162,26 @@ export default function SignUp() {
         }
       `}</style>
 
-      {/* Top bar — back link (steps 2-4) + step counter on the right for orientation. */}
-      <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
-        {step > 1 ? (
-          <button
-            type="button"
-            onClick={goBack}
-            className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
-            aria-label="Go to previous step"
-          >
-            <span aria-hidden="true">←</span> Back
-          </button>
-        ) : <span />}
-        <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
-          {step} / {TOTAL_STEPS}
-        </span>
-      </div>
+      {/* Top bar — back link (steps 2-4) + step counter on the right for orientation.
+          Hidden in upgrade mode: there's no wizard to step back through and the
+          "4/4" counter would be confusing for a one-screen flow. */}
+      {!isUpgrade && (
+        <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={goBack}
+              className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
+              aria-label="Go to previous step"
+            >
+              <span aria-hidden="true">←</span> Back
+            </button>
+          ) : <span />}
+          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
+            {step} / {TOTAL_STEPS}
+          </span>
+        </div>
+      )}
 
       <div className="flex-1 flex items-center justify-center w-full">
         <div key={step} className={`w-full max-w-lg ${enterClasses}`}>
@@ -226,6 +214,7 @@ export default function SignUp() {
               onSubmit={onCreate}
               onApple={onApple}
               onGoogle={onGoogle}
+              isUpgrade={isUpgrade}
             />
           )}
         </div>
@@ -420,14 +409,17 @@ function StepAccount({
   onSubmit,
   onApple,
   onGoogle,
+  isUpgrade,
 }) {
   return (
     <form onSubmit={onSubmit} className="pt-2">
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        One last step.
+        {isUpgrade ? 'Save your board.' : 'One last step.'}
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        Create your account so we can save their board.
+        {isUpgrade
+          ? 'Add an email so you can come back to it from any device.'
+          : 'Create your account so we can save their board.'}
       </p>
 
       <label htmlFor="signup-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
