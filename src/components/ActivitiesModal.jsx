@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, writeBatch } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { ACTIVITY_COLORS, ACTIVITY_EMOJIS, ACTIVITY_PRESETS } from '../lib/themes'
+import { mirrorActivitiesForKid } from '../lib/activities-mirror'
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
 import ActivityRow from './ActivityRow'
@@ -30,7 +31,7 @@ function pickRandomColor(existingColors) {
 // emoji, colour, preset) toggled inside a single Modal — no nested modals.
 // Same merge-by-id preset semantics: existing customised activities win,
 // new ids append, 10-cap respected.
-export default function ActivitiesModal({ open, onClose, kid, boardId }) {
+export default function ActivitiesModal({ open, onClose, kid, boardId, kids }) {
   const toast = useToast()
   const [view, setView] = useState('list')
   const [editingId, setEditingId] = useState(null)
@@ -50,12 +51,22 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
 
   if (!kid) return null
 
-  const ref = doc(db, 'boards', boardId, 'kids', kid.id)
-
+  // Activity edits fan out to every kid on the board so the task list stays
+  // in sync across siblings. The source kid (the one being edited) gets the
+  // new array verbatim; every other kid is mirrored — labels matching keep
+  // their existing IDs so star checks survive (`checks` are keyed by
+  // `${activityId}-${day}`). One atomic Firestore batch.
   const persist = async (next) => {
     setBusy(true)
     try {
-      await updateDoc(ref, { activities: next })
+      const batch = writeBatch(db)
+      const allKids = Array.isArray(kids) && kids.length > 0 ? kids : [kid]
+      for (const k of allKids) {
+        const ref = doc(db, 'boards', boardId, 'kids', k.id)
+        const arr = k.id === kid.id ? next : mirrorActivitiesForKid(k.activities, next)
+        batch.update(ref, { activities: arr })
+      }
+      await batch.commit()
     } catch {
       toast.error('Could not save tasks — try again')
     } finally {
