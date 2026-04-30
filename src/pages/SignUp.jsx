@@ -12,6 +12,8 @@ import {
 } from 'firebase/auth'
 import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { auth } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
+import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import PrimaryButton from '../components/PrimaryButton'
 import HeroStar from '../components/HeroStar'
@@ -34,9 +36,31 @@ const TOTAL_STEPS = 4
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const [searchParams] = useSearchParams()
   const isUpgrade = searchParams.get('upgrade') === '1'
   const isGuest = searchParams.get('guest') === '1' && !isUpgrade
+
+  // ?upgrade=1 only makes sense for anonymous guests. If a fully signed-in
+  // user lands here (e.g., bookmark, stale link), route them to their
+  // existing board. If a signed-out user lands here (anonymous session
+  // expired or never existed), drop them onto the regular wizard so they
+  // pick theme + kid name properly instead of a default-named board.
+  useEffect(() => {
+    if (!isUpgrade || authLoading) return
+    let cancelled = false
+    if (user && !user.isAnonymous) {
+      ;(async () => {
+        const existing = await findUserBoards(user.uid)
+        if (cancelled) return
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+      })()
+      return () => { cancelled = true }
+    }
+    if (!user) {
+      navigate('/signup', { replace: true })
+    }
+  }, [isUpgrade, authLoading, user, navigate])
 
   // Upgrade flow skips the wizard — the guest already has a seeded board
   // from /try, so theme + kid name are already chosen. Drop straight to
@@ -78,6 +102,7 @@ export default function SignUp() {
         const credential = EmailAuthProvider.credential(email.trim(), password)
         const linked = await linkWithCredential(auth.currentUser, credential)
         const existing = await findUserBoards(linked.user.uid)
+        flagUpgradeSuccess()
         navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
         return
       }
@@ -85,7 +110,7 @@ export default function SignUp() {
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
-      setError(formatAuthError(err))
+      setError(friendlyAuthError(err, isUpgrade))
     } finally {
       setLoading(false)
     }
@@ -109,6 +134,7 @@ export default function SignUp() {
       if (isUpgrade && auth.currentUser?.isAnonymous) {
         const linked = await linkWithPopup(auth.currentUser, provider)
         const existing = await findUserBoards(linked.user.uid)
+        flagUpgradeSuccess()
         navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
         return
       }
@@ -127,7 +153,7 @@ export default function SignUp() {
     } catch (err) {
       // Treat duplicate popup-request as a no-op — the user just clicked twice
       // before the first popup resolved. No banner, just clear the spinner.
-      if (!isSilentAuthError(err)) setError(formatAuthError(err))
+      if (!isSilentAuthError(err)) setError(friendlyAuthError(err, isUpgrade))
     } finally {
       setLoading(false)
     }
@@ -140,6 +166,18 @@ export default function SignUp() {
     onOAuth(provider)
   }
   const onGoogle = () => onOAuth(new GoogleAuthProvider())
+
+  // Surface a friendlier message in upgrade mode when the parent's email
+  // (or Google/Apple account) is already a Winking Star user. The "Use
+  // existing account" link below the form is the action — this just tells
+  // them why their input bounced.
+  function friendlyAuthError(err, upgrading) {
+    const code = err?.code
+    if (upgrading && (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use')) {
+      return 'This email is already a Winking Star account. Use it below ↓'
+    }
+    return formatAuthError(err)
+  }
 
   // Guest path: signInAnonymously + seed a board using the wizard answers.
   // Same kid/board shape as a real signup — only the credential is anonymous.
@@ -270,13 +308,28 @@ export default function SignUp() {
       </div>
 
       {/* Sign-in escape hatch lives outside the per-step container so it's
-          always reachable — first-time visitors with an existing account
-          shouldn't have to walk through 4 screens to find it. */}
+          always reachable. In upgrade mode the framing is different: the
+          parent isn't a brand-new visitor, they're an anon guest who may
+          already have a Winking Star account elsewhere. Clicking the link
+          will throw away their demo board, so we say so plainly. */}
       <p className="w-full max-w-lg mx-auto text-center text-sm text-earthy-cocoaSoft mt-6">
-        Already have an account?{' '}
-        <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
-          Sign in
-        </Link>
+        {isUpgrade ? (
+          <>
+            Already a member?{' '}
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+              Use your existing account →
+            </Link>
+            <br />
+            <span className="text-xs">(your demo won't transfer)</span>
+          </>
+        ) : (
+          <>
+            Already have an account?{' '}
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+              Sign in
+            </Link>
+          </>
+        )}
       </p>
     </main>
   )

@@ -19,6 +19,8 @@ import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
 import Modal from '../components/Modal'
+import { useToast } from '../contexts/ToastContext'
+import { consumeUpgradeFlag } from '../lib/upgrade-flag'
 import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
@@ -77,6 +79,19 @@ export default function Board() {
   const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
+  const [shareGateOpen, setShareGateOpen] = useState(false)
+  const toast = useToast()
+  const isAnonymous = !!user?.isAnonymous
+
+  // Show a one-shot success toast on the first Board render after a
+  // successful guest-to-account upgrade. Flag is set in SignUp's upgrade
+  // branches (linkWithCredential / linkWithPopup) and consumed exactly once
+  // here. Empty deps — runs at mount only.
+  useEffect(() => {
+    if (consumeUpgradeFlag()) {
+      toast.success('Your board is saved.')
+    }
+  }, [toast])
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { kid, archive, weekKey } or null
@@ -288,8 +303,18 @@ export default function Board() {
           </span>
         </h1>
         <div className="flex gap-1.5 sm:gap-2 shrink-0 items-center">
+          {isAnonymous && (
+            <Link
+              to="/signup?upgrade=1"
+              aria-label="Save your board"
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="px-3 sm:px-4 py-1.5 rounded-pill text-xs font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
+            >
+              💾<span className="hidden sm:inline"> Save your board</span>
+            </Link>
+          )}
           <button
-            onClick={() => setShareOpen(true)}
+            onClick={() => isAnonymous ? setShareGateOpen(true) : setShareOpen(true)}
             aria-label="Share"
             className="px-3 sm:px-4 py-1.5 rounded-pill bg-earthy-cream border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:border-earthy-cocoaSoft active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
           >
@@ -499,17 +524,57 @@ export default function Board() {
 
       <Modal open={signOutOpen} onClose={() => setSignOutOpen(false)} emoji="↩︎" title="Sign out of Winking Star?">
         <div className="flex flex-col gap-2 mt-2">
+          {isAnonymous && (
+            <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
+              Your demo board will be discarded.
+            </p>
+          )}
+          {isAnonymous && (
+            <Link
+              to="/signup?upgrade=1"
+              onClick={() => setSignOutOpen(false)}
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+            >
+              Save with email
+            </Link>
+          )}
           <button
             type="button"
             onClick={async () => { setSignOutOpen(false); await onSignOut() }}
-            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-            className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+            style={isAnonymous
+              ? { color: '#8A3A2E', backgroundColor: '#F8E5DF' }
+              : { color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all"
           >
-            Sign out
+            {isAnonymous ? 'Sign out and discard' : 'Sign out'}
           </button>
           <button
             type="button"
             onClick={() => setSignOutOpen(false)}
+            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal open={shareGateOpen} onClose={() => setShareGateOpen(false)} emoji="🔗" title="Share with your family">
+        <div className="flex flex-col gap-2 mt-2">
+          <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
+            Save your board first so the link still works when your family opens it.
+          </p>
+          <Link
+            to="/signup?upgrade=1"
+            onClick={() => setShareGateOpen(false)}
+            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+          >
+            Save with email
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShareGateOpen(false)}
             className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
           >
             Cancel
