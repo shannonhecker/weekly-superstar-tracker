@@ -303,23 +303,6 @@ export default function Board() {
           </span>
         </h1>
         <div className="flex gap-1.5 sm:gap-2 shrink-0 items-center">
-          {isAnonymous && (
-            <Link
-              to="/signup?upgrade=1"
-              aria-label="Save your board"
-              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="px-3 sm:px-4 py-1.5 rounded-pill text-xs font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
-            >
-              💾<span className="hidden sm:inline"> Save your board</span>
-            </Link>
-          )}
-          <button
-            onClick={() => isAnonymous ? setShareGateOpen(true) : setShareOpen(true)}
-            aria-label="Share"
-            className="px-3 sm:px-4 py-1.5 rounded-pill bg-earthy-cream border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:border-earthy-cocoaSoft active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
-          >
-            🔗<span className="hidden sm:inline"> Share</span>
-          </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -409,7 +392,6 @@ export default function Board() {
                 </div>
 
                 <div className="mb-3">
-                  <BirthdayBanner kid={activeKid} />
                   {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
