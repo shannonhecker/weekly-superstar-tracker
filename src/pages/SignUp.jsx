@@ -13,6 +13,7 @@ import {
 import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { auth } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { THEMES } from '../lib/themes'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import PrimaryButton from '../components/PrimaryButton'
