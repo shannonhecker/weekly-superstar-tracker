@@ -60,7 +60,7 @@ export default function Landing() {
           Sign in
         </Link>
         <Link
-          to="/try"
+          to="/signup?guest=1"
           className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors"
         >
           or try it first — no signup

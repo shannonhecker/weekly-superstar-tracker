@@ -7,6 +7,7 @@ import {
   OAuthProvider,
   linkWithCredential,
   linkWithPopup,
+  signInAnonymously,
   signInWithPopup,
 } from 'firebase/auth'
 import { createBoardForNewUser, findUserBoards } from '../lib/boards'
@@ -20,17 +21,22 @@ import HeroStar from '../components/HeroStar'
 // generous breathing room, and one decision per screen. Step state is local —
 // no extra routes — so back/next preserves selections without re-mounting.
 //
+// `?guest=1` runs the full wizard but step 4 is a "Start your board" CTA
+// instead of credentials — on submit we signInAnonymously + create a board
+// using the picked theme/kid/birthday. Same onboarding parity as a real
+// signup, just without the email gate.
+//
 // `?upgrade=1` short-circuits the wizard: the user is already an anonymous
-// guest with a seeded board (from /try), so we skip theme + kid name and
-// jump straight to the credentials screen, then call linkWithCredential /
-// linkWithPopup to convert the anonymous account in place — UID and
-// memberIds are preserved.
+// guest with a seeded board, so we skip steps 1-3 and jump straight to
+// credentials, then call linkWithCredential / linkWithPopup to convert
+// the anonymous account in place — UID and memberIds are preserved.
 const TOTAL_STEPS = 4
 
 export default function SignUp() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isUpgrade = searchParams.get('upgrade') === '1'
+  const isGuest = searchParams.get('guest') === '1' && !isUpgrade
 
   // Upgrade flow skips the wizard — the guest already has a seeded board
   // from /try, so theme + kid name are already chosen. Drop straight to
@@ -135,6 +141,41 @@ export default function SignUp() {
   }
   const onGoogle = () => onOAuth(new GoogleAuthProvider())
 
+  // Guest path: signInAnonymously + seed a board using the wizard answers.
+  // Same kid/board shape as a real signup — only the credential is anonymous.
+  // Defends against a non-anonymous user hitting ?guest=1 by mistake: if
+  // they're already signed in for real, route to their existing board
+  // instead of replacing their session with an anon UID.
+  const onGuestStart = async () => {
+    if (loading) return
+    setError('')
+    setLoading(true)
+    try {
+      if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        const existing = await findUserBoards(auth.currentUser.uid)
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
+      let currentUser = auth.currentUser
+      if (!currentUser) {
+        const cred = await signInAnonymously(auth)
+        currentUser = cred.user
+      }
+      // Returning anonymous user with a board already → don't seed twice.
+      const existing = await findUserBoards(currentUser.uid)
+      if (existing.length > 0) {
+        navigate(`/board/${existing[0].id}`, { replace: true })
+        return
+      }
+      const boardId = await createBoardForNewUser(currentUser, { theme, kidName, birthday })
+      navigate(`/board/${boardId}`, { replace: true })
+    } catch (err) {
+      setError(formatAuthError(err))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Subtle slide+fade. Tailwind transition utilities on a key'd wrapper —
   // re-mount per step keeps each screen's enter animation predictable.
   const enterClasses =
@@ -203,7 +244,15 @@ export default function SignUp() {
               onSkip={() => { setBirthday(''); goNext() }}
             />
           )}
-          {step === 4 && (
+          {step === 4 && isGuest && (
+            <StepGuestStart
+              kidName={kidName}
+              error={error}
+              loading={loading}
+              onStart={onGuestStart}
+            />
+          )}
+          {step === 4 && !isGuest && (
             <StepAccount
               email={email}
               setEmail={setEmail}
@@ -230,6 +279,33 @@ export default function SignUp() {
         </Link>
       </p>
     </main>
+  )
+}
+
+/* ---------- Step 4 (guest) — start without an account ---------- */
+function StepGuestStart({ kidName, error, loading, onStart }) {
+  const trimmed = (kidName || '').trim()
+  return (
+    <div className="pt-2">
+      <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
+        Ready when you are.
+      </h2>
+      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
+        {trimmed
+          ? `${trimmed}'s board is set up. You can save it with an email any time.`
+          : 'Your board is set up. You can save it with an email any time.'}
+      </p>
+
+      {error && (
+        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+          {error}
+        </div>
+      )}
+
+      <PrimaryButton type="button" onClick={onStart} disabled={loading}>
+        {loading ? 'Setting up…' : 'Start your board'}
+      </PrimaryButton>
+    </div>
   )
 }
 
