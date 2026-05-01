@@ -5,7 +5,7 @@ import { db } from '../lib/firebase'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
 import { useToast } from '../contexts/ToastContext'
-import PromptModal from './PromptModal'
+import NewKidModal from './NewKidModal'
 import { KidAvatar } from './KidAvatar'
 
 // URL-driven kid selection. Active kid is stored in `?kid=<id>`,
@@ -20,17 +20,17 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
     navigate(`/board/${currentBoardId}?kid=${encodeURIComponent(id)}`, { replace: true })
   }
 
-  const addKid = async (rawName) => {
-    const name = (rawName || '').trim()
-    setPromptOpen(false)
-    if (!name) return
+  const addKid = async ({ name, avatarEmoji, theme, birthday }) => {
+    const trimmedName = (name || '').trim()
+    if (!trimmedName) return
     const themeKeys = Object.keys(THEMES)
-    const theme = themeKeys[kids.length % themeKeys.length]
+    const resolvedTheme = theme && THEMES[theme] ? theme : themeKeys[kids.length % themeKeys.length]
     try {
       await addDoc(collection(db, 'boards', boardId, 'kids'), {
-        name,
-        theme,
+        name: trimmedName,
+        theme: resolvedTheme,
         order: kids.length,
+        birthday: birthday || null,
         activities: DEFAULT_ACTIVITIES,
         checks: {},
         stickers: {},
@@ -41,8 +41,12 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         weekHistory: {},
         chainKey: null,
         favoritePet: null,
+        avatarKind: avatarEmoji ? 'preset' : 'theme',
+        avatarEmoji: avatarEmoji ?? null,
+        avatarUrl: null,
         createdAt: serverTimestamp(),
       })
+      setPromptOpen(false)
     } catch (e) {
       toast.error('Could not add superstar — try again')
     }
@@ -91,14 +95,11 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         <span className="text-xs font-bold text-earthy-cocoaSoft">Add</span>
       </button>
 
-      <PromptModal
+      <NewKidModal
         open={promptOpen}
         onClose={() => setPromptOpen(false)}
         onSubmit={addKid}
-        emoji="⭐"
-        title="Add a new superstar"
-        submitLabel="Add"
-        fields={[{ name: 'name', label: 'Name', placeholder: 'e.g. Leo', defaultValue: '' }]}
+        kidCount={kids.length}
       />
     </div>
   )
