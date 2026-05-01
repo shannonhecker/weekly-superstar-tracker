@@ -19,6 +19,9 @@ const ART = {
   train: { bg: '#EEE2D7', panel: '#D7C3B1', body: '#B08367', belly: '#FFF4E6', accent: '#8FA9B5', deep: '#705849', blush: '#EBA083', kind: 'bear', prop: 'train' },
   fairy: { bg: '#F2E3F0', panel: '#E0C5DB', body: '#F5C8B3', belly: '#FFF7ED', accent: '#9DBA74', deep: '#785A87', blush: '#EDA4C8', kind: 'unicorn', prop: 'flower' },
   bear: { bg: '#F4E1CE', panel: '#D9B797', body: '#9E7357', belly: '#FFF1DC', accent: '#D39B55', deep: '#664932', blush: '#E89A78', kind: 'bear', prop: 'book' },
+  deer: { bg: '#F5EFD8', panel: '#DDD4B8', body: '#A37855', belly: '#FFF7E6', accent: '#9CB382', deep: '#5C7549', blush: '#E8A48B', kind: 'fox', prop: 'flower' },
+  elephant: { bg: '#DCEAF1', panel: '#C2D8E5', body: '#A8B5BC', belly: '#F0F5F8', accent: '#8DA9B5', deep: '#5C7484', blush: '#F4B8AE', kind: 'koala', prop: 'flower' },
+  fox: { bg: '#F8E5D5', panel: '#EFCDB6', body: '#D78951', belly: '#FFF5E8', accent: '#E0AB7E', deep: '#8C5A3D', blush: '#F2A488', kind: 'fox', prop: 'flower' },
 }
 
 function configFor(themeKey) {
