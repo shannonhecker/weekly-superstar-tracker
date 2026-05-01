@@ -19,6 +19,7 @@ import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
 import Modal from '../components/Modal'
+import Icon from '../components/Icon'
 import { useToast } from '../contexts/ToastContext'
 import { consumeUpgradeFlag } from '../lib/upgrade-flag'
 import WeeklySummary from '../components/WeeklySummary'
@@ -311,7 +312,7 @@ export default function Board() {
               style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
               className="w-9 h-9 rounded-full text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
             >
-              ⋯
+              <Icon name="menu-more" size={20} />
             </button>
             {menuOpen && (
               <>
@@ -322,7 +323,7 @@ export default function Board() {
                       onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
-                      <span>🏆</span>
+                      <Icon name="trophy" size={18} />
                       <span>Pet collection</span>
                     </button>
                   )}
@@ -331,7 +332,7 @@ export default function Board() {
                       onClick={() => { setMenuOpen(false); setTasksOpen(true) }}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
-                      <span>📝</span>
+                      <Icon name="tasks" size={18} />
                       <span className="flex-1">Edit tasks</span>
                       <span className="text-xs text-earthy-cocoaSoft">
                         {(activeKid.activities?.length ?? 0)} of 10
@@ -344,7 +345,7 @@ export default function Board() {
                       onClick={() => setMenuOpen(false)}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
-                      <span>🖨️</span>
+                      <Icon name="print" size={18} />
                       <span>Print this week's sheet</span>
                     </Link>
                   )}
@@ -352,7 +353,7 @@ export default function Board() {
                     onClick={() => { setMenuOpen(false); toggleMute() }}
                     className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                   >
-                    <span>{muted ? '🔇' : '🔊'}</span>
+                    <Icon name={muted ? 'volume-off' : 'volume-on'} size={18} />
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
                   </button>
                   {user && (
@@ -360,7 +361,7 @@ export default function Board() {
                       onClick={() => { setMenuOpen(false); setSignOutOpen(true) }}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
-                      <span>↩︎</span>
+                      <Icon name="sign-out" size={18} />
                       <span>Sign out</span>
                     </button>
                   )}
@@ -404,10 +405,10 @@ export default function Board() {
                       <button
                         onClick={() => setEditKidOpen(true)}
                         aria-label={`Edit ${activeKid.name}`}
-                        className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory text-xs hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center"
+                        className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center text-earthy-cocoa"
                         style={{ border: `1px solid ${activeTheme.deeper}66` }}
                       >
-                        ✏️
+                        <Icon name="edit" size={16} />
                       </button>
                       {activeKid.custodyLabel && (
                         <span

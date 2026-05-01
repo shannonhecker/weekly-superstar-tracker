@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/style.css'
 import './EarthyDatePicker.css'
+import Icon from './Icon'
 
 // Themed wrapper around react-day-picker. We don't fork the lib's
 // styles — we rely on its v9 CSS-variable surface and override only
@@ -44,6 +45,19 @@ export default function EarthyDatePicker({
 }) {
   const [open, setOpen] = useState(false)
   const selected = fromIso(value)
+  const popoverRef = useRef(null)
+
+  // Scroll the popover into view when it opens — the picker is rendered
+  // inside a modal's overflow-y scroll container, so otherwise the
+  // calendar can land below the visible viewport and look like the
+  // click did nothing.
+  useEffect(() => {
+    if (!open) return
+    const id = window.setTimeout(() => {
+      popoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 30)
+    return () => window.clearTimeout(id)
+  }, [open])
 
   const toggle = () => setOpen((v) => !v)
 
@@ -87,12 +101,14 @@ export default function EarthyDatePicker({
               Clear
             </span>
           )}
-          <span aria-hidden="true" className="text-earthy-cocoaSoft">📅</span>
+          <span aria-hidden="true" className="text-earthy-cocoaSoft flex items-center">
+            <Icon name="calendar" size={20} />
+          </span>
         </span>
       </button>
 
       {open && (
-        <div className="earthy-rdp mt-2 rounded-2xl bg-earthy-card border border-earthy-divider shadow-earthy-card p-2 inline-block">
+        <div ref={popoverRef} className="earthy-rdp mt-2 rounded-2xl bg-earthy-card border border-earthy-divider shadow-earthy-card p-2 inline-block">
           <DayPicker
             mode="single"
             selected={selected}
