@@ -5,6 +5,7 @@ import { getWeekKey, formatWeekKey } from '../lib/week'
 import { RARE_STICKERS } from '../lib/stickers'
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
+import Icon from './Icon'
 import Egg from './Egg'
 import EmptyStateScene from './EmptyStateScene'
 
@@ -172,9 +173,10 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 <button
                   onClick={(e) => { e.stopPropagation(); onClose?.(); onRename(); }}
                   aria-label="Rename pet"
-                  className="shrink-0 px-2 py-1 rounded-lg text-xs font-bold text-earthy-cocoa bg-earthy-cream border border-earthy-divider"
+                  className="shrink-0 px-2 py-1 rounded-lg text-xs font-bold text-earthy-cocoa bg-earthy-cream border border-earthy-divider flex items-center gap-1"
                 >
-                  ✏️ Rename
+                  <Icon name="edit" size={14} />
+                  <span>Rename</span>
                 </button>
               )}
             </div>
@@ -237,9 +239,9 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               <button
                 onClick={(e) => { e.stopPropagation(); deleteEntry(weekKey) }}
                 aria-label="Delete history entry"
-                className="shrink-0 text-earthy-cocoaSoft hover:text-red-400 text-lg px-2"
+                className="shrink-0 text-earthy-cocoaSoft hover:text-red-400 px-2 flex items-center"
               >
-                🗑
+                <Icon name="delete" size={18} />
               </button>
             </div>
           )

@@ -6,6 +6,7 @@ import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
 import { KidAvatar } from './KidAvatar'
 import { uploadKidAvatar, deleteKidAvatar } from '../lib/avatarUpload'
+import Icon from './Icon'
 
 export default function KidEditModal({ open, onClose, kid, kids, boardId, onDeleted }) {
   const [name, setName] = useState(kid?.name || '')
@@ -131,9 +132,9 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
           onClick={() => setConfirmingDelete(true)}
           aria-label="Delete this superstar"
           title="Delete this superstar"
-          className="absolute top-3 right-3 w-8 h-8 rounded-full text-earthy-cocoaSoft hover:text-[#B85450] hover:bg-[#B85450]/10 flex items-center justify-center text-base transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full text-earthy-cocoaSoft hover:text-[#B85450] hover:bg-[#B85450]/10 flex items-center justify-center transition-colors"
         >
-          🗑
+          <Icon name="delete" size={18} />
         </button>
       )}
       <div className="max-h-[65vh] overflow-y-auto">
