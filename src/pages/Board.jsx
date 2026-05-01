@@ -316,7 +316,7 @@ export default function Board() {
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl shadow-earthy-pop py-1 min-w-[220px]">
+                <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl overflow-hidden shadow-earthy-pop py-1 min-w-[220px]">
                   {activeKid && (
                     <button
                       onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
