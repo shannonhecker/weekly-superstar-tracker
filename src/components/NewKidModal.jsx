@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { THEMES, KID_AVATARS } from '../lib/themes'
 import Modal from './Modal'
+import EarthyDatePicker from './EarthyDatePicker'
 
 // Single-screen "Add a superstar" modal: name + avatar emoji + theme +
 // optional birthday. Only the name is required. Replaces the legacy
@@ -139,12 +140,11 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
           <label htmlFor="new-kid-birthday" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
             Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">— optional</span>
           </label>
-          <input
-            id="new-kid-birthday"
-            type="date"
+          <EarthyDatePicker
             value={birthday}
-            onChange={(e) => setBirthday(e.target.value)}
-            className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
+            onChange={setBirthday}
+            placeholder="Add a birthday"
+            ariaLabel="Pick a birthday"
           />
         </div>
 

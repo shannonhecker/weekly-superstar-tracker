@@ -1,0 +1,95 @@
+/* Earthy theme overlay for react-day-picker v9.
+ * Scoped under .earthy-rdp so only our wrapper picks it up — the
+ * library's default styles still load globally for any other consumer.
+ *
+ * Token references (kept as literals here because Tailwind utilities
+ * don't reach inside the lib's selectors). Source of truth is
+ * weekly-superstar-shared/src/tokens/earthy.ts:
+ *   cocoa        #5A3A2E
+ *   cocoaSoft    #8B6651
+ *   cream        #FFFAF0
+ *   ivory        #F8F1E1
+ *   card         #FFFDF7
+ *   terracotta   #C77846
+ *   divider      #E8DDD0
+ */
+
+.earthy-rdp .rdp-root {
+  --rdp-accent-color: #5A3A2E;            /* cocoa: selected day fill + today */
+  --rdp-accent-background-color: #F4E5D2; /* warm cream: hover + selected bg */
+  --rdp-day-height: 38px;
+  --rdp-day-width: 38px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-day_button-border-radius: 999px;  /* full round */
+  --rdp-selected-border: 2px solid var(--rdp-accent-color);
+  --rdp-today-color: #C77846;             /* terracotta: stand-out today */
+  --rdp-nav-height: 2.5rem;
+  --rdp-nav_button-height: 2rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-outside-opacity: 0.45;
+  --rdp-disabled-opacity: 0.35;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #5A3A2E;
+}
+
+.earthy-rdp .rdp-month_caption {
+  font-weight: 800;
+  color: #5A3A2E;
+}
+
+.earthy-rdp .rdp-weekday {
+  color: #8B6651;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.earthy-rdp .rdp-day_button {
+  font-weight: 600;
+}
+
+.earthy-rdp .rdp-day_button:hover:not([disabled]) {
+  background: #F4E5D2;
+  color: #5A3A2E;
+}
+
+.earthy-rdp .rdp-selected .rdp-day_button {
+  background: #5A3A2E;
+  color: #FFFAF0;
+  font-weight: 800;
+}
+
+.earthy-rdp .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: #C77846;
+  font-weight: 800;
+}
+
+.earthy-rdp .rdp-button_previous,
+.earthy-rdp .rdp-button_next {
+  color: #5A3A2E;
+  border-radius: 999px;
+  border: 1px solid #E8DDD0;
+  background: #FFFDF7;
+}
+
+.earthy-rdp .rdp-button_previous:hover,
+.earthy-rdp .rdp-button_next:hover {
+  background: #F4E5D2;
+}
+
+.earthy-rdp .rdp-dropdown {
+  font-family: inherit;
+  font-weight: 700;
+  color: #5A3A2E;
+  background: #FFFDF7;
+  border: 1px solid #E8DDD0;
+  border-radius: 12px;
+  padding: 4px 8px;
+}
+
+.earthy-rdp .rdp-dropdown:focus {
+  outline: 2px solid #5A3A2E;
+  outline-offset: 2px;
+}
