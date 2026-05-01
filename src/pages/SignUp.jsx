@@ -1,78 +1,75 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
+  EmailAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
+  linkWithCredential,
+  linkWithPopup,
+  signInAnonymously,
   signInWithPopup,
 } from 'firebase/auth'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
-import { findUserBoards } from '../lib/boards'
-import { auth, db } from '../lib/firebase'
-import { generateShareCode } from '../lib/codes'
+import { createBoardForNewUser, findUserBoards } from '../lib/boards'
+import { auth } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
+import { THEMES } from '../lib/themes'
+import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
-import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import PrimaryButton from '../components/PrimaryButton'
-import { getWeekKey } from '../lib/week'
 import HeroStar from '../components/HeroStar'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
 // generous breathing room, and one decision per screen. Step state is local —
 // no extra routes — so back/next preserves selections without re-mounting.
+//
+// `?guest=1` runs the full wizard but step 4 is a "Start your board" CTA
+// instead of credentials — on submit we signInAnonymously + create a board
+// using the picked theme/kid/birthday. Same onboarding parity as a real
+// signup, just without the email gate.
+//
+// `?upgrade=1` short-circuits the wizard: the user is already an anonymous
+// guest with a seeded board, so we skip steps 1-3 and jump straight to
+// credentials, then call linkWithCredential / linkWithPopup to convert
+// the anonymous account in place — UID and memberIds are preserved.
 const TOTAL_STEPS = 4
-
-// Shared by every auth path on this page (email/password + Apple + Google).
-// The board+kid Firestore writes are identical regardless of how the user
-// authed — only the credential source changes. Keeping this in one place
-// means tweaks to the default kid shape can't drift between code paths.
-export async function createBoardForNewUser(user, { theme, kidName, birthday }) {
-  const trimmedKid = (kidName || '').trim()
-  // Display name falls back to the kid's name so the board feels personal even
-  // if we never collected an explicit parent name (we don't, in Direction B).
-  // Skip the update if Firebase already has a displayName from OAuth.
-  if (trimmedKid && !user.displayName) {
-    try { await updateProfile(user, { displayName: trimmedKid }) } catch { /* non-fatal */ }
-  }
-
-  const board = await addDoc(collection(db, 'boards'), {
-    name: trimmedKid ? `${trimmedKid}'s board` : 'Our Family',
-    adminId: user.uid,
-    memberIds: [user.uid],
-    shareCode: generateShareCode(),
-    createdAt: serverTimestamp(),
-  })
-
-  // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
-  await addDoc(collection(db, 'boards', board.id, 'kids'), {
-    name: trimmedKid || 'Superstar',
-    theme: theme || Object.keys(THEMES)[0],
-    order: 0,
-    birthday: birthday || null,
-    activities: DEFAULT_ACTIVITIES,
-    checks: {},
-    stickers: {},
-    badges: [],
-    petName: null,
-    reward: null,
-    weekKey: getWeekKey(),
-    weekHistory: {},
-    chainKey: null,
-    favoritePet: null,
-    createdAt: serverTimestamp(),
-  })
-
-  return board.id
-}
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
+  const [searchParams] = useSearchParams()
+  const isUpgrade = searchParams.get('upgrade') === '1'
+  const isGuest = searchParams.get('guest') === '1' && !isUpgrade
 
-  const [step, setStep] = useState(1)
+  // ?upgrade=1 only makes sense for anonymous guests. If a fully signed-in
+  // user lands here (e.g., bookmark, stale link), route them to their
+  // existing board. If a signed-out user lands here (anonymous session
+  // expired or never existed), drop them onto the regular wizard so they
+  // pick theme + kid name properly instead of a default-named board.
+  useEffect(() => {
+    if (!isUpgrade || authLoading) return
+    let cancelled = false
+    if (user && !user.isAnonymous) {
+      ;(async () => {
+        const existing = await findUserBoards(user.uid)
+        if (cancelled) return
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+      })()
+      return () => { cancelled = true }
+    }
+    if (!user) {
+      navigate('/signup', { replace: true })
+    }
+  }, [isUpgrade, authLoading, user, navigate])
+
+  // Upgrade flow skips the wizard — the guest already has a seeded board
+  // from /try, so theme + kid name are already chosen. Drop straight to
+  // step 4 (the credentials screen).
+  const [step, setStep] = useState(isUpgrade ? TOTAL_STEPS : 1)
   // Track previous step so we know whether to slide forwards or backwards.
   const [direction, setDirection] = useState('forward')
-  const prevStepRef = useRef(1)
+  const prevStepRef = useRef(isUpgrade ? TOTAL_STEPS : 1)
 
   // Onboarding answers — preserved across step navigation.
   const [theme, setTheme] = useState(null)
@@ -100,11 +97,21 @@ export default function SignUp() {
     setError('')
     setLoading(true)
     try {
+      // Upgrade path: anonymous guest converting to email/password. Preserves
+      // UID + memberIds + the demo board they already seeded at /try.
+      if (isUpgrade && auth.currentUser?.isAnonymous) {
+        const credential = EmailAuthProvider.credential(email.trim(), password)
+        const linked = await linkWithCredential(auth.currentUser, credential)
+        const existing = await findUserBoards(linked.user.uid)
+        flagUpgradeSuccess()
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
-      setError(formatAuthError(err))
+      setError(friendlyAuthError(err, isUpgrade))
     } finally {
       setLoading(false)
     }
@@ -122,6 +129,16 @@ export default function SignUp() {
     setError('')
     setLoading(true)
     try {
+      // Upgrade path: link the OAuth provider to the existing anonymous user
+      // so the UID survives. Skip the duplicate-board guard — by definition
+      // we already have a board (the demo seeded at /try).
+      if (isUpgrade && auth.currentUser?.isAnonymous) {
+        const linked = await linkWithPopup(auth.currentUser, provider)
+        const existing = await findUserBoards(linked.user.uid)
+        flagUpgradeSuccess()
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
       const cred = await signInWithPopup(auth, provider)
       // Existing-user guard: if Firestore has any board where this user is a
       // member (admin or family member), route to their original — earliest
@@ -137,7 +154,7 @@ export default function SignUp() {
     } catch (err) {
       // Treat duplicate popup-request as a no-op — the user just clicked twice
       // before the first popup resolved. No banner, just clear the spinner.
-      if (!isSilentAuthError(err)) setError(formatAuthError(err))
+      if (!isSilentAuthError(err)) setError(friendlyAuthError(err, isUpgrade))
     } finally {
       setLoading(false)
     }
@@ -150,6 +167,53 @@ export default function SignUp() {
     onOAuth(provider)
   }
   const onGoogle = () => onOAuth(new GoogleAuthProvider())
+
+  // Surface a friendlier message in upgrade mode when the parent's email
+  // (or Google/Apple account) is already a Winking Star user. The "Use
+  // existing account" link below the form is the action — this just tells
+  // them why their input bounced.
+  function friendlyAuthError(err, upgrading) {
+    const code = err?.code
+    if (upgrading && (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use')) {
+      return 'This email is already a Winking Star account. Use it below ↓'
+    }
+    return formatAuthError(err)
+  }
+
+  // Guest path: signInAnonymously + seed a board using the wizard answers.
+  // Same kid/board shape as a real signup — only the credential is anonymous.
+  // Defends against a non-anonymous user hitting ?guest=1 by mistake: if
+  // they're already signed in for real, route to their existing board
+  // instead of replacing their session with an anon UID.
+  const onGuestStart = async () => {
+    if (loading) return
+    setError('')
+    setLoading(true)
+    try {
+      if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        const existing = await findUserBoards(auth.currentUser.uid)
+        navigate(existing[0] ? `/board/${existing[0].id}` : '/', { replace: true })
+        return
+      }
+      let currentUser = auth.currentUser
+      if (!currentUser) {
+        const cred = await signInAnonymously(auth)
+        currentUser = cred.user
+      }
+      // Returning anonymous user with a board already → don't seed twice.
+      const existing = await findUserBoards(currentUser.uid)
+      if (existing.length > 0) {
+        navigate(`/board/${existing[0].id}`, { replace: true })
+        return
+      }
+      const boardId = await createBoardForNewUser(currentUser, { theme, kidName, birthday })
+      navigate(`/board/${boardId}`, { replace: true })
+    } catch (err) {
+      setError(formatAuthError(err))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Subtle slide+fade. Tailwind transition utilities on a key'd wrapper —
   // re-mount per step keeps each screen's enter animation predictable.
@@ -178,22 +242,26 @@ export default function SignUp() {
         }
       `}</style>
 
-      {/* Top bar — back link (steps 2-4) + step counter on the right for orientation. */}
-      <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
-        {step > 1 ? (
-          <button
-            type="button"
-            onClick={goBack}
-            className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
-            aria-label="Go to previous step"
-          >
-            <span aria-hidden="true">←</span> Back
-          </button>
-        ) : <span />}
-        <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
-          {step} / {TOTAL_STEPS}
-        </span>
-      </div>
+      {/* Top bar — back link (steps 2-4) + step counter on the right for orientation.
+          Hidden in upgrade mode: there's no wizard to step back through and the
+          "4/4" counter would be confusing for a one-screen flow. */}
+      {!isUpgrade && (
+        <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={goBack}
+              className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
+              aria-label="Go to previous step"
+            >
+              <span aria-hidden="true">←</span> Back
+            </button>
+          ) : <span />}
+          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
+            {step} / {TOTAL_STEPS}
+          </span>
+        </div>
+      )}
 
       <div className="flex-1 flex items-center justify-center w-full">
         <div key={step} className={`w-full max-w-lg ${enterClasses}`}>
@@ -215,7 +283,15 @@ export default function SignUp() {
               onSkip={() => { setBirthday(''); goNext() }}
             />
           )}
-          {step === 4 && (
+          {step === 4 && isGuest && (
+            <StepGuestStart
+              kidName={kidName}
+              error={error}
+              loading={loading}
+              onStart={onGuestStart}
+            />
+          )}
+          {step === 4 && !isGuest && (
             <StepAccount
               email={email}
               setEmail={setEmail}
@@ -226,21 +302,64 @@ export default function SignUp() {
               onSubmit={onCreate}
               onApple={onApple}
               onGoogle={onGoogle}
+              isUpgrade={isUpgrade}
             />
           )}
         </div>
       </div>
 
       {/* Sign-in escape hatch lives outside the per-step container so it's
-          always reachable — first-time visitors with an existing account
-          shouldn't have to walk through 4 screens to find it. */}
+          always reachable. In upgrade mode the framing is different: the
+          parent isn't a brand-new visitor, they're an anon guest who may
+          already have a Winking Star account elsewhere. Clicking the link
+          will throw away their demo board, so we say so plainly. */}
       <p className="w-full max-w-lg mx-auto text-center text-sm text-earthy-cocoaSoft mt-6">
-        Already have an account?{' '}
-        <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
-          Sign in
-        </Link>
+        {isUpgrade ? (
+          <>
+            Already a member?{' '}
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+              Use your existing account →
+            </Link>
+            <br />
+            <span className="text-xs">(your demo won't transfer)</span>
+          </>
+        ) : (
+          <>
+            Already have an account?{' '}
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+              Sign in
+            </Link>
+          </>
+        )}
       </p>
     </main>
+  )
+}
+
+/* ---------- Step 4 (guest) — start without an account ---------- */
+function StepGuestStart({ kidName, error, loading, onStart }) {
+  const trimmed = (kidName || '').trim()
+  return (
+    <div className="pt-2">
+      <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
+        Ready when you are.
+      </h2>
+      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
+        {trimmed
+          ? `${trimmed}'s board is set up. You can save it with an email any time.`
+          : 'Your board is set up. You can save it with an email any time.'}
+      </p>
+
+      {error && (
+        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+          {error}
+        </div>
+      )}
+
+      <PrimaryButton type="button" onClick={onStart} disabled={loading}>
+        {loading ? 'Setting up…' : 'Start your board'}
+      </PrimaryButton>
+    </div>
   )
 }
 
@@ -420,14 +539,17 @@ function StepAccount({
   onSubmit,
   onApple,
   onGoogle,
+  isUpgrade,
 }) {
   return (
     <form onSubmit={onSubmit} className="pt-2">
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        One last step.
+        {isUpgrade ? 'Save your board.' : 'One last step.'}
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        Create your account so we can save their board.
+        {isUpgrade
+          ? 'Add an email so you can come back to it from any device.'
+          : 'Create your account so we can save their board.'}
       </p>
 
       <label htmlFor="signup-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">

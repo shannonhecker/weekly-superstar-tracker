@@ -166,4 +166,7 @@ export const EFFECT_BY_THEME = {
   animals: 'petals',
   garden: 'petals',
   bear: 'petals',
+  deer: 'petals',
+  elephant: 'bubbles',
+  fox: 'petals',
 }

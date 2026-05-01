@@ -7,9 +7,8 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
-import { findUserBoards } from '../lib/boards'
+import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
-import { createBoardForNewUser } from './SignUp'
 import PrimaryButton from '../components/PrimaryButton'
 
 // First-time OAuth users on the SignIn page have no board yet — give them

@@ -18,6 +18,9 @@ import RewardGoal from '../components/RewardGoal'
 import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
 import KidEditModal from '../components/KidEditModal'
+import Modal from '../components/Modal'
+import { useToast } from '../contexts/ToastContext'
+import { consumeUpgradeFlag } from '../lib/upgrade-flag'
 import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
@@ -75,6 +78,20 @@ export default function Board() {
   const [editKidOpen, setEditKidOpen] = useState(false)
   const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [signOutOpen, setSignOutOpen] = useState(false)
+  const [shareGateOpen, setShareGateOpen] = useState(false)
+  const toast = useToast()
+  const isAnonymous = !!user?.isAnonymous
+
+  // Show a one-shot success toast on the first Board render after a
+  // successful guest-to-account upgrade. Flag is set in SignUp's upgrade
+  // branches (linkWithCredential / linkWithPopup) and consumed exactly once
+  // here. Empty deps — runs at mount only.
+  useEffect(() => {
+    if (consumeUpgradeFlag()) {
+      toast.success('Your board is saved.')
+    }
+  }, [toast])
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { kid, archive, weekKey } or null
@@ -286,13 +303,6 @@ export default function Board() {
           </span>
         </h1>
         <div className="flex gap-1.5 sm:gap-2 shrink-0 items-center">
-          <button
-            onClick={() => setShareOpen(true)}
-            aria-label="Share"
-            className="px-3 sm:px-4 py-1.5 rounded-pill bg-earthy-cream border border-earthy-divider text-xs font-bold text-earthy-cocoa hover:border-earthy-cocoaSoft active:scale-[0.98] transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
-          >
-            🔗<span className="hidden sm:inline"> Share</span>
-          </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -345,9 +355,9 @@ export default function Board() {
                     <span>{muted ? '🔇' : '🔊'}</span>
                     <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
                   </button>
-                  {user && !user.isAnonymous && (
+                  {user && (
                     <button
-                      onClick={() => { setMenuOpen(false); onSignOut() }}
+                      onClick={() => { setMenuOpen(false); setSignOutOpen(true) }}
                       className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <span>↩︎</span>
@@ -382,7 +392,6 @@ export default function Board() {
                 </div>
 
                 <div className="mb-3">
-                  <BirthdayBanner kid={activeKid} />
                   {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -494,6 +503,66 @@ export default function Board() {
         replay={!!summary?.replay}
         onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
       />
+
+      <Modal open={signOutOpen} onClose={() => setSignOutOpen(false)} emoji="↩︎" title="Sign out of Winking Star?">
+        <div className="flex flex-col gap-2 mt-2">
+          {isAnonymous && (
+            <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
+              Your demo board will be discarded.
+            </p>
+          )}
+          {isAnonymous && (
+            <Link
+              to="/signup?upgrade=1"
+              onClick={() => setSignOutOpen(false)}
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+            >
+              Save with email
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={async () => { setSignOutOpen(false); await onSignOut() }}
+            style={isAnonymous
+              ? { color: '#8A3A2E', backgroundColor: '#F8E5DF' }
+              : { color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all"
+          >
+            {isAnonymous ? 'Sign out and discard' : 'Sign out'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSignOutOpen(false)}
+            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal open={shareGateOpen} onClose={() => setShareGateOpen(false)} emoji="🔗" title="Share with your family">
+        <div className="flex flex-col gap-2 mt-2">
+          <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
+            Save your board first so the link still works when your family opens it.
+          </p>
+          <Link
+            to="/signup?upgrade=1"
+            onClick={() => setShareGateOpen(false)}
+            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+          >
+            Save with email
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShareGateOpen(false)}
+            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
 
       <p className="text-center text-earthy-cocoaSoft text-[12px] mt-6 font-semibold">
         💡 Tap a sticker square to mark it. Switch kids with the avatars above.
