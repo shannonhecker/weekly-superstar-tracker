@@ -1,7 +1,46 @@
-import { lazy, Suspense } from 'react'
+import { Component, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import LogoLoader from './components/LogoLoader'
+
+// Catches render-time throws from any route. Suspense (below) only catches
+// thrown promises for lazy chunks; it does NOT catch synchronous errors.
+// Without this, a missing import or other render error white-screens the
+// whole tree (PR #58 had a real-world version of that). Class component
+// because React's only error-boundary primitive is class-based.
+class RouteErrorBoundary extends Component {
+  state = { error: null }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) {
+    // eslint-disable-next-line no-console
+    console.error('[Route] uncaught render error', error, info)
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <main id="main" className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory font-jakarta">
+          <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center p-8">
+            <h1 className="font-extrabold text-earthy-cocoa text-2xl mb-2">
+              Something went sideways.
+            </h1>
+            <p className="text-earthy-cocoaSoft text-sm mb-5">
+              Refresh the page — and let us know if it keeps happening.
+            </p>
+            <button
+              type="button"
+              onClick={() => { window.location.reload() }}
+              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+              className="px-5 py-3 rounded-pill font-bold text-sm hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+            >
+              Reload
+            </button>
+          </div>
+        </main>
+      )
+    }
+    return this.props.children
+  }
+}
 
 // Route components are lazy-imported so each route only ships its own
 // JS on first paint. The signin page no longer drags in Board's deps,
@@ -42,6 +81,7 @@ export default function App() {
       >
         Skip to main content
       </a>
+      <RouteErrorBoundary>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/signin" element={<SignIn />} />
@@ -68,6 +108,7 @@ export default function App() {
         <Route path="/style-guide" element={<StyleGuide />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </RouteErrorBoundary>
     </Suspense>
   )
 }

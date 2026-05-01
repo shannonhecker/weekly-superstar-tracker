@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 const ToastContext = createContext(null)
 
@@ -11,11 +11,14 @@ export function ToastProvider({ children }) {
     setTimeout(() => setToasts((ts) => ts.filter((t) => t.id !== id)), 3500)
   }, [])
 
-  const api = {
+  // Memoize so consumers' useEffect deps that include `toast` don't re-run
+  // every time a toast is added/removed. push is already stable via
+  // useCallback so this just stabilises the wrapping object.
+  const api = useMemo(() => ({
     error: (m) => push('error', m),
     success: (m) => push('success', m),
     info: (m) => push('info', m),
-  }
+  }), [push])
 
   return (
     <ToastContext.Provider value={api}>
