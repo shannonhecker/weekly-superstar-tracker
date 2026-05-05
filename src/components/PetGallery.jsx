@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { doc, updateDoc, deleteField } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { PET_CHAINS, THEMES, petAtStage, animatedFluentUrl } from '../lib/themes'
@@ -29,6 +30,13 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
   const toast = useToast()
   const history = kid?.weekHistory || {}
   const favorite = kid?.favoritePet || null
+  // Two-step delete — the trash icon next to each week entry sits 8px
+  // away from the favourite-star icon and is easy to mis-tap on touch.
+  // An accidental tap fires an irreversible Firestore deleteField on
+  // a real memory. Confirming via a second deliberate click (in a
+  // separate modal with a destructive-styled button) is what defeats
+  // fat-finger taps.
+  const [pendingDelete, setPendingDelete] = useState(null) // { weekKey, archive } | null
   const isFavoriteEntry = (weekKey, emoji) =>
     !!favorite && favorite.weekKey === weekKey && favorite.emoji === emoji
   const rareCounts = collectRareStickers(kid)
@@ -75,6 +83,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
   }
 
   return (
+    <>
     <Modal open={open} onClose={onClose} emoji="🏆" title={`${kid?.name || ''}'s Collection`}>
       <div className="max-h-[65vh] overflow-y-auto">
         {/* Treasures section — rare stickers + bonus stars from mystery boxes */}
@@ -237,8 +246,8 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 {isFav ? '⭐' : '☆'}
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); deleteEntry(weekKey) }}
-                aria-label="Delete history entry"
+                onClick={(e) => { e.stopPropagation(); setPendingDelete({ weekKey, archive: snapshot }) }}
+                aria-label="Remove this week from collection"
                 className="shrink-0 text-earthy-cocoaSoft hover:text-red-400 px-2 flex items-center"
               >
                 <Icon name="delete" size={18} />
@@ -254,5 +263,40 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         Close
       </button>
     </Modal>
+    <Modal
+      open={!!pendingDelete}
+      onClose={() => setPendingDelete(null)}
+      emoji="🗑"
+      title="Remove this week?"
+    >
+        <div className="text-sm text-earthy-cocoa font-bold mb-2">
+          {pendingDelete?.archive?.emoji ? `${pendingDelete.archive.emoji} ` : ''}
+          {pendingDelete?.archive?.petName ? `"${pendingDelete.archive.petName}" — ` : ''}
+          {pendingDelete?.weekKey ? formatWeekKey(pendingDelete.weekKey) : ''}
+        </div>
+        <p className="text-sm text-earthy-cocoaSoft mb-5">
+          Removing this week from {kid?.name || 'this collection'} can't be undone.
+          Tap Cancel if you didn't mean to.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setPendingDelete(null)}
+            className="flex-1 py-3 rounded-xl bg-earthy-divider text-earthy-cocoa font-bold text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              const wk = pendingDelete?.weekKey
+              setPendingDelete(null)
+              if (wk) await deleteEntry(wk)
+            }}
+            className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+          >
+            Remove
+          </button>
+        </div>
+    </Modal>
+    </>
   )
 }
