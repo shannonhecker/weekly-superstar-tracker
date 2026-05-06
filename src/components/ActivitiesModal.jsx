@@ -35,12 +35,19 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
   const [view, setView] = useState('list')
   const [editingId, setEditingId] = useState(null)
   const [busy, setBusy] = useState(false)
+  // Pending-delete shape: { id, emoji, label } | null. Tapping the trash
+  // icon stages this and opens the confirm modal; only Remove proceeds
+  // to the persist() call. Defends against fat-finger taps on the wrong
+  // row (delete is irreversible — wipes the activity and every check
+  // tied to its id).
+  const [pendingDelete, setPendingDelete] = useState(null)
 
   useEffect(() => {
     if (!open) return
     setView('list')
     setEditingId(null)
     setBusy(false)
+    setPendingDelete(null)
   }, [open, kid?.id])
 
   const activities = useMemo(
@@ -85,8 +92,20 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
   }
 
   const deleteActivity = (id) => {
+    const target = activities.find((a) => a.id === id)
+    setPendingDelete({
+      id,
+      emoji: target?.emoji || '',
+      label: target?.label?.trim() || 'this activity',
+    })
+  }
+
+  const confirmDeleteActivity = async () => {
+    const id = pendingDelete?.id
+    setPendingDelete(null)
+    if (!id) return
     const next = activities.filter((a) => a.id !== id)
-    return persist(next)
+    await persist(next)
   }
 
   const addActivity = () => {
@@ -135,6 +154,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
   )
 
   return (
+    <>
     <Modal open={open} onClose={busy ? undefined : onClose}>
       <div className="max-h-[65vh] overflow-y-auto">
         {view === 'list' && (
@@ -280,5 +300,35 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
         )}
       </div>
     </Modal>
+    <Modal
+      open={!!pendingDelete}
+      onClose={() => setPendingDelete(null)}
+      emoji="🗑"
+      title="Remove this activity?"
+    >
+      <div className="text-sm text-earthy-cocoa font-bold mb-2">
+        {pendingDelete?.emoji ? `${pendingDelete.emoji} ` : ''}
+        {pendingDelete?.label || 'this activity'}
+      </div>
+      <p className="text-sm text-earthy-cocoaSoft mb-5">
+        Removing this activity from {kid?.name || 'this superstar'}'s board can't be undone.
+        Any stars they've earned for it this week will disappear.
+      </p>
+      <div className="flex gap-3">
+        <button
+          onClick={() => setPendingDelete(null)}
+          className="flex-1 py-3 rounded-xl bg-earthy-divider text-earthy-cocoa font-bold text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={confirmDeleteActivity}
+          className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+        >
+          Remove
+        </button>
+      </div>
+    </Modal>
+    </>
   )
 }
