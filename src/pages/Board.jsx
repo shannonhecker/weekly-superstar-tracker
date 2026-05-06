@@ -365,6 +365,17 @@ export default function Board() {
                       <span>Sign out</span>
                     </button>
                   )}
+                  {user && !isAnonymous && (
+                    <Link
+                      to="/settings/delete-account"
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold hover:bg-[#FFF1F2] flex items-center gap-2 border-t border-earthy-divider"
+                      style={{ color: '#9F1239' }}
+                    >
+                      <Icon name="delete" size={18} />
+                      <span>Delete account</span>
+                    </Link>
+                  )}
                 </div>
               </>
             )}

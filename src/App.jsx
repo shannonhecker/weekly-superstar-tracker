@@ -58,6 +58,7 @@ const Join = lazy(() => import('./pages/Join'))
 const Board = lazy(() => import('./pages/Board'))
 const PrintSheet = lazy(() => import('./pages/PrintSheet'))
 const StyleGuide = lazy(() => import('./pages/StyleGuide'))
+const DeleteAccount = lazy(() => import('./pages/DeleteAccount'))
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -102,6 +103,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <PrintSheet />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/delete-account"
+          element={
+            <ProtectedRoute>
+              <DeleteAccount />
             </ProtectedRoute>
           }
         />
