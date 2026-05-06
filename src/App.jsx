@@ -58,6 +58,7 @@ const Join = lazy(() => import('./pages/Join'))
 const Board = lazy(() => import('./pages/Board'))
 const PrintSheet = lazy(() => import('./pages/PrintSheet'))
 const StyleGuide = lazy(() => import('./pages/StyleGuide'))
+const Privacy = lazy(() => import('./pages/Privacy'))
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -105,6 +106,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/style-guide" element={<StyleGuide />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
