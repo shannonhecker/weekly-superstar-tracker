@@ -138,6 +138,19 @@ service cloud.firestore {
         allow read, write: if isSignedIn()
           && authedUid() in get(/databases/$(database)/documents/boards/$(boardId)).data.memberIds;
       }
+
+      // -----------------------------------------------------------------
+      // /boards/{boardId}/kids/{kidId}/habits/{habitId} — daily habit
+      // tracking added by the iOS Habits tab (PR-3, 2026-05-09). Same
+      // member-gated permissions as weekHistory. Doc shape:
+      //   { label, emoji, cadence, customDays?, completions, createdAt }
+      // No PII. completions map keys are YYYY-MM-DD; iOS validates the
+      // shape before constructing the field path (lib/habits/store.ts).
+      // -----------------------------------------------------------------
+      match /kids/{kidId}/habits/{habitId} {
+        allow read, write: if isSignedIn()
+          && authedUid() in get(/databases/$(database)/documents/boards/$(boardId)).data.memberIds;
+      }
     }
   }
 }
