@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  updateDoc,
+  writeBatch,
+} from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { THEMES, KID_AVATARS } from '../lib/themes'
 import { useToast } from '../contexts/ToastContext'
@@ -117,11 +124,41 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
     if (!canDelete) return
     setBusy(true)
     try {
+      // COPPA hard rule: wipe kids-data subcollections BEFORE the parent
+      // doc. Firestore does NOT cascade-delete subcollections — without
+      // this, /habits/* (added by iOS Habits tab) and /weekHistory/*
+      // orphan in the database forever, violating "no indefinite
+      // retention". Surfaced by security review FIND-003 (2026-05-09).
+      await deleteSubcollection(boardId, kid.id, 'habits')
+      await deleteSubcollection(boardId, kid.id, 'weekHistory')
       await deleteDoc(ref)
       onDeleted?.(kid.id)
       onClose?.()
-    } catch { toast.error('Could not delete — try again') }
+    } catch { toast.error('Could not delete. Try again') }
     setBusy(false)
+  }
+
+  // Batched cascade delete of one kids-data subcollection. Firestore caps
+  // batches at 500 ops; both habits and weekHistory typically stay well
+  // under, but the loop handles the edge case for long-tenured kids.
+  async function deleteSubcollection(bId, kId, subcollection) {
+    const colRef = collection(db, 'boards', bId, 'kids', kId, subcollection)
+    const snap = await getDocs(colRef)
+    if (snap.empty) return
+    const batches = []
+    let batch = writeBatch(db)
+    let count = 0
+    for (const docSnap of snap.docs) {
+      batch.delete(docSnap.ref)
+      count++
+      if (count >= 500) {
+        batches.push(batch)
+        batch = writeBatch(db)
+        count = 0
+      }
+    }
+    if (count > 0) batches.push(batch)
+    await Promise.all(batches.map((b) => b.commit()))
   }
 
   return (
