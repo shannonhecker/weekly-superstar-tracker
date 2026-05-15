@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -9,6 +9,7 @@ import {
 import { auth } from '../lib/firebase'
 import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
+import { safeRedirect } from '../lib/safeRedirect'
 import PrimaryButton from '../components/PrimaryButton'
 
 // First-time OAuth users on the SignIn page have no board yet — give them
@@ -28,23 +29,44 @@ async function ensureBoardForOAuthUser(user) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const next = safeRedirect(searchParams.get('next'), '')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [lockedUntil, setLockedUntil] = useState(0)
 
   const onSubmit = async (e) => {
     e.preventDefault()
     if (loading) return
+    if (Date.now() < lockedUntil) {
+      setError('Too many tries. Wait a minute, then try again.')
+      return
+    }
     setError('')
     setLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password)
+      setFailedAttempts(0)
+      setLockedUntil(0)
+      if (next) {
+        navigate(next, { replace: true })
+        return
+      }
       // Existing email accounts always have a board (created at signup).
       // Landing handles the redirect for us.
       navigate('/', { replace: true })
     } catch (err) {
-      setError(formatAuthError(err))
+      const nextFailedAttempts = failedAttempts + 1
+      setFailedAttempts(nextFailedAttempts)
+      if (nextFailedAttempts >= 5) {
+        setLockedUntil(Date.now() + 60 * 1000)
+        setError('Too many tries. Wait a minute, then try again.')
+      } else {
+        setError(formatAuthError(err))
+      }
     } finally {
       setLoading(false)
     }
@@ -56,6 +78,10 @@ export default function SignIn() {
     setLoading(true)
     try {
       const cred = await signInWithPopup(auth, provider)
+      if (next) {
+        navigate(next, { replace: true })
+        return
+      }
       const boardId = await ensureBoardForOAuthUser(cred.user)
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {

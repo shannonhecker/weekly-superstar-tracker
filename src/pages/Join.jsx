@@ -1,11 +1,43 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { signInAnonymously } from 'firebase/auth'
-import { collection, query, where, getDocs, doc, updateDoc, arrayUnion } from 'firebase/firestore'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { httpsCallable } from 'firebase/functions'
+import { arrayUnion, collection, doc, getDocs, limit, query, updateDoc, where } from 'firebase/firestore'
 import { useAuth } from '../contexts/AuthContext'
-import { auth, db } from '../lib/firebase'
+import { db, functions } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 import EmptyStateScene from '../components/EmptyStateScene'
+
+async function redeemShareCodeFromFirestore(code, uid) {
+  const normalizedCode = String(code || '').trim()
+  if (!normalizedCode) throw new Error('Invite code is missing.')
+
+  const boardsRef = collection(db, 'boards')
+  const shareCodeQuery = query(boardsRef, where('shareCode', '==', normalizedCode), limit(1))
+  const snapshot = await getDocs(shareCodeQuery)
+  if (snapshot.empty) throw new Error('Invite could not be redeemed.')
+
+  const board = snapshot.docs[0]
+  await updateDoc(doc(db, 'boards', board.id), {
+    memberIds: arrayUnion(uid),
+  })
+  return board.id
+}
+
+async function redeemShareCode(code, uid) {
+  try {
+    const redeem = httpsCallable(functions, 'redeemShareCode')
+    const result = await redeem({ code })
+    const boardId = result.data?.boardId
+    if (!boardId) throw new Error('Invite could not be redeemed.')
+    return boardId
+  } catch (err) {
+    const codeValue = err?.code || ''
+    const isMissingCallable = codeValue === 'functions/not-found' || codeValue === 'functions/unimplemented'
+    if (!isMissingCallable) throw err
+
+    return redeemShareCodeFromFirestore(code, uid)
+  }
+}
 
 export default function Join() {
   const { code } = useParams()
@@ -15,29 +47,15 @@ export default function Join() {
 
   useEffect(() => {
     if (loading) return
+    if (!user) {
+      setError('Sign in or create a parent account to join this family board.')
+      return
+    }
     let cancelled = false
     ;(async () => {
       try {
-        let currentUser = user
-        if (!currentUser) {
-          const cred = await signInAnonymously(auth)
-          currentUser = cred.user
-        }
-
-        const q = query(collection(db, 'boards'), where('shareCode', '==', code))
-        const snap = await getDocs(q)
-        if (snap.empty) {
-          if (!cancelled) setError('That invite link is no longer valid.')
-          return
-        }
-        const board = snap.docs[0]
-        const data = board.data()
-        if (!data.memberIds || !data.memberIds.includes(currentUser.uid)) {
-          await updateDoc(doc(db, 'boards', board.id), {
-            memberIds: arrayUnion(currentUser.uid),
-          })
-        }
-        if (!cancelled) navigate(`/board/${board.id}`, { replace: true })
+        const boardId = await redeemShareCode(code, user.uid)
+        if (!cancelled) navigate(`/board/${boardId}`, { replace: true })
       } catch (err) {
         if (!cancelled) setError(formatAuthError(err))
       }
@@ -53,7 +71,28 @@ export default function Join() {
         </div>
         <div className="p-8 pt-6">
           {error
-            ? <p className="text-earthy-cocoa font-extrabold text-lg">{error}</p>
+            ? (
+                <>
+                  <p className="text-earthy-cocoa font-extrabold text-lg">{error}</p>
+                  {!user && (
+                    <div className="mt-5 flex flex-col gap-2">
+                      <Link
+                        to={`/signin?next=${encodeURIComponent(`/join/${code}`)}`}
+                        style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+                        className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center"
+                      >
+                        Sign in
+                      </Link>
+                      <Link
+                        to={`/signup?next=${encodeURIComponent(`/join/${code}`)}`}
+                        className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all text-center"
+                      >
+                        Create account
+                      </Link>
+                    </div>
+                  )}
+                </>
+              )
             : <>
                 <p className="text-earthy-cocoa font-extrabold text-lg mb-1">Joining the board…</p>
                 <p className="text-earthy-cocoaSoft text-sm font-bold">Hang tight, we're getting you in.</p>

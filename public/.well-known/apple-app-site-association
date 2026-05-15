@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "CF9UQ27897.com.winkingstar.app",
+        "paths": [
+          "/join/*",
+          "/board/*"
+        ]
+      }
+    ]
+  }
+}

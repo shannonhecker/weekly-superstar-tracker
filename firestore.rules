@@ -42,27 +42,16 @@ service cloud.firestore {
     //       memberIds via update with `uid in request.resource.data.memberIds`.
     //  S2 — A member could rewrite adminId / shareCode / name with no
     //       field-level guard.
-    //  S3 — Anonymous users can join (sign-in path goes through Join.jsx).
-    //       NOTE: this rule does NOT block anonymous joins on its own
-    //       because the rule evaluator can't tell anonymous from
-    //       provider-authed users — disable Anonymous in Firebase Console
-    //       (Auth → Sign-in method → Anonymous → Disabled) for full
-    //       defence. Documented in the PR description.
-    //
-    //  S4 — `allow list` is INTENTIONALLY KEPT for Join.jsx's share-code
-    //       lookup query. Combined with strict per-doc `allow get`,
-    //       individual non-member docs can still leak via list queries.
-    //       Full fix requires moving share-code redemption to a Cloud
-    //       Function (separate follow-up PR). This rule shrinks the
-    //       attack to "must know shareCode + boardId both" because a
-    //       non-member can only modify the memberIds field by adding
-    //       themselves — no other writes possible.
+    //  S3 — Cloud Function redemption is implemented but cannot be deployed
+    //       until the Firebase project is upgraded to Blaze. Until then,
+    //       Join.jsx falls back to the client share-code lookup below.
+    //       After redeemShareCode is deployed, change list to false and remove
+    //       the non-member self-join update path.
     // -----------------------------------------------------------------
     match /boards/{boardId} {
 
-      // List queries — required by Join.jsx's `where('shareCode', '==', code)`.
-      // Each document returned still has to satisfy `get` for the data
-      // fields the query consumes.
+      // List queries are required by the Spark-plan fallback in Join.jsx:
+      // `where('shareCode', '==', code)`.
       allow list: if isSignedIn();
 
       // Single-doc read — only members can see the full board doc.
@@ -74,7 +63,7 @@ service cloud.firestore {
         && request.resource.data.adminId == authedUid()
         && authedUid() in request.resource.data.memberIds;
 
-      // Update — three legitimate paths:
+      // Update — three legitimate client paths:
       //
       //   1. Admin update — admin can change any field EXCEPT adminId.
       //      Once you're admin, you stay admin until you explicitly
@@ -87,15 +76,11 @@ service cloud.firestore {
       //      check enforces both the diff and that the user is leaving
       //      (was in old memberIds, not in new memberIds).
       //
-      //   3. Non-member self-join via share-code — a non-member can
-      //      ONLY add themselves to memberIds, no other field change.
-      //      They must be in new memberIds and not in old memberIds.
-      //      The share-code is still validated client-side via the
-      //      Join.jsx query — the rule's job is to enforce field-level
-      //      restrictions on what can be written.
+      //   3. Non-member self-join via share-code — temporary Spark-plan
+      //      fallback until redeemShareCode can be deployed.
       //
       //   No update path lets a non-admin change adminId, shareCode,
-      //   board name, or any field other than memberIds (their own).
+      //   board name, or any field other than memberIds.
       allow update: if isSignedIn() && (
         (
           // Admin update — admin path
@@ -109,7 +94,7 @@ service cloud.firestore {
           && !(authedUid() in request.resource.data.memberIds)
         ) ||
         (
-          // Non-member self-join via share-code
+          // Non-member self-join via share-code fallback.
           !isMemberOf(resource.data)
           && changedKeys().hasOnly(['memberIds'])
           && authedUid() in request.resource.data.memberIds

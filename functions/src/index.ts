@@ -9,7 +9,7 @@
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { initializeApp, getApps } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { processSheetPhoto } from './sheet-scan.js'
 import type { ScanRequest, SheetDetection } from './types.js'
 
@@ -23,6 +23,14 @@ interface KidDoc {
 
 interface BoardDoc {
   memberIds?: string[]
+}
+
+interface RedeemShareCodeRequest {
+  code?: unknown
+}
+
+interface RedeemShareCodeResponse {
+  boardId: string
 }
 
 export const scanSheet = onCall<ScanRequest, Promise<SheetDetection>>(
@@ -78,5 +86,51 @@ export const scanSheet = onCall<ScanRequest, Promise<SheetDetection>>(
       const message = err instanceof Error ? err.message : 'scan failed'
       throw new HttpsError('failed-precondition', message)
     }
+  },
+)
+
+export const redeemShareCode = onCall<RedeemShareCodeRequest, Promise<RedeemShareCodeResponse>>(
+  {
+    region: 'us-central1',
+    cors: true,
+  },
+  async (request) => {
+    const uid = request.auth?.uid
+    if (!uid) throw new HttpsError('unauthenticated', 'sign-in required')
+
+    const provider = request.auth?.token.firebase?.sign_in_provider
+    if (provider === 'anonymous') {
+      throw new HttpsError('failed-precondition', 'create or sign in to a parent account first')
+    }
+
+    const rawCode = request.data?.code
+    if (typeof rawCode !== 'string') {
+      throw new HttpsError('invalid-argument', 'invite code missing')
+    }
+    const code = rawCode.trim().toLowerCase()
+    if (!/^[a-z0-9-]{5,40}$/.test(code)) {
+      throw new HttpsError('invalid-argument', 'invite code invalid')
+    }
+
+    const db = getFirestore()
+    const snap = await db
+      .collection('boards')
+      .where('shareCode', '==', code)
+      .limit(1)
+      .get()
+
+    if (snap.empty) {
+      throw new HttpsError('not-found', 'invite link expired')
+    }
+
+    const boardDoc = snap.docs[0]
+    const board = boardDoc.data() as BoardDoc
+    if (!Array.isArray(board.memberIds) || !board.memberIds.includes(uid)) {
+      await boardDoc.ref.update({
+        memberIds: FieldValue.arrayUnion(uid),
+      })
+    }
+
+    return { boardId: boardDoc.id }
   },
 )

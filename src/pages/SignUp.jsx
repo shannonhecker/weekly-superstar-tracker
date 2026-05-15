@@ -16,8 +16,10 @@ import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
+import { safeRedirect } from '../lib/safeRedirect'
 import PrimaryButton from '../components/PrimaryButton'
 import HeroStar from '../components/HeroStar'
+import ParentConsentGate from '../components/ParentConsentGate'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -41,6 +43,8 @@ export default function SignUp() {
   const [searchParams] = useSearchParams()
   const isUpgrade = searchParams.get('upgrade') === '1'
   const isGuest = searchParams.get('guest') === '1' && !isUpgrade
+  const next = safeRedirect(searchParams.get('next'), '')
+  const isInviteSignup = next.startsWith('/join/') && !isUpgrade
 
   // ?upgrade=1 only makes sense for anonymous guests. If a fully signed-in
   // user lands here (e.g., bookmark, stale link), route them to their
@@ -66,15 +70,16 @@ export default function SignUp() {
   // Upgrade flow skips the wizard — the guest already has a seeded board
   // from /try, so theme + kid name are already chosen. Drop straight to
   // step 4 (the credentials screen).
-  const [step, setStep] = useState(isUpgrade ? TOTAL_STEPS : 1)
+  const [step, setStep] = useState(isUpgrade || isInviteSignup ? TOTAL_STEPS : 1)
   // Track previous step so we know whether to slide forwards or backwards.
   const [direction, setDirection] = useState('forward')
-  const prevStepRef = useRef(isUpgrade ? TOTAL_STEPS : 1)
+  const prevStepRef = useRef(isUpgrade || isInviteSignup ? TOTAL_STEPS : 1)
 
   // Onboarding answers — preserved across step navigation.
   const [theme, setTheme] = useState(null)
   const [kidName, setKidName] = useState('')
   const [birthday, setBirthday] = useState('')
+  const [parentConsent, setParentConsent] = useState(false)
 
   // Final-step credentials.
   const [email, setEmail] = useState('')
@@ -95,6 +100,10 @@ export default function SignUp() {
     e.preventDefault()
     if (loading) return
     setError('')
+    if (!isGuest && password.length < 8) {
+      setError('Use at least 8 characters for your password.')
+      return
+    }
     setLoading(true)
     try {
       // Upgrade path: anonymous guest converting to email/password. Preserves
@@ -108,6 +117,10 @@ export default function SignUp() {
         return
       }
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
+      if (next) {
+        navigate(next, { replace: true })
+        return
+      }
       const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
@@ -140,6 +153,10 @@ export default function SignUp() {
         return
       }
       const cred = await signInWithPopup(auth, provider)
+      if (next) {
+        navigate(next, { replace: true })
+        return
+      }
       // Existing-user guard: if Firestore has any board where this user is a
       // member (admin or family member), route to their original — earliest
       // by createdAt — so a returning user doesn't get a fresh duplicate
@@ -245,7 +262,7 @@ export default function SignUp() {
       {/* Top bar — back link (steps 2-4) + step counter on the right for orientation.
           Hidden in upgrade mode: there's no wizard to step back through and the
           "4/4" counter would be confusing for a one-screen flow. */}
-      {!isUpgrade && (
+      {!isUpgrade && !isInviteSignup && (
         <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
           {step > 1 ? (
             <button
@@ -279,6 +296,8 @@ export default function SignUp() {
               setName={setKidName}
               birthday={birthday}
               setBirthday={setBirthday}
+              parentConsent={parentConsent}
+              onConsent={() => setParentConsent(true)}
               onNext={goNext}
               onSkip={() => { setBirthday(''); goNext() }}
             />
@@ -303,6 +322,7 @@ export default function SignUp() {
               onApple={onApple}
               onGoogle={onGoogle}
               isUpgrade={isUpgrade}
+              isInviteSignup={isInviteSignup}
             />
           )}
         </div>
@@ -459,7 +479,11 @@ function StepTheme({ selected, onSelect, onContinue }) {
 }
 
 /* ---------- Step 3 — first kid ---------- */
-function StepKid({ name, setName, birthday, setBirthday, onNext, onSkip }) {
+function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsent, onNext, onSkip }) {
+  if (!parentConsent) {
+    return <ParentConsentGate onAccept={onConsent} />
+  }
+
   const canContinue = name.trim().length > 0
   return (
     <form
@@ -540,15 +564,18 @@ function StepAccount({
   onApple,
   onGoogle,
   isUpgrade,
+  isInviteSignup,
 }) {
   return (
     <form onSubmit={onSubmit} className="pt-2">
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        {isUpgrade ? 'Save your board.' : 'One last step.'}
+        {isUpgrade ? 'Save your board.' : isInviteSignup ? 'Join your family.' : 'One last step.'}
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
         {isUpgrade
           ? 'Add an email so you can come back to it from any device.'
+          : isInviteSignup
+            ? 'Create a parent account, then we will add you to the shared board.'
           : 'Create your account so we can save their board.'}
       </p>
 
@@ -573,12 +600,12 @@ function StepAccount({
         type="password"
         autoComplete="new-password"
         required
-        minLength={6}
+        minLength={8}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
       />
-      <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 6 characters.</p>
+      <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 8 characters.</p>
 
       {error && (
         <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">

@@ -216,7 +216,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           onChange={handlePhotoPick}
           className="hidden"
         />

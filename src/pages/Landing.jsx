@@ -66,7 +66,12 @@ export default function Landing() {
           or try it first — no signup
         </Link>
         <p className="mt-4 text-xs text-earthy-cocoaSoft/70">
-          Got an invite link? Just tap it — no account needed.
+          Got an invite link? Tap it and sign in to join.
+        </p>
+        <p className="mt-3 text-[11px] text-earthy-cocoaSoft/70 font-bold">
+          <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
+          {' · '}
+          <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
         </p>
         </div>
       </div>

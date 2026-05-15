@@ -5,6 +5,9 @@
 import { formatAuthError as sharedFormatAuthError } from '@weekly-superstar/shared/auth-errors'
 
 const OAUTH_OVERRIDES = {
+  'auth/user-not-found': 'Email or password is incorrect.',
+  'auth/wrong-password': 'Email or password is incorrect.',
+  'auth/invalid-credential': 'Email or password is incorrect.',
   'auth/popup-closed-by-user': 'Sign-in window was closed before finishing.',
   'auth/popup-blocked':
     'Your browser blocked the sign-in popup. Allow popups for winkingstar.com and try again.',

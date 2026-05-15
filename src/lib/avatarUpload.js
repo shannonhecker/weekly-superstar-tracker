@@ -2,7 +2,7 @@
 // Takes a File from a <input type="file"> picker, resizes it to a 256x256
 // square (cover-fit, centered) so we ship a small JPEG instead of a 12 MB
 // phone photo, then uploads it to Firebase Storage at:
-//   avatars/{boardId}/{kidId}.jpg
+//   boards/{boardId}/kids/{kidId}/avatar.jpg
 // Returns the downloadable URL ready to drop into Firestore as kid.avatarUrl.
 
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
@@ -50,11 +50,13 @@ function resizeToSquareJpeg(img) {
 
 export async function uploadKidAvatar({ boardId, kidId, file }) {
   if (!file) throw new Error('No file selected')
-  if (!file.type.startsWith('image/')) throw new Error('That file isn\'t an image')
+  if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) {
+    throw new Error('Use a JPEG, PNG, WebP, or GIF image')
+  }
   if (file.size > MAX_INPUT_BYTES) throw new Error('Photo is too large (max 12 MB)')
   const img = await readAsImage(file)
   const blob = await resizeToSquareJpeg(img)
-  const path = `avatars/${boardId}/${kidId}.jpg`
+  const path = `boards/${boardId}/kids/${kidId}/avatar.jpg`
   const objectRef = storageRef(storage, path)
   // Cache-bust by adding a timestamp metadata so the browser refetches when
   // the same kid uploads a new photo (the URL stays the same path-wise).
@@ -68,7 +70,7 @@ export async function uploadKidAvatar({ boardId, kidId, file }) {
 
 export async function deleteKidAvatar({ boardId, kidId }) {
   try {
-    const objectRef = storageRef(storage, `avatars/${boardId}/${kidId}.jpg`)
+    const objectRef = storageRef(storage, `boards/${boardId}/kids/${kidId}/avatar.jpg`)
     await deleteObject(objectRef)
   } catch (err) {
     // 404 is fine — nothing to delete.

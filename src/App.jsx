@@ -58,6 +58,8 @@ const Join = lazy(() => import('./pages/Join'))
 const Board = lazy(() => import('./pages/Board'))
 const PrintSheet = lazy(() => import('./pages/PrintSheet'))
 const StyleGuide = lazy(() => import('./pages/StyleGuide'))
+const Privacy = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
+const Terms = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms })))
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -89,6 +91,8 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/action" element={<AuthAction />} />
         <Route path="/join/:code" element={<Join />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route
           path="/board/:boardId"
           element={

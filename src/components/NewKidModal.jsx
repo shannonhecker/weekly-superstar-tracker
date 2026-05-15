@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { THEMES, KID_AVATARS } from '../lib/themes'
 import Modal from './Modal'
 import EarthyDatePicker from './EarthyDatePicker'
+import ParentConsentGate from './ParentConsentGate'
 
 // Single-screen "Add a superstar" modal: name + avatar emoji + theme +
 // optional birthday. Only the name is required. Replaces the legacy
@@ -19,6 +20,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
   const [avatarEmoji, setAvatarEmoji] = useState(null)
   const [theme, setTheme] = useState(defaultTheme)
   const [birthday, setBirthday] = useState('')
+  const [parentConsent, setParentConsent] = useState(false)
   const [busy, setBusy] = useState(false)
 
   // Reset every time the modal re-opens so a previously-cancelled draft
@@ -29,6 +31,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
     setAvatarEmoji(null)
     setTheme(themeKeys[kidCount % themeKeys.length])
     setBirthday('')
+    setParentConsent(false)
     setBusy(false)
   }, [open, kidCount])
 
@@ -53,6 +56,9 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
 
   return (
     <Modal open={open} onClose={busy ? undefined : onClose} emoji="⭐" title="Add a superstar">
+      {!parentConsent ? (
+        <ParentConsentGate compact onAccept={() => setParentConsent(true)} />
+      ) : (
       <form onSubmit={handleSubmit}>
         <div className="max-h-[65vh] overflow-y-auto pr-1">
           {/* Name */}
@@ -174,6 +180,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
           </button>
         </div>
       </form>
+      )}
     </Modal>
   )
 }

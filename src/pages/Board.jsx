@@ -22,6 +22,8 @@ import Modal from '../components/Modal'
 import Icon from '../components/Icon'
 import { useToast } from '../contexts/ToastContext'
 import { consumeUpgradeFlag } from '../lib/upgrade-flag'
+import { deleteAccountCascade, deletionRequiresPassword } from '../lib/deleteAccount'
+import { formatAuthError } from '../lib/authErrors'
 import WeeklySummary from '../components/WeeklySummary'
 import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
@@ -80,6 +82,10 @@ export default function Board() {
   const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [deleteBusy, setDeleteBusy] = useState(false)
   const [shareGateOpen, setShareGateOpen] = useState(false)
   const toast = useToast()
   const isAnonymous = !!user?.isAnonymous
@@ -238,6 +244,26 @@ export default function Board() {
     navigate('/', { replace: true })
   }
 
+  const needsDeletePassword = deletionRequiresPassword(user)
+  const onDeleteAccount = async () => {
+    if (!user || deleteBusy) return
+    setDeleteError('')
+    if (needsDeletePassword && !deletePassword) {
+      setDeleteError('Enter your password to confirm.')
+      return
+    }
+    setDeleteBusy(true)
+    try {
+      await deleteAccountCascade(user, deletePassword)
+      toast.success('Your account and saved family data were deleted.')
+      navigate('/', { replace: true })
+    } catch (err) {
+      setDeleteError(formatAuthError(err))
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
   // End-of-week summary: when a rollover has just happened, show each kid's recap
   // modal once. We detect "just happened" by looking at the most recent weekHistory
   // entry whose weekKey is BEFORE the current week, and remember the shown entry
@@ -363,6 +389,20 @@ export default function Board() {
                     >
                       <Icon name="sign-out" size={18} />
                       <span>Sign out</span>
+                    </button>
+                  )}
+                  {user && !isAnonymous && (
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false)
+                        setDeletePassword('')
+                        setDeleteError('')
+                        setDeleteAccountOpen(true)
+                      }}
+                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-[#B85450] hover:bg-[#F8E5DF] flex items-center gap-2"
+                    >
+                      <Icon name="delete" size={18} />
+                      <span>Delete account</span>
                     </button>
                   )}
                 </div>
@@ -535,6 +575,62 @@ export default function Board() {
           <button
             type="button"
             onClick={() => setSignOutOpen(false)}
+            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={deleteAccountOpen}
+        onClose={deleteBusy ? undefined : () => setDeleteAccountOpen(false)}
+        emoji="🗑️"
+        title="Delete account?"
+      >
+        <div className="flex flex-col gap-3 mt-2">
+          <p className="text-sm text-earthy-cocoaSoft text-center font-bold">
+            This permanently removes your sign-in and family spaces you manage. Shared spaces stay with their admin.
+          </p>
+          {needsDeletePassword ? (
+            <label className="text-left">
+              <span className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
+                Confirm with your password
+              </span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => {
+                  setDeletePassword(e.target.value)
+                  if (deleteError) setDeleteError('')
+                }}
+                autoComplete="current-password"
+                className="w-full px-4 py-3 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
+              />
+            </label>
+          ) : (
+            <p className="text-xs text-earthy-cocoaSoft text-center font-bold">
+              You will confirm once more with your sign-in provider.
+            </p>
+          )}
+          {deleteError && (
+            <div role="alert" className="px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+              {deleteError}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onDeleteAccount}
+            disabled={deleteBusy}
+            style={{ color: '#FFFAF0', backgroundColor: '#B85450' }}
+            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all disabled:opacity-50"
+          >
+            {deleteBusy ? 'Deleting…' : 'Delete my account'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeleteAccountOpen(false)}
+            disabled={deleteBusy}
             className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
           >
             Cancel
