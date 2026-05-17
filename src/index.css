@@ -371,7 +371,7 @@ html, body, #root { height: 100%; }
   }
 }
 body {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Nunito', system-ui, sans-serif;
   background: #FFFAF0; /* earthy.ivory */
   color: #5A3A2E; /* earthy.cocoa */
   -webkit-font-smoothing: antialiased;

@@ -62,7 +62,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         onClick={openDetails}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails() } }}
         className="rounded-2xl p-3 h-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
-        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
+        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${colors.earthy.divider}` }}
       >
         <div className="flex items-center justify-between mb-1 gap-2">
           <div className="text-xs font-bold truncate" style={{ color: theme.deeper }}>

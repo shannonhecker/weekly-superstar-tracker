@@ -56,7 +56,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
           className="w-full h-full text-left rounded-2xl p-3 font-bold text-xs font-jakarta"
           style={{
             background: colors.earthy.card,
-            border: `2px dashed ${theme.accent}99`,
+            border: `2px dashed ${colors.earthy.divider}`,
             color: theme.deeper,
           }}
         >
@@ -71,7 +71,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
   return (
     <div
       className="rounded-2xl p-3 h-full shadow-earthy-card font-jakarta"
-      style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
+      style={{ backgroundColor: colors.earthy.card, border: `1px solid ${colors.earthy.divider}` }}
     >
       <div className="flex items-center justify-between mb-1.5">
         <div className="font-bold text-xs truncate text-earthy-cocoa">🎁 {reward.label}</div>

@@ -12,9 +12,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Legacy direction (Fredoka + Nunito) — still used by every existing
-        // surface. Earthy direction adds 'jakarta' as the new default-ish
-        // family that future surfaces consume.
+        // `jakarta` remains as a compatibility alias for existing surfaces,
+        // but all typography tokens resolve to Nunito.
         display: typography.fonts.display,
         body: typography.fonts.body,
         jakarta: typography.earthy.body,

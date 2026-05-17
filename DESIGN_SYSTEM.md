@@ -40,12 +40,11 @@ tokens — they're runtime data, not design decisions.
 
 ## Typography
 
-Two fonts. Two weights per screen, cap.
+One font. Two weights per screen, cap.
 
-- **Fredoka** (`font-display`) — used ONLY for: board title, kid name, score numerals,
-  stage titles. Weight 900.
-- **Nunito** (`font-body`) — everything else. Weight 700 (bold) for labels, 400
-  (normal) for body copy.
+- **Nunito** (`font-display`, `font-body`, and compatibility `font-jakarta`) —
+  used everywhere. Heavy weights (700–900) for display, labels, and metrics;
+  400–600 for body and dense UI.
 
 **Do not mix** `font-extrabold` (800) and `font-black` (900) on the same screen. Pick
 one per role. This is the most common current violation in the codebase.

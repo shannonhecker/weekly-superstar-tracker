@@ -182,7 +182,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         onClick={openGallery}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGallery() } }}
         className="rounded-2xl p-3 flex items-center gap-3 h-full overflow-hidden w-full text-left active:scale-[0.98] transition-transform cursor-pointer shadow-earthy-card font-jakarta"
-        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${theme.accent}55` }}
+        style={{ backgroundColor: colors.earthy.card, border: `1px solid ${colors.earthy.divider}` }}
       >
         <div
           className={`relative shrink-0 flex items-center justify-center overflow-hidden ${levelUp ? 'level-up-burst' : ''}`}

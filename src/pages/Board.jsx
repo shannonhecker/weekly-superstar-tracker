@@ -39,17 +39,15 @@ const HATCH_GOAL = 60
 
 const BOARD_SECTIONS = [
   { id: 'top', label: 'Home', icon: 'home' },
-  { id: 'today', label: 'Today', icon: 'calendar' },
   { id: 'activity', label: 'Activities', icon: 'tasks' },
   { id: 'treasure-progress', label: 'Treasure & Progress', icon: 'reward' },
-  { id: 'settings', label: 'Settings', icon: 'menu-more' },
 ]
 
 function boardSectionFromPath(pathname) {
   const section = pathname.split('/').filter(Boolean)[2]
   if (section === 'activity') return 'activity'
   if (section === 'treasure' || section === 'progress') return 'treasure-progress'
-  if (section === 'more') return 'settings'
+  if (section === 'more') return 'top'
   return 'top'
 }
 
@@ -460,7 +458,7 @@ export default function Board() {
   }, [pendingGalleryOpen, location.hash])
 
   useEffect(() => {
-    if (loading || kids.length === 0 || legacySection === 'top' || location.pathname === `/board/${boardId}`) return
+    if (loading || kids.length === 0 || location.pathname === `/board/${boardId}`) return
     navigate(boardSectionHref(boardId, legacySection, activeKid?.id), { replace: true })
   }, [loading, kids.length, legacySection, location.pathname, boardId, activeKid?.id, navigate])
 
@@ -543,13 +541,24 @@ export default function Board() {
                             {(activeKid.activities?.length ?? 0)} of 10
                           </span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => { setMenuOpen(false); setEditKidOpen(true) }}
+                          className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
+                        >
+                          <Icon name="edit" size={18} />
+                          <span className="flex-1">Edit kid</span>
+                          <span className="text-xs text-earthy-cocoaSoft truncate max-w-[120px]">
+                            {activeKid.name}
+                          </span>
+                        </button>
                         <Link
                           to={`/board/${boardId}/print/${activeKid.id}`}
                           onClick={() => setMenuOpen(false)}
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="print" size={18} />
-                          <span>Print this week's sheet</span>
+                          <span>Print sheet</span>
                         </Link>
                         <button
                           type="button"
@@ -557,7 +566,7 @@ export default function Board() {
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="reward" size={18} />
-                          <span>Open pet collection</span>
+                          <span>Pet collection</span>
                         </button>
                       </>
                     )}
@@ -584,7 +593,7 @@ export default function Board() {
                         className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                       >
                         <Icon name="sign-out" size={18} />
-                        <span>Sign out</span>
+                        <span>{isAnonymous ? 'Discard demo' : 'Sign out'}</span>
                       </button>
                     )}
                     {user && !isAnonymous && (
@@ -626,14 +635,7 @@ export default function Board() {
                   replaySummary={replaySummary}
                   onEditKid={() => setEditKidOpen(true)}
                   onEditTasks={() => setTasksOpen(true)}
-                  onOpenShare={openShare}
                   onOpenCollection={openTreasureCollection}
-                  onToggleMute={toggleMute}
-                  muted={muted}
-                  onSignOut={() => setSignOutOpen(true)}
-                  onDeleteAccount={requestDeleteAccount}
-                  user={user}
-                  isAnonymous={isAnonymous}
                 />
               )}
             </>
@@ -885,15 +887,7 @@ function BoardSinglePage({
   onEditKid,
   onEditTasks,
   onOpenCollection,
-  onOpenShare,
-  onToggleMute,
-  muted,
-  onSignOut,
-  onDeleteAccount,
-  user,
-  isAnonymous,
 }) {
-  const celebrations = getRecentCelebrations(activeKid)
   const discoveries = getDiscoveryEntries(activeKid)
   const weekly = getWeeklyBreakdown(activeKid)
   const earnedAchievements = evaluateAchievements(activeKid || {}, { totalStars: activeStars, days: getCurrentWeek().days })
@@ -908,17 +902,6 @@ function BoardSinglePage({
         <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
         <BirthdayBanner kid={activeKid} />
         <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
-      </section>
-
-      <section id="today" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
-        <SectionHeading label="Today" />
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] gap-4">
-          <TodayCard kid={activeKid} activeTheme={activeTheme} actionHref={boardSectionHref(boardId, 'activity', activeKid.id)} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            <FamilyTodayList boardId={boardId} kids={kids} activeKidId={activeKid.id} />
-            <RecentCelebrations celebrations={celebrations} />
-          </div>
-        </div>
       </section>
 
       <section id="activity" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
@@ -954,9 +937,11 @@ function BoardSinglePage({
           <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
           <TreasureProgressCard kid={activeKid} activeStars={activeStars} activeTheme={activeTheme} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
-          <StreakCounter kid={activeKid} />
-          <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 mt-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StreakCounter kid={activeKid} />
+            <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
+          </div>
           <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
@@ -978,33 +963,6 @@ function BoardSinglePage({
         </button>
       </section>
 
-      <section id="settings" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
-        <SectionHeading label="Settings" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-          <ActionTile icon="tasks" label="Edit tasks" subtitle={`${activeKid.activities?.length ?? 0} of 10 active`} onClick={onEditTasks} />
-          <ActionTile icon="edit" label="Edit kid" subtitle={activeKid.name} onClick={onEditKid} />
-          <ActionTile icon="print" label="Print sheet" subtitle="This week's page" to={`/board/${boardId}/print/${activeKid.id}`} />
-          <ActionTile icon="share" label="Share board" subtitle={isAnonymous ? 'Save first to share' : 'Invite family'} onClick={onOpenShare} />
-        </div>
-
-        <SectionHeading label="Family settings" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-          <ActionTile icon={muted ? 'volume-off' : 'volume-on'} label={muted ? 'Unmute sounds' : 'Mute sounds'} subtitle="Sticker feedback" onClick={onToggleMute} />
-          <ActionTile icon="reward" label="Pet collection" subtitle="Treasure room" onClick={onOpenCollection} />
-        </div>
-
-        {user && (
-          <>
-            <SectionHeading label="Account" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <ActionTile icon="sign-out" label={isAnonymous ? 'Discard demo' : 'Sign out'} subtitle={isAnonymous ? 'Demo board only' : 'Leave this device'} onClick={onSignOut} />
-              {!isAnonymous && (
-                <ActionTile icon="delete" label="Delete account" subtitle="Permanent" onClick={onDeleteAccount} danger />
-              )}
-            </div>
-          </>
-        )}
-      </section>
     </BoardPanel>
   )
 }
@@ -1013,7 +971,7 @@ function TodayCard({ kid, activeTheme, actionHref }) {
   const today = getTodayStats(kid)
   const pct = today.total > 0 ? Math.round((today.done / today.total) * 100) : 0
   const body = (
-    <div className="rounded-2xl p-4 bg-earthy-card shadow-earthy-card border border-earthy-divider h-full">
+    <div className="rounded-2xl p-4 bg-earthy-card shadow-earthy-card border border-earthy-divider">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-xs font-bold uppercase tracking-wide" style={{ color: activeTheme.deeper }}>
@@ -1057,7 +1015,7 @@ function TodayCard({ kid, activeTheme, actionHref }) {
 
   if (!actionHref) return body
   return (
-    <Link to={actionHref} className="block h-full active:scale-[0.99] transition-transform">
+    <Link to={actionHref} className="block active:scale-[0.99] transition-transform">
       {body}
     </Link>
   )
@@ -1207,35 +1165,6 @@ function MiniStat({ label, value, compact = false }) {
       <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{label}</div>
       <div className={`${compact ? 'text-xl' : 'text-2xl'} font-extrabold text-earthy-cocoa mt-1`}>{value}</div>
     </div>
-  )
-}
-
-function ActionTile({ icon, label, subtitle, onClick, to, danger = false }) {
-  const className = `min-h-[68px] rounded-2xl px-4 py-3 text-left border flex items-center gap-3 transition-all active:scale-[0.99] ${
-    danger
-      ? 'bg-[#F8E5DF] border-[#E8B7AA] text-[#8A3A2E] hover:bg-[#F4D8CF]'
-      : 'bg-earthy-ivory border-earthy-divider text-earthy-cocoa hover:bg-earthy-cream'
-  }`
-  const content = (
-    <>
-      <span className="w-10 h-10 rounded-full bg-earthy-card flex items-center justify-center shrink-0">
-        <Icon name={icon} size={20} />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-extrabold truncate">{label}</span>
-        <span className="block text-xs font-bold opacity-70 truncate">{subtitle}</span>
-      </span>
-    </>
-  )
-
-  if (to) {
-    return <Link to={to} className={className}>{content}</Link>
-  }
-
-  return (
-    <button type="button" onClick={onClick} className={className}>
-      {content}
-    </button>
   )
 }
 

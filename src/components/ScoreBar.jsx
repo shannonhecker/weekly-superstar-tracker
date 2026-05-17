@@ -1,5 +1,5 @@
 // Full-width score progress bar — earthy palette. Score numerals are the
-// visual hero of the kid card, set in jakarta extrabold with tabular-nums
+// visual hero of the kid card, set in Nunito extrabold with tabular-nums
 // so digits don't jitter on increment. Theme accent + deeper come from the
 // retuned earthy THEMES map.
 export default function ScoreBar({ total, max, theme }) {

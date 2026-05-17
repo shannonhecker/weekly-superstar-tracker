@@ -6,7 +6,7 @@
 //
 // Sections:
 //   1. Palette — earthy + legacy side by side
-//   2. Typography — Plus Jakarta Sans scale
+//   2. Typography — Nunito scale
 //   3. Buttons — primary / secondary / tertiary on cream
 //   4. Cards — three elevation levels on cream / sage / ivory
 //   5. Hexagonal level badge — prototype for replacing star+count
@@ -70,7 +70,7 @@ function HexBadge({ tier = 4, size = 80 }) {
         x="50"
         y="60"
         textAnchor="middle"
-        fontFamily="Plus Jakarta Sans, system-ui"
+        fontFamily="Nunito, system-ui"
         fontWeight="800"
         fontSize="34"
         fill="#FFFAF0"
@@ -164,7 +164,7 @@ export default function StyleGuide() {
           </div>
         </Section>
 
-        <Section title="Typography" description="Plus Jakarta Sans — single family, two weight ranges. 700–800 for display, 400–600 for body.">
+        <Section title="Typography" description="Nunito — single family, two weight ranges. 700–900 for display, 400–600 for body.">
           <div className="rounded-2xl bg-earthy-cream p-6 shadow-earthy-soft space-y-4">
             {typeScale.map((t) => (
               <div key={t.token} className="border-b border-earthy-divider last:border-b-0 pb-3 last:pb-0">
