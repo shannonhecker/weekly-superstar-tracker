@@ -19,7 +19,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
   const setActive = (id) => {
     const params = new URLSearchParams(location.search)
     params.set('kid', id)
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true })
+    navigate(`${location.pathname}?${params.toString()}${location.hash}`, { replace: true })
   }
 
   const addKid = async ({ name, avatarEmoji, theme, birthday }) => {
