@@ -876,6 +876,10 @@ function BoardSinglePage({
         <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
         <BirthdayBanner kid={activeKid} />
         <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 mt-5">
+          <TodayCard kid={activeKid} activeTheme={activeTheme} />
+          <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
+        </div>
       </section>
 
       <section id="activity" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
@@ -890,32 +894,19 @@ function BoardSinglePage({
             <span>Edit tasks</span>
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-4 mb-5">
-          <TodayCard kid={activeKid} activeTheme={activeTheme} />
-          <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider flex flex-col justify-between gap-3">
-            <div>
-              <div className="text-xs font-bold uppercase text-earthy-cocoaSoft tracking-wide">Today's star spots</div>
-              <div className="text-sm font-extrabold text-earthy-cocoa mt-1">
-                {(activeKid.activities || []).length} weekly activities
-              </div>
-            </div>
-            <MiniStat label="Week total" value={`${activeStars}/${activeMax}`} compact />
-          </div>
-        </div>
         <ActivityGrid kid={activeKid} boardId={boardId} />
       </section>
 
       <section id="treasure-progress" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
         <SectionHeading label="Treasure & Progress" />
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4">
-          <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
-          <TreasureProgressCard kid={activeKid} activeStars={activeStars} activeTheme={activeTheme} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 mt-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <StreakCounter kid={activeKid} />
             <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
           </div>
+          <TreasureProgressCard kid={activeKid} activeStars={activeStars} activeTheme={activeTheme} />
+        </div>
+        <div className="mt-5">
           <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
