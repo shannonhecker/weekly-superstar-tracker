@@ -431,17 +431,6 @@ export default function Board() {
     }
   }
 
-  const jumpToSection = (sectionId) => {
-    setMenuOpen(false)
-    const href = boardSectionHref(boardId, sectionId, activeKid?.id)
-    const nextHash = sectionId && sectionId !== 'top' ? `#${sectionId}` : ''
-    if (location.pathname === `/board/${boardId}` && location.hash === nextHash) {
-      scrollToSection(sectionId)
-      return
-    }
-    navigate(href)
-  }
-
   const openTreasureCollection = () => {
     if (location.hash === '#treasure-progress' && mysteryPetRef.current) {
       mysteryPetRef.current.openGallery()
@@ -513,21 +502,6 @@ export default function Board() {
                 <>
                   <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl overflow-hidden shadow-earthy-pop py-1 min-w-[260px]">
-                    <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
-                      Jump to
-                    </div>
-                    {BOARD_SECTIONS.map((section) => (
-                      <button
-                        key={section.id}
-                        type="button"
-                        onClick={() => jumpToSection(section.id)}
-                        className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                      >
-                        <Icon name={section.icon} size={18} />
-                        <span>{section.label}</span>
-                      </button>
-                    ))}
-                    <div className="my-1 h-px bg-earthy-divider" />
                     {activeKid && (
                       <>
                         <button
