@@ -1,5 +1,6 @@
 import {
   MdMoreHoriz,
+  MdHome,
   MdShare,
   MdSave,
   MdCalendarToday,
@@ -14,6 +15,8 @@ import {
   MdRedeem,
   MdClose,
   MdArrowBack,
+  MdChevronLeft,
+  MdChevronRight,
 } from 'react-icons/md'
 
 // Curated Material-icon registry. Keep this list short — every icon
@@ -26,6 +29,7 @@ import {
 // are part of the kid-facing brand voice.
 const ICONS = {
   'menu-more': MdMoreHoriz,
+  home: MdHome,
   share: MdShare,
   save: MdSave,
   calendar: MdCalendarToday,
@@ -40,6 +44,8 @@ const ICONS = {
   reward: MdRedeem,
   close: MdClose,
   back: MdArrowBack,
+  'chevron-left': MdChevronLeft,
+  'chevron-right': MdChevronRight,
 }
 
 export default function Icon({ name, size = 20, className = '', style, ...rest }) {

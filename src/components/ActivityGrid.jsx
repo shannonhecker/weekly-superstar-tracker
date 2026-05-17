@@ -38,6 +38,8 @@ export default function ActivityGrid({ kid, boardId }) {
   const stickers = kid.stickers || {}
   const activities = kid.activities || []
   const today = new Date()
+  const todayIndex = days.findIndex((d) => d.date.toDateString() === today.toDateString())
+  const safeTodayIndex = todayIndex >= 0 ? todayIndex : 0
   const toast = useToast()
   const theme = THEMES[kid.theme] || THEMES.football
   // Slightly stronger tint than previous (1A → 33) — earthy accents are
@@ -81,9 +83,12 @@ export default function ActivityGrid({ kid, boardId }) {
         // Daily clean-sweep: use the POST-toggle checks so uncheck/re-check
         // edges don't false-fire via the stale closure.
         const nextChecks = { ...checks, [key]: next }
+        const dayIndex = days.findIndex((d) => d.key === dayKey)
+        const isoDay = dayIndex >= 0 ? dayIndex + 1 : 1
+        const scheduledForDay = activities.filter((a) => isDayScheduled(a.daysOfWeek, isoDay))
         const allDone =
-          activities.length > 0 &&
-          activities.every((a) => nextChecks[`${a.id}-${dayKey}`])
+          scheduledForDay.length > 0 &&
+          scheduledForDay.every((a) => nextChecks[`${a.id}-${dayKey}`])
         if (allDone) {
           setTimeout(() => { celebrate('day'); play('cheer') }, 250)
         }
@@ -97,88 +102,111 @@ export default function ActivityGrid({ kid, boardId }) {
     <>
     <MysteryBox open={mysteryOpen} onClose={() => setMysteryOpen(false)} prize={mysteryPrize} />
     <div
-      className="rounded-2xl shadow-earthy-card overflow-x-auto font-jakarta p-2 sm:p-3 bg-earthy-card"
+      className="rounded-3xl shadow-earthy-card overflow-x-auto font-jakarta p-3 sm:p-4 bg-earthy-card"
       style={{ border: '1px solid #F0E1C8' }}
     >
-      <table className="w-full text-center text-xs">
-        <thead>
-          <tr className="text-earthy-cocoaSoft">
-            <th className="text-left pl-3 py-3 font-bold sticky left-0 z-10 uppercase tracking-wide rounded-l-2xl bg-[#FFF4DF]">Activity</th>
-            {days.map((d) => {
-              const isToday =
-                d.date.toDateString() === today.toDateString()
-              const isWeekend = d.label === 'Sat' || d.label === 'Sun'
-              return (
-                <th
-                  key={d.key}
-                  className="px-1 py-3 font-bold relative bg-[#FFF4DF]"
-                  style={isWeekend ? { background: weekendTint } : undefined}
-                >
-                  <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{d.label}</div>
-                  <div className={`text-[11px] font-bold ${isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoaSoft'}`}>
-                    {monthShort(d.date)} {d.date.getDate()}
-                  </div>
-                  {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-earthy-terracotta rounded-full" />}
-                </th>
-              )
-            })}
-            <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-2xl bg-[#FFF4DF]">Total</th>
-          </tr>
-        </thead>
-        <tbody className="[&_tr:first-child_td]:pt-3">
-          {activities.map((a, idx) => {
-            const rowTotal = days.filter((d) => checks[`${a.id}-${d.key}`]).length
-            const rowBg = idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'
-            return (
-              <tr key={a.id} className={rowBg}>
-                <td
-                  className={`text-left pl-3 py-2 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'}`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0"
-                      style={{ backgroundColor: `${a.color || '#A8E6C1'}33` }}
-                    >
-                      {a.emoji}
-                    </span>
-                    <span className="font-bold text-earthy-cocoa text-xs">{a.label}</span>
-                  </div>
-                </td>
-                {days.map((d) => {
-                  const checked = !!checks[`${a.id}-${d.key}`]
+      <div className="mb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+        <div>
+          <h3 className="text-xl sm:text-2xl font-extrabold text-earthy-cocoa leading-tight">
+            This week
+          </h3>
+          <p className="text-sm font-bold text-earthy-cocoaSoft">
+            Tap a circle to add a sticker star.
+          </p>
+        </div>
+        <div className="text-xs font-extrabold text-earthy-cocoaSoft">
+          Today is {days[safeTodayIndex]?.label}, {days[safeTodayIndex] ? `${monthShort(days[safeTodayIndex].date)} ${days[safeTodayIndex].date.getDate()}` : ''}
+        </div>
+      </div>
+
+      <table className="w-full min-w-[760px] text-center text-xs">
+            <thead>
+              <tr className="text-earthy-cocoaSoft">
+                <th className="text-left pl-4 py-3 font-bold sticky left-0 z-10 uppercase tracking-wide rounded-l-2xl bg-[#FFF4DF]">Activity</th>
+                {days.map((d, dayIndex) => {
+                  const isToday = dayIndex === safeTodayIndex
                   const isWeekend = d.label === 'Sat' || d.label === 'Sun'
                   return (
-                    <td
+                    <th
                       key={d.key}
-                      className="p-1"
+                      className="px-1 py-3 font-bold relative bg-[#FFF4DF]"
                       style={isWeekend ? { background: weekendTint } : undefined}
                     >
-                      <button
-                        onClick={() => toggle(a.id, d.key)}
-                        aria-label={`${checked ? 'Uncheck' : 'Check'} ${a.label} for ${d.label}${checked ? ' (currently completed)' : ''}`}
-                        aria-pressed={checked}
-                        className="activity-check-cell w-11 h-11 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto"
-                        style={{
-                          background: checked ? `${a.color}33` : colors.earthy.card,
-                          border: checked ? `2px solid ${a.color}` : `2px solid ${colors.earthy.divider}`,
-                        }}
-                      >
-                        {checked
-                          ? <span key={stickers[`${a.id}-${d.key}`] || ''} className="pop-in inline-block">{stickers[`${a.id}-${d.key}`] || fallbackStickerFor(a)}</span>
-                          : <span className="text-earthy-cocoaSoft/40 text-base">○</span>}
-                      </button>
-                    </td>
+                      <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{d.label}</div>
+                      <div className={`text-[11px] font-bold ${isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoaSoft'}`}>
+                        {monthShort(d.date)} {d.date.getDate()}
+                      </div>
+                      {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-earthy-terracotta rounded-full" />}
+                    </th>
                   )
                 })}
-                <td className="pr-3 font-bold text-earthy-cocoaSoft text-xs">{rowTotal}/7</td>
+                <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-2xl bg-[#FFF4DF]">Total</th>
               </tr>
-            )
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody className="[&_tr:first-child_td]:pt-3">
+              {activities.map((a, idx) => {
+                const color = a.color || theme.accent
+                const scheduledDays = days.filter((_, dayIndex) => isDayScheduled(a.daysOfWeek, dayIndex + 1))
+                const rowTotal = scheduledDays.filter((d) => checks[`${a.id}-${d.key}`]).length
+                const rowBg = idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'
+                const label = a.label || 'Activity'
+                return (
+                  <tr key={a.id} className={rowBg}>
+                    <td
+                      className={`text-left pl-4 py-3 sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0"
+                          style={{ backgroundColor: `${color}33` }}
+                        >
+                          {a.emoji || '⭐'}
+                        </span>
+                        <span className="font-extrabold text-earthy-cocoa text-sm truncate max-w-[170px]">{label}</span>
+                      </div>
+                    </td>
+                    {days.map((d, dayIndex) => {
+                      const checked = !!checks[`${a.id}-${d.key}`]
+                      const scheduled = isDayScheduled(a.daysOfWeek, dayIndex + 1)
+                      const isWeekend = d.label === 'Sat' || d.label === 'Sun'
+                      return (
+                        <td
+                          key={d.key}
+                          className="p-1"
+                          style={isWeekend ? { background: weekendTint } : undefined}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => scheduled && toggle(a.id, d.key)}
+                            disabled={!scheduled}
+                            aria-label={`${checked ? 'Uncheck' : 'Check'} ${label} for ${d.label}${!scheduled ? ' (not scheduled)' : checked ? ' (currently completed)' : ''}`}
+                            aria-pressed={checked}
+                            className="activity-check-cell w-12 h-12 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
+                            style={{
+                              background: checked ? `${color}33` : colors.earthy.card,
+                              border: checked ? `2px solid ${color}` : `2px solid ${colors.earthy.divider}`,
+                            }}
+                          >
+                            {checked
+                              ? <span key={stickers[`${a.id}-${d.key}`] || ''} className="pop-in inline-block">{stickers[`${a.id}-${d.key}`] || fallbackStickerFor(a)}</span>
+                              : <span className="text-earthy-cocoaSoft/40 text-base">{scheduled ? '○' : '•'}</span>}
+                          </button>
+                        </td>
+                      )
+                    })}
+                    <td className="pr-3 font-bold text-earthy-cocoaSoft text-xs">{rowTotal}/{scheduledDays.length}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
     </div>
     </>
   )
+}
+
+function isDayScheduled(daysOfWeek, isoIndex) {
+  return !daysOfWeek || daysOfWeek.length === 0 || daysOfWeek.includes(isoIndex)
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']

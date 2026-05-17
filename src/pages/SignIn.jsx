@@ -11,6 +11,8 @@ import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { safeRedirect } from '../lib/safeRedirect'
 import PrimaryButton from '../components/PrimaryButton'
+import Logo from '../components/Logo'
+import ThemeScene from '../components/ThemeScene'
 
 // First-time OAuth users on the SignIn page have no board yet — give them
 // sensible defaults so they land on a working board instead of the marketing
@@ -37,6 +39,7 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [failedAttempts, setFailedAttempts] = useState(0)
   const [lockedUntil, setLockedUntil] = useState(0)
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -100,105 +103,167 @@ export default function SignIn() {
   const onGoogle = () => onOAuth(new GoogleAuthProvider())
 
   return (
-    <main id="main" className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
-      <form
-        onSubmit={onSubmit}
-        className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full"
-      >
-        <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-1">
-          Welcome back
-        </h1>
-        <p className="text-earthy-cocoaSoft text-sm mb-6">Sign in to your board.</p>
-
-        <label htmlFor="signin-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Email
-        </label>
-        <input
-          id="signin-email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 mb-4 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-        />
-
-        <label htmlFor="signin-password" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Password
-        </label>
-        <input
-          id="signin-password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-        />
-
-        <div className="flex justify-end mb-2">
-          <Link
-            to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-            className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
-        {error && (
-          <div role="alert" className="mb-3 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
-            {error}
+    <main id="main" className="min-h-screen bg-earthy-ivory px-5 py-6 sm:py-10 font-jakarta">
+      <div className="mx-auto grid w-full max-w-5xl items-stretch gap-5 lg:grid-cols-[1fr_0.86fr]">
+        <section
+          className="hidden overflow-hidden rounded-3xl border border-earthy-divider bg-earthy-card shadow-earthy-lifted lg:flex lg:flex-col"
+          aria-label="Winking Star"
+        >
+          <div className="h-[320px] overflow-hidden">
+            <ThemeScene themeKey="animals" height="320px" />
           </div>
-        )}
+          <div className="flex flex-1 flex-col justify-between p-8">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <Logo size={52} />
+                <span className="text-2xl font-extrabold text-earthy-cocoa">
+                  Winking Star
+                </span>
+              </div>
+              <h1 className="max-w-xl text-4xl font-extrabold leading-tight text-earthy-cocoa">
+                Back to the family board.
+              </h1>
+              <p className="mt-4 max-w-lg text-base font-bold leading-relaxed text-earthy-cocoaSoft">
+                Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+              </p>
+            </div>
+            <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+              {['Big taps', 'Weekly view', 'Pet pals'].map((label) => (
+                <div key={label} className="rounded-2xl border border-earthy-divider bg-earthy-ivory px-3 py-3 text-sm font-extrabold text-earthy-cocoa">
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <PrimaryButton type="submit" disabled={loading} className="mt-2">
-          {loading ? 'Signing in…' : 'Sign in'}
-        </PrimaryButton>
+        <form
+          onSubmit={onSubmit}
+          className="flex min-h-[calc(100vh-48px)] flex-col justify-center rounded-3xl border border-earthy-divider bg-earthy-card p-6 shadow-earthy-lifted sm:p-8 lg:min-h-[720px]"
+        >
+          <div className="mb-7 flex items-center gap-3 lg:hidden">
+            <Logo size={48} />
+            <div>
+              <div className="text-xl font-extrabold text-earthy-cocoa">
+                Winking Star
+              </div>
+              <div className="text-sm font-bold text-earthy-cocoaSoft">
+                Family achievement board
+              </div>
+            </div>
+          </div>
 
-        {/* Divider — same rule as SignUp screen 4 so the two screens read as a pair. */}
-        <div className="flex items-center gap-3 my-6" role="presentation">
-          <span className="flex-1 h-px bg-earthy-divider" />
-          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">or</span>
-          <span className="flex-1 h-px bg-earthy-divider" />
-        </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-earthy-cocoa sm:text-4xl">
+            Sign in
+          </h2>
+          <p className="mt-2 text-sm font-bold leading-relaxed text-earthy-cocoaSoft sm:text-base">
+            Use the parent account connected to your family board.
+          </p>
 
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={onApple}
-            disabled={loading}
-            aria-label="Continue with Apple"
-            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
-          >
-            <span aria-hidden="true"></span> Continue with Apple
-          </button>
-          <button
-            type="button"
-            onClick={onGoogle}
-            disabled={loading}
-            aria-label="Continue with Google"
-            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
-          >
-            <span aria-hidden="true">G</span> Continue with Google
-          </button>
-        </div>
+          <div className="mt-7">
+            <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
+              Email
+            </label>
+            <input
+              id="signin-email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+            />
+          </div>
 
-        <p className="text-center mt-6 text-sm text-earthy-cocoaSoft">
-          No account?{' '}
-          <Link to="/signup" className="text-earthy-cocoa font-bold underline underline-offset-2">
-            Create one
-          </Link>
-        </p>
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
+                Password
+              </label>
+              <Link
+                to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <div className="relative">
+              <input
+                id="signin-password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
 
-        <p className="text-center mt-3 text-xs text-earthy-cocoaSoft">
-          <a
-            href="mailto:hello@winkingstar.com?subject=Help%20signing%20in%20to%20Winking%20Star"
-            className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
-          >
-            Need help?
-          </a>
-        </p>
-      </form>
+          {error && (
+            <div role="alert" className="mt-4 rounded-2xl bg-[#F8E5DF] px-4 py-3 text-sm font-bold text-[#8A3A2E]">
+              {error}
+            </div>
+          )}
+
+          <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
+            {loading ? 'Signing in...' : 'Sign in'}
+          </PrimaryButton>
+
+          <div className="my-6 flex items-center gap-3" role="presentation">
+            <span className="h-px flex-1 bg-earthy-divider" />
+            <span className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">or</span>
+            <span className="h-px flex-1 bg-earthy-divider" />
+          </div>
+
+          <div className="grid gap-3">
+            <button
+              type="button"
+              onClick={onApple}
+              disabled={loading}
+              aria-label="Continue with Apple"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider"
+            >
+              <span aria-hidden="true" className="text-base">A</span>
+              Continue with Apple
+            </button>
+            <button
+              type="button"
+              onClick={onGoogle}
+              disabled={loading}
+              aria-label="Continue with Google"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider"
+            >
+              <span aria-hidden="true" className="text-base">G</span>
+              Continue with Google
+            </button>
+          </div>
+
+          <p className="mt-7 text-center text-sm font-bold text-earthy-cocoaSoft">
+            No account?{' '}
+            <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
+              Create one
+            </Link>
+          </p>
+
+          <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
+            <a
+              href="mailto:hello@winkingstar.com?subject=Help%20signing%20in%20to%20Winking%20Star"
+              className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
+            >
+              Need help?
+            </a>
+          </p>
+        </form>
+      </div>
     </main>
   )
 }

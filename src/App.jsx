@@ -69,6 +69,12 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  const protectedBoard = (
+    <ProtectedRoute>
+      <Board />
+    </ProtectedRoute>
+  )
+
   return (
     // Single Suspense at the route boundary — same fallback the auth
     // gate uses, so the transition between "checking auth" and "loading
@@ -95,11 +101,23 @@ export default function App() {
         <Route path="/terms" element={<Terms />} />
         <Route
           path="/board/:boardId"
-          element={
-            <ProtectedRoute>
-              <Board />
-            </ProtectedRoute>
-          }
+          element={protectedBoard}
+        />
+        <Route
+          path="/board/:boardId/activity"
+          element={protectedBoard}
+        />
+        <Route
+          path="/board/:boardId/treasure"
+          element={protectedBoard}
+        />
+        <Route
+          path="/board/:boardId/progress"
+          element={protectedBoard}
+        />
+        <Route
+          path="/board/:boardId/more"
+          element={protectedBoard}
         />
         <Route
           path="/board/:boardId/print/:kidId"

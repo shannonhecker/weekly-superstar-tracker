@@ -1,15 +1,11 @@
-// Winking Star — the brand mark.
-// Renders the actual /public/winking-star.png so the proportions match the
-// authored asset exactly (the previous hand-built SVG path mis-positioned
-// the eyes + smile and read as a "squashed" face at small sizes).
-//
-// The PNG is the original ChatGPT-authored mark. For non-React contexts
-// (favicon, share previews) the same asset is referenced directly via
-// /winking-star.png.
+// Winking Star brand mark.
+// Keep this aligned with the browser/PWA icons in /public.
 export default function Logo({ size = 32, className = '', title = 'Winking Star' }) {
+  const cornerRadius = typeof size === 'number' ? Math.max(6, Math.round(size * 0.22)) : '22%'
+
   return (
     <img
-      src="/winking-star.png"
+      src="/winking-star.png?v=20260516"
       alt={title}
       width={size}
       height={size}
@@ -20,6 +16,7 @@ export default function Logo({ size = 32, className = '', title = 'Winking Star'
         flexShrink: 0,
         userSelect: 'none',
         objectFit: 'contain',
+        borderRadius: cornerRadius,
       }}
       className={className}
     />

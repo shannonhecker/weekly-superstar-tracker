@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { doc, onSnapshot, collection, query, orderBy, updateDoc } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { auth, db } from '../lib/firebase'
@@ -13,7 +13,7 @@ import ActivitiesModal from '../components/ActivitiesModal'
 import ShareModal from '../components/ShareModal'
 import MysteryPet from '../components/MysteryPet'
 import StreakCounter from '../components/StreakCounter'
-import BadgeShelf from '../components/BadgeShelf'
+import BadgeShelf, { BADGE_TIERS } from '../components/BadgeShelf'
 import RewardGoal from '../components/RewardGoal'
 import ScoreBar from '../components/ScoreBar'
 import OfflineBanner from '../components/OfflineBanner'
@@ -33,8 +33,29 @@ import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
 import ThemeScene from '../components/ThemeScene'
 import EmptyStateScene from '../components/EmptyStateScene'
+import { ACHIEVEMENTS, evaluateAchievements } from '../lib/achievements'
 
 const HATCH_GOAL = 60
+
+const BOARD_SECTIONS = [
+  { id: 'home', label: 'Home', icon: 'home' },
+  { id: 'activity', label: 'Activity', icon: 'tasks' },
+  { id: 'treasure', label: 'Treasure', icon: 'reward' },
+  { id: 'progress', label: 'Progress', icon: 'trophy' },
+  { id: 'more', label: 'More', icon: 'menu-more' },
+]
+
+function boardSectionFromPath(pathname) {
+  const section = pathname.split('/').filter(Boolean)[2]
+  return BOARD_SECTIONS.some((item) => item.id === section) ? section : 'home'
+}
+
+function boardSectionHref(boardId, sectionId, kidId) {
+  const base = sectionId === 'home'
+    ? `/board/${boardId}`
+    : `/board/${boardId}/${sectionId}`
+  return kidId ? `${base}?kid=${encodeURIComponent(kidId)}` : base
+}
 
 function progressToStage(stars, goal) {
   if (goal <= 0) return 0
@@ -69,9 +90,89 @@ function totalStarsFor(kid) {
   return checked + bonusSum
 }
 
+function totalActivityCapFor(kid) {
+  if (!kid) return 0
+  return (kid.activities || []).reduce((sum, a) => {
+    const scheduled = a.daysOfWeek
+    return sum + (scheduled && scheduled.length > 0 ? scheduled.length : 7)
+  }, 0)
+}
+
+function isActivityScheduledForDay(daysOfWeek, isoIndex) {
+  return !daysOfWeek || daysOfWeek.length === 0 || daysOfWeek.includes(isoIndex)
+}
+
+function getTodayStats(kid) {
+  const { days } = getCurrentWeek()
+  const today = new Date()
+  const todayIndex = days.findIndex((d) => d.date.toDateString() === today.toDateString())
+  const safeTodayIndex = todayIndex >= 0 ? todayIndex : 0
+  const day = days[safeTodayIndex]
+  const isoIndex = safeTodayIndex + 1
+  const checks = kid?.checks || {}
+  const activities = kid?.activities || []
+  const scheduledActivities = activities.filter((activity) => isActivityScheduledForDay(activity.daysOfWeek, isoIndex))
+  const doneActivities = scheduledActivities.filter((activity) => checks[`${activity.id}-${day.key}`])
+
+  return {
+    day,
+    done: doneActivities.length,
+    total: scheduledActivities.length,
+    scheduledActivities,
+    doneActivities,
+  }
+}
+
+function getWeeklyBreakdown(kid) {
+  const { days } = getCurrentWeek()
+  const checks = kid?.checks || {}
+  const activities = kid?.activities || []
+  return days.map((day, index) => {
+    const scheduled = activities.filter((activity) => isActivityScheduledForDay(activity.daysOfWeek, index + 1))
+    const done = scheduled.filter((activity) => checks[`${activity.id}-${day.key}`]).length
+    return {
+      day,
+      done,
+      total: scheduled.length,
+    }
+  })
+}
+
+function getRecentCelebrations(kid, limit = 6) {
+  const { days } = getCurrentWeek()
+  const checks = kid?.checks || {}
+  const stickers = kid?.stickers || {}
+  const activities = kid?.activities || []
+  const items = []
+
+  activities.forEach((activity) => {
+    days.forEach((day, dayIndex) => {
+      const key = `${activity.id}-${day.key}`
+      if (!checks[key]) return
+      items.push({
+        key,
+        dayIndex,
+        dayLabel: day.label,
+        label: activity.label || 'Activity',
+        sticker: stickers[key] || activity.emoji || '⭐',
+      })
+    })
+  })
+
+  return items.sort((a, b) => b.dayIndex - a.dayIndex).slice(0, limit)
+}
+
+function getDiscoveryEntries(kid, limit = 4) {
+  return Object.entries(kid?.weekHistory || {})
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, limit)
+    .map(([weekKey, archive]) => ({ weekKey, archive }))
+}
+
 export default function Board() {
   const { boardId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [board, setBoard] = useState(null)
@@ -80,7 +181,6 @@ export default function Board() {
   const [shareOpen, setShareOpen] = useState(false)
   const [editKidOpen, setEditKidOpen] = useState(false)
   const [tasksOpen, setTasksOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
@@ -102,7 +202,16 @@ export default function Board() {
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { kid, archive, weekKey } or null
+  const [pendingGalleryOpen, setPendingGalleryOpen] = useState(false)
+  const [navCollapsed, setNavCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('board-nav-collapsed') === '1'
+    } catch {
+      return false
+    }
+  })
   const mysteryPetRef = useRef(null)
+  const activeSection = boardSectionFromPath(location.pathname)
 
   const toggleMute = () => {
     const next = !muted
@@ -150,10 +259,13 @@ export default function Board() {
   )
 
   useEffect(() => {
-    if (!loading && kids.length > 0 && !activeKidId) {
-      setSearchParams({ kid: kids[0].id }, { replace: true })
-    }
-  }, [loading, kids, activeKidId, setSearchParams])
+    if (loading || kids.length === 0) return
+    const activeKidExists = activeKidId && kids.some((kid) => kid.id === activeKidId)
+    if (activeKidExists) return
+    const next = new URLSearchParams(searchParams)
+    next.set('kid', kids[0].id)
+    setSearchParams(next, { replace: true })
+  }, [loading, kids, activeKidId, searchParams, setSearchParams])
 
   // Auto-rollover on Monday: when the calendar advances to a new week, archive
   // the outgoing week's pet into weekHistory, reset progress, and assign a fresh
@@ -302,17 +414,56 @@ export default function Board() {
     setSummary({ kid: activeKid, archive, weekKey, replay: true })
   }
 
+  const openShare = () => {
+    if (isAnonymous) {
+      setShareGateOpen(true)
+      return
+    }
+    setShareOpen(true)
+  }
+
+  const requestDeleteAccount = () => {
+    setDeletePassword('')
+    setDeleteError('')
+    setDeleteAccountOpen(true)
+  }
+
+  const toggleNavCollapsed = () => {
+    setNavCollapsed((current) => {
+      const next = !current
+      try {
+        localStorage.setItem('board-nav-collapsed', next ? '1' : '0')
+      } catch {}
+      return next
+    })
+  }
+
+  const openTreasureCollection = () => {
+    if (activeSection === 'treasure' && mysteryPetRef.current) {
+      mysteryPetRef.current.openGallery()
+      return
+    }
+    setPendingGalleryOpen(true)
+    navigate(boardSectionHref(boardId, 'treasure', activeKid?.id))
+  }
+
+  useEffect(() => {
+    if (!pendingGalleryOpen || activeSection !== 'treasure' || !mysteryPetRef.current) return
+    mysteryPetRef.current.openGallery()
+    setPendingGalleryOpen(false)
+  }, [pendingGalleryOpen, activeSection])
+
   if (loading) return <LogoLoader label="Loading board..." />
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
   const activeTheme = activeKid ? (THEMES[activeKid.theme] || THEMES.football) : THEMES.football
   const activeStars = activeKid ? totalStarsFor(activeKid) : 0
-  const activeMax = activeKid ? (activeKid.activities || []).length * 7 : 0
+  const activeMax = activeKid ? totalActivityCapFor(activeKid) : 0
   const { monday, sunday } = getCurrentWeek()
 
   return (
-    <div className="relative min-h-screen bg-earthy-ivory px-3 sm:px-4 py-3 sm:py-4 pb-10 font-jakarta">
+    <div className="relative min-h-screen bg-earthy-ivory px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-10 font-jakarta">
       {/* Per-kid bg wash — subtle ~8% accent overlay over ivory, fades when switching kids. */}
       <div
         aria-hidden
@@ -321,189 +472,80 @@ export default function Board() {
       />
       <div className="relative z-10">
       <OfflineBanner />
-      {/* Header */}
-      <header className="max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between gap-2 mb-4">
-        <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
-          <Logo size={36} className="shrink-0" />
-          <span className="text-earthy-cocoa truncate">
-            {board.name}
-          </span>
-        </h1>
-        <div className="flex gap-1.5 sm:gap-2 shrink-0 items-center">
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="More options"
-              aria-expanded={menuOpen}
-              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="w-9 h-9 rounded-full text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
-            >
-              <Icon name="menu-more" size={20} />
-            </button>
-            {menuOpen && (
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <header className="flex items-center gap-3 mb-4 sm:mb-5">
+          <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
+            <Logo size={36} className="shrink-0" />
+            <span className="text-earthy-cocoa truncate">
+              {board.name}
+            </span>
+          </h1>
+        </header>
+
+        {kids.length > 0 && (
+          <BoardSectionNav
+            boardId={boardId}
+            activeKidId={activeKid?.id}
+            activeSection={activeSection}
+            compact
+          />
+        )}
+
+        <div className={`lg:grid lg:gap-6 ${navCollapsed ? 'lg:grid-cols-[72px_minmax(0,1fr)]' : 'lg:grid-cols-[176px_minmax(0,1fr)]'}`}>
+          {kids.length > 0 && (
+            <aside className="hidden lg:block">
+              <div className="sticky top-5">
+                <BoardSectionNav
+                  boardId={boardId}
+                  activeKidId={activeKid?.id}
+                  activeSection={activeSection}
+                  collapsed={navCollapsed}
+                  onToggleCollapsed={toggleNavCollapsed}
+                />
+              </div>
+            </aside>
+          )}
+
+          <main id="main" className="min-w-0">
+            {kids.length === 0 ? (
+              <EmptyState boardId={boardId} />
+            ) : (
               <>
-                <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-[100] bg-white rounded-2xl overflow-hidden shadow-earthy-pop py-1 min-w-[220px]">
-                  {activeKid && (
-                    <button
-                      onClick={() => { setMenuOpen(false); mysteryPetRef.current?.openGallery() }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                    >
-                      <Icon name="trophy" size={18} />
-                      <span>Pet collection</span>
-                    </button>
-                  )}
-                  {activeKid && (
-                    <button
-                      onClick={() => { setMenuOpen(false); setTasksOpen(true) }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                    >
-                      <Icon name="tasks" size={18} />
-                      <span className="flex-1">Edit tasks</span>
-                      <span className="text-xs text-earthy-cocoaSoft">
-                        {(activeKid.activities?.length ?? 0)} of 10
-                      </span>
-                    </button>
-                  )}
-                  {activeKid && (
-                    <Link
-                      to={`/board/${boardId}/print/${activeKid.id}`}
-                      onClick={() => setMenuOpen(false)}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                    >
-                      <Icon name="print" size={18} />
-                      <span>Print this week's sheet</span>
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => { setMenuOpen(false); toggleMute() }}
-                    className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                  >
-                    <Icon name={muted ? 'volume-off' : 'volume-on'} size={18} />
-                    <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
-                  </button>
-                  {user && (
-                    <button
-                      onClick={() => { setMenuOpen(false); setSignOutOpen(true) }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
-                    >
-                      <Icon name="sign-out" size={18} />
-                      <span>Sign out</span>
-                    </button>
-                  )}
-                  {user && !isAnonymous && (
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false)
-                        setDeletePassword('')
-                        setDeleteError('')
-                        setDeleteAccountOpen(true)
-                      }}
-                      className="w-full text-left px-3 py-2.5 text-sm font-bold text-[#B85450] hover:bg-[#F8E5DF] flex items-center gap-2"
-                    >
-                      <Icon name="delete" size={18} />
-                      <span>Delete account</span>
-                    </button>
-                  )}
-                </div>
+                <KidSwitcher kids={kids} activeKidId={activeKid?.id} boardId={boardId} />
+
+                {activeKid && (
+                  <BoardSectionContent
+                    section={activeSection}
+                    boardId={boardId}
+                    board={board}
+                    kids={kids}
+                    activeKid={activeKid}
+                    activeTheme={activeTheme}
+                    activeStars={activeStars}
+                    activeMax={activeMax}
+                    chainAssignment={chainAssignment}
+                    monday={monday}
+                    sunday={sunday}
+                    mysteryPetRef={mysteryPetRef}
+                    replaySummary={replaySummary}
+                    onEditKid={() => setEditKidOpen(true)}
+                    onEditTasks={() => setTasksOpen(true)}
+                    onOpenShare={openShare}
+                    onOpenCollection={openTreasureCollection}
+                    onToggleMute={toggleMute}
+                    muted={muted}
+                    onSignOut={() => setSignOutOpen(true)}
+                    onDeleteAccount={requestDeleteAccount}
+                    user={user}
+                    isAnonymous={isAnonymous}
+                  />
+                )}
               </>
             )}
-          </div>
+          </main>
         </div>
-      </header>
-
-      <main id="main" className="max-w-2xl lg:max-w-4xl mx-auto">
-        {kids.length === 0 ? (
-          <EmptyState boardId={boardId} />
-        ) : (
-          <>
-            <KidSwitcher kids={kids} activeKidId={activeKid?.id} boardId={boardId} />
-
-            {activeKid && (
-              <div
-                className="relative rounded-3xl shadow-earthy-card"
-                style={{
-                  backgroundColor: colors.earthy.card,
-                  border: `1px solid ${activeTheme.accent}66`,
-                }}
-              >
-                <div className="relative p-3 sm:p-4">
-                <div className="mb-3 overflow-hidden rounded-[24px]">
-                  <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(136px, 22vw, 188px)" favoritePet={activeKid?.favoritePet} />
-                </div>
-
-                <div className="mb-3">
-                  {/* Inner card header — 2-row on mobile, 1-row on sm+ */}
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <KidAvatar kid={activeKid} size={46} />
-                      <h2
-                        className="text-2xl sm:text-3xl font-extrabold truncate text-earthy-cocoa"
-                      >
-                        {activeKid.name}
-                      </h2>
-                      <button
-                        onClick={() => setEditKidOpen(true)}
-                        aria-label={`Edit ${activeKid.name}`}
-                        className="shrink-0 w-8 h-8 rounded-full bg-earthy-ivory hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center text-earthy-cocoa"
-                        style={{ border: `1px solid ${activeTheme.deeper}66` }}
-                      >
-                        <Icon name="edit" size={16} />
-                      </button>
-                      {activeKid.custodyLabel && (
-                        <span
-                          className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
-                          style={{
-                            backgroundColor: `${activeTheme.accent}33`,
-                            color: activeTheme.deeper,
-                          }}
-                          aria-label={`At ${activeKid.custodyLabel} this week`}
-                        >
-                          <span className="text-[12px]" aria-hidden>🏠</span>
-                          <span className="text-[11px] font-bold truncate max-w-[120px]">
-                            {activeKid.custodyLabel}
-                          </span>
-                        </span>
-                      )}
-                    </div>
-                    <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
-                      📅 {formatWeekRange(monday, sunday)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status cards — 1/2/3-col at sm/md/lg. Badge Shelf joins the row on desktop. */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-                  <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
-                  <StreakCounter kid={activeKid} />
-                  <div className="hidden lg:block">
-                    <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
-                  </div>
-                </div>
-
-                {/* Score bar */}
-                <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
-
-                {/* Below-fold cards — Badge Shelf shows here on sm/md only, Reward Goal spans on lg */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 mb-4">
-                  <div className="lg:hidden">
-                    <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
-                  </div>
-                  <RewardGoal
-                    kid={activeKid}
-                    boardId={boardId}
-                    totalStars={activeStars}
-                  />
-                </div>
-
-                {/* Activity grid */}
-                <ActivityGrid kid={activeKid} boardId={boardId} />
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </main>
+      </div>
 
       <ShareModal
         open={shareOpen}
@@ -519,11 +561,14 @@ export default function Board() {
         boardId={boardId}
         onDeleted={(deletedId) => {
           const remaining = kids.filter((k) => k.id !== deletedId)
+          const nextParams = new URLSearchParams(searchParams)
           if (remaining.length > 0) {
             const next = [...remaining].sort((a, b) => (a.order || 0) - (b.order || 0))[0]
-            setSearchParams({ kid: next.id }, { replace: true })
+            nextParams.set('kid', next.id)
+            setSearchParams(nextParams, { replace: true })
           } else {
-            setSearchParams({}, { replace: true })
+            nextParams.delete('kid')
+            setSearchParams(nextParams, { replace: true })
           }
         }}
       />
@@ -542,7 +587,7 @@ export default function Board() {
         archive={summary?.archive}
         weekKey={summary?.weekKey}
         replay={!!summary?.replay}
-        onOpenCollection={summary?.replay ? undefined : () => mysteryPetRef.current?.openGallery()}
+        onOpenCollection={summary?.replay ? undefined : openTreasureCollection}
       />
 
       <Modal open={signOutOpen} onClose={() => setSignOutOpen(false)} emoji="↩︎" title="Sign out of Winking Star?">
@@ -671,6 +716,592 @@ export default function Board() {
       </p>
       </div>
     </div>
+  )
+}
+
+function BoardSectionNav({
+  boardId,
+  activeKidId,
+  activeSection,
+  compact = false,
+  collapsed = false,
+  onToggleCollapsed,
+}) {
+  if (compact) {
+    return (
+      <nav aria-label="Board sections" className="lg:hidden mb-4 -mx-1 overflow-x-auto pb-1">
+        <div className="flex gap-2 min-w-max px-1">
+          {BOARD_SECTIONS.map((item) => {
+            const active = item.id === activeSection
+            return (
+              <Link
+                key={item.id}
+                to={boardSectionHref(boardId, item.id, activeKidId)}
+                aria-current={active ? 'page' : undefined}
+                className={`min-h-11 px-3 rounded-2xl flex items-center gap-2 text-sm font-extrabold transition-all border ${
+                  active
+                    ? 'bg-earthy-cocoa text-earthy-cream border-earthy-cocoa shadow-earthy-card'
+                    : 'bg-earthy-card text-earthy-cocoa border-earthy-divider hover:bg-earthy-cream'
+                }`}
+              >
+                <Icon name={item.icon} size={18} />
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
+    )
+  }
+
+  return (
+    <nav aria-label="Board sections" className="rounded-3xl bg-earthy-card shadow-earthy-card p-2 border border-earthy-divider flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={onToggleCollapsed}
+        aria-label={collapsed ? 'Expand board navigation' : 'Collapse board navigation'}
+        title={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+        className={`min-h-11 rounded-2xl flex items-center text-earthy-cocoa hover:bg-earthy-cream active:scale-[0.99] transition-all ${
+          collapsed ? 'justify-center px-0' : 'justify-between gap-2 px-3'
+        }`}
+      >
+        {!collapsed && <span className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">Sections</span>}
+        <Icon name={collapsed ? 'chevron-right' : 'chevron-left'} size={20} />
+      </button>
+      {BOARD_SECTIONS.map((item) => {
+        const active = item.id === activeSection
+        return (
+          <Link
+            key={item.id}
+            to={boardSectionHref(boardId, item.id, activeKidId)}
+            aria-current={active ? 'page' : undefined}
+            aria-label={collapsed ? item.label : undefined}
+            title={collapsed ? item.label : undefined}
+            className={`min-h-12 rounded-2xl flex items-center text-sm font-extrabold transition-all ${
+              active
+                ? 'bg-earthy-cocoa text-earthy-cream shadow-earthy-card'
+                : 'text-earthy-cocoa hover:bg-earthy-cream'
+            } ${collapsed ? 'justify-center px-0' : 'gap-2 px-3'}`}
+          >
+            <Icon name={item.icon} size={20} />
+            <span className={collapsed ? 'sr-only' : ''}>{item.label}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
+function BoardSectionContent(props) {
+  switch (props.section) {
+    case 'activity':
+      return <ActivitySection {...props} />
+    case 'treasure':
+      return <TreasureSection {...props} />
+    case 'progress':
+      return <ProgressSection {...props} />
+    case 'more':
+      return <MoreSection {...props} />
+    case 'home':
+    default:
+      return <HomeSection {...props} />
+  }
+}
+
+function BoardPanel({ activeTheme, children, className = '' }) {
+  return (
+    <div
+      className={`relative rounded-3xl shadow-earthy-card ${className}`}
+      style={{
+        backgroundColor: colors.earthy.card,
+        border: `1px solid ${activeTheme.accent}66`,
+      }}
+    >
+      <div className="relative p-4 sm:p-6 lg:p-7">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function KidContextHeader({ activeKid, activeTheme, monday, sunday, onEditKid }) {
+  return (
+    <div className="mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <KidAvatar kid={activeKid} size={54} />
+          <h2 className="text-3xl sm:text-4xl font-extrabold truncate text-earthy-cocoa">
+            {activeKid.name}
+          </h2>
+          <button
+            onClick={onEditKid}
+            aria-label={`Edit ${activeKid.name}`}
+            className="shrink-0 w-10 h-10 rounded-full bg-earthy-ivory hover:bg-earthy-cream active:scale-95 transition-all flex items-center justify-center text-earthy-cocoa"
+            style={{ border: `1px solid ${activeTheme.deeper}66` }}
+          >
+            <Icon name="edit" size={17} />
+          </button>
+          {activeKid.custodyLabel && (
+            <span
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full"
+              style={{
+                backgroundColor: `${activeTheme.accent}33`,
+                color: activeTheme.deeper,
+              }}
+              aria-label={`At ${activeKid.custodyLabel} this week`}
+            >
+              <span className="text-[12px]" aria-hidden>🏠</span>
+              <span className="text-[11px] font-bold truncate max-w-[120px]">
+                {activeKid.custodyLabel}
+              </span>
+            </span>
+          )}
+        </div>
+        <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
+          📅 {formatWeekRange(monday, sunday)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HomeSection({
+  boardId,
+  kids,
+  activeKid,
+  activeTheme,
+  activeStars,
+  activeMax,
+  chainAssignment,
+  monday,
+  sunday,
+  mysteryPetRef,
+  replaySummary,
+  onEditKid,
+}) {
+  const celebrations = getRecentCelebrations(activeKid)
+
+  return (
+    <BoardPanel activeTheme={activeTheme}>
+      <div className="mb-5 overflow-hidden rounded-[24px]">
+        <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(156px, 24vw, 220px)" favoritePet={activeKid?.favoritePet} />
+      </div>
+      <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
+      <BirthdayBanner kid={activeKid} />
+
+      <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] gap-4 mb-5">
+        <TodayCard kid={activeKid} activeTheme={activeTheme} actionHref={boardSectionHref(boardId, 'activity', activeKid.id)} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+          <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
+          <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FamilyTodayList boardId={boardId} kids={kids} activeKidId={activeKid.id} />
+        <RecentCelebrations celebrations={celebrations} />
+      </div>
+
+    </BoardPanel>
+  )
+}
+
+function ActivitySection({
+  boardId,
+  activeKid,
+  activeTheme,
+  activeStars,
+  activeMax,
+  monday,
+  sunday,
+  onEditKid,
+  onEditTasks,
+}) {
+  return (
+    <BoardPanel activeTheme={activeTheme}>
+      <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-4 mb-5">
+        <TodayCard kid={activeKid} activeTheme={activeTheme} />
+        <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider flex flex-col justify-between gap-3">
+          <div>
+            <div className="text-xs font-bold uppercase text-earthy-cocoaSoft tracking-wide">Today's star spots</div>
+            <div className="text-sm font-extrabold text-earthy-cocoa mt-1">
+              {(activeKid.activities || []).length} weekly activities
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onEditTasks}
+            className="min-h-11 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          >
+            <Icon name="tasks" size={18} />
+            <span>Edit tasks</span>
+          </button>
+        </div>
+      </div>
+      <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
+      <ActivityGrid kid={activeKid} boardId={boardId} />
+    </BoardPanel>
+  )
+}
+
+function TreasureSection({
+  boardId,
+  activeKid,
+  activeTheme,
+  activeStars,
+  chainAssignment,
+  monday,
+  sunday,
+  mysteryPetRef,
+  replaySummary,
+  onEditKid,
+  onOpenCollection,
+}) {
+  const discoveries = getDiscoveryEntries(activeKid)
+
+  return (
+    <BoardPanel activeTheme={activeTheme}>
+      <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4">
+        <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
+        <TreasureProgressCard kid={activeKid} activeStars={activeStars} activeTheme={activeTheme} />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+        <DiscoveryList discoveries={discoveries} onReplay={replaySummary} />
+        <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+          <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Collection</div>
+          <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
+            {discoveries.length + (activeStars > 0 ? 1 : 0)}
+          </div>
+          <div className="text-sm font-bold text-earthy-cocoaSoft mt-1">
+            pets and weekly discoveries
+          </div>
+          <button
+            type="button"
+            onClick={onOpenCollection}
+            className="mt-4 min-h-11 w-full rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          >
+            <Icon name="reward" size={18} />
+            <span>Open collection</span>
+          </button>
+        </div>
+      </div>
+    </BoardPanel>
+  )
+}
+
+function ProgressSection({
+  boardId,
+  activeKid,
+  activeTheme,
+  activeStars,
+  activeMax,
+  monday,
+  sunday,
+  onEditKid,
+}) {
+  const weekly = getWeeklyBreakdown(activeKid)
+  const earnedAchievements = evaluateAchievements(activeKid || {}, { totalStars: activeStars, days: getCurrentWeek().days })
+  const starBadgeCount = BADGE_TIERS.filter((tier) => activeStars >= tier.stars).length
+
+  return (
+    <BoardPanel activeTheme={activeTheme}>
+      <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
+      <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+        <StreakCounter kid={activeKid} />
+        <BadgeShelf totalStars={activeStars} themeKey={activeKid.theme} kid={activeKid} />
+        <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+        <MiniStat label="Star badges" value={`${starBadgeCount}/${BADGE_TIERS.length}`} />
+        <MiniStat label="Achievements" value={`${earnedAchievements.length}/${ACHIEVEMENTS.length}`} />
+        <MiniStat label="Week total" value={`${activeStars}/${activeMax}`} />
+      </div>
+      <WeeklyProgressList weekly={weekly} activeTheme={activeTheme} />
+    </BoardPanel>
+  )
+}
+
+function MoreSection({
+  boardId,
+  activeKid,
+  activeTheme,
+  monday,
+  sunday,
+  onEditKid,
+  onEditTasks,
+  onOpenShare,
+  onToggleMute,
+  muted,
+  onSignOut,
+  onDeleteAccount,
+  user,
+  isAnonymous,
+}) {
+  return (
+    <BoardPanel activeTheme={activeTheme}>
+      <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
+
+      <SectionHeading label="Parent tools" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <ActionTile icon="tasks" label="Edit tasks" subtitle={`${activeKid.activities?.length ?? 0} of 10 active`} onClick={onEditTasks} />
+        <ActionTile icon="edit" label="Edit kid" subtitle={activeKid.name} onClick={onEditKid} />
+        <ActionTile icon="print" label="Print sheet" subtitle="This week's page" to={`/board/${boardId}/print/${activeKid.id}`} />
+        <ActionTile icon="share" label="Share board" subtitle={isAnonymous ? 'Save first to share' : 'Invite family'} onClick={onOpenShare} />
+      </div>
+
+      <SectionHeading label="Family settings" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <ActionTile icon={muted ? 'volume-off' : 'volume-on'} label={muted ? 'Unmute sounds' : 'Mute sounds'} subtitle="Sticker feedback" onClick={onToggleMute} />
+        <ActionTile icon="reward" label="Pet collection" subtitle="Treasure room" to={boardSectionHref(boardId, 'treasure', activeKid.id)} />
+      </div>
+
+      {user && (
+        <>
+          <SectionHeading label="Account" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <ActionTile icon="sign-out" label={isAnonymous ? 'Discard demo' : 'Sign out'} subtitle={isAnonymous ? 'Demo board only' : 'Leave this device'} onClick={onSignOut} />
+            {!isAnonymous && (
+              <ActionTile icon="delete" label="Delete account" subtitle="Permanent" onClick={onDeleteAccount} danger />
+            )}
+          </div>
+        </>
+      )}
+    </BoardPanel>
+  )
+}
+
+function TodayCard({ kid, activeTheme, actionHref }) {
+  const today = getTodayStats(kid)
+  const pct = today.total > 0 ? Math.round((today.done / today.total) * 100) : 0
+  const body = (
+    <div className="rounded-2xl p-4 bg-earthy-card shadow-earthy-card border border-earthy-divider h-full">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wide" style={{ color: activeTheme.deeper }}>
+            Today
+          </div>
+          <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
+            {today.done}/{today.total} done
+          </div>
+        </div>
+        <div className="px-3 py-1 rounded-pill bg-earthy-ivory text-xs font-extrabold text-earthy-cocoaSoft shrink-0">
+          {today.day?.label}
+        </div>
+      </div>
+      <div className="h-3 rounded-full overflow-hidden mt-3" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
+        <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {today.scheduledActivities.length === 0 ? (
+          <span className="text-sm font-bold text-earthy-cocoaSoft">No star spots today</span>
+        ) : (
+          today.scheduledActivities.slice(0, 5).map((activity) => {
+            const done = today.doneActivities.some((item) => item.id === activity.id)
+            return (
+              <span
+                key={activity.id}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-pill text-xs font-extrabold"
+                style={{
+                  backgroundColor: done ? `${activeTheme.accent}33` : '#FFF4DF',
+                  color: done ? activeTheme.deeper : '#8B6651',
+                }}
+              >
+                <span aria-hidden>{done ? '✓' : activity.emoji || '○'}</span>
+                <span className="truncate max-w-[120px]">{activity.label || 'Activity'}</span>
+              </span>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+
+  if (!actionHref) return body
+  return (
+    <Link to={actionHref} className="block h-full active:scale-[0.99] transition-transform">
+      {body}
+    </Link>
+  )
+}
+
+function FamilyTodayList({ boardId, kids, activeKidId }) {
+  return (
+    <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Family today</div>
+      <div className="mt-3 flex flex-col gap-2">
+        {kids.map((kid) => {
+          const stats = getTodayStats(kid)
+          const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
+          return (
+            <Link
+              key={kid.id}
+              to={boardSectionHref(boardId, 'activity', kid.id)}
+              className={`min-h-14 rounded-2xl flex items-center gap-3 px-3 py-2 transition-all ${
+                kid.id === activeKidId ? 'bg-earthy-card shadow-earthy-card' : 'hover:bg-earthy-card'
+              }`}
+            >
+              <KidAvatar kid={kid} size={40} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-extrabold text-earthy-cocoa truncate">{kid.name}</span>
+                  <span className="text-xs font-extrabold text-earthy-cocoaSoft shrink-0">{stats.done}/{stats.total}</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden mt-1 bg-earthy-cream">
+                  <div className="h-full bg-earthy-cocoa" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function RecentCelebrations({ celebrations }) {
+  return (
+    <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Recent celebrations</div>
+      {celebrations.length === 0 ? (
+        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">No stickers yet this week</div>
+      ) : (
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {celebrations.map((item) => (
+            <div key={item.key} className="min-h-12 rounded-2xl bg-earthy-card px-3 py-2 flex items-center gap-2 border border-earthy-divider">
+              <span className="text-xl shrink-0" aria-hidden>{item.sticker}</span>
+              <div className="min-w-0">
+                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{item.label}</div>
+                <div className="text-xs font-bold text-earthy-cocoaSoft">{item.dayLabel}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TreasureProgressCard({ kid, activeStars, activeTheme }) {
+  const remaining = Math.max(0, HATCH_GOAL - activeStars)
+  const pct = Math.min(100, Math.round((activeStars / HATCH_GOAL) * 100))
+  const historyCount = Object.keys(kid.weekHistory || {}).length
+
+  return (
+    <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Mystery box</div>
+      <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
+        {remaining === 0 ? 'Ready' : `${remaining} to hatch`}
+      </div>
+      <div className="h-3 rounded-full overflow-hidden mt-3" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
+        <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
+      </div>
+      <div className="grid grid-cols-2 gap-2 mt-4">
+        <MiniStat label="This week" value={`${activeStars}/${HATCH_GOAL}`} compact />
+        <MiniStat label="Past pets" value={historyCount} compact />
+      </div>
+    </div>
+  )
+}
+
+function DiscoveryList({ discoveries, onReplay }) {
+  return (
+    <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Recent discoveries</div>
+      {discoveries.length === 0 ? (
+        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">No archived pets yet</div>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2">
+          {discoveries.map(({ weekKey, archive }) => (
+            <button
+              key={weekKey}
+              type="button"
+              onClick={() => onReplay(weekKey, archive)}
+              className="min-h-14 rounded-2xl bg-earthy-card px-3 py-2 flex items-center gap-3 text-left border border-earthy-divider hover:bg-earthy-cream active:scale-[0.99] transition-all"
+            >
+              <span className="text-2xl shrink-0" aria-hidden>{archive.petEmoji || '⭐'}</span>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{archive.petName || 'Mystery friend'}</div>
+                <div className="text-xs font-bold text-earthy-cocoaSoft">{weekKey}</div>
+              </div>
+              <span className="text-xs font-extrabold text-earthy-cocoaSoft shrink-0">{archive.totalStars || 0} stars</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function WeeklyProgressList({ weekly, activeTheme }) {
+  return (
+    <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Weekly progress</div>
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
+        {weekly.map(({ day, done, total }) => {
+          const pct = total > 0 ? Math.round((done / total) * 100) : 0
+          return (
+            <div key={day.key} className="rounded-2xl bg-earthy-card border border-earthy-divider p-3 min-h-[112px]">
+              <div className="font-extrabold text-earthy-cocoa">{day.label}</div>
+              <div className="text-xs font-bold text-earthy-cocoaSoft mt-0.5">{done}/{total} done</div>
+              <div className="h-2 rounded-full overflow-hidden mt-3 bg-earthy-cream">
+                <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SectionHeading({ label }) {
+  return (
+    <h3 className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
+      {label}
+    </h3>
+  )
+}
+
+function MiniStat({ label, value, compact = false }) {
+  return (
+    <div className={`rounded-2xl bg-earthy-ivory border border-earthy-divider ${compact ? 'p-3' : 'p-4'}`}>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{label}</div>
+      <div className={`${compact ? 'text-xl' : 'text-2xl'} font-extrabold text-earthy-cocoa mt-1`}>{value}</div>
+    </div>
+  )
+}
+
+function ActionTile({ icon, label, subtitle, onClick, to, danger = false }) {
+  const className = `min-h-[68px] rounded-2xl px-4 py-3 text-left border flex items-center gap-3 transition-all active:scale-[0.99] ${
+    danger
+      ? 'bg-[#F8E5DF] border-[#E8B7AA] text-[#8A3A2E] hover:bg-[#F4D8CF]'
+      : 'bg-earthy-ivory border-earthy-divider text-earthy-cocoa hover:bg-earthy-cream'
+  }`
+  const content = (
+    <>
+      <span className="w-10 h-10 rounded-full bg-earthy-card flex items-center justify-center shrink-0">
+        <Icon name={icon} size={20} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-extrabold truncate">{label}</span>
+        <span className="block text-xs font-bold opacity-70 truncate">{subtitle}</span>
+      </span>
+    </>
+  )
+
+  if (to) {
+    return <Link to={to} className={className}>{content}</Link>
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   )
 }
 

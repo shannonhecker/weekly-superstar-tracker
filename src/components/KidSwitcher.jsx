@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
@@ -12,12 +12,14 @@ import { KidAvatar } from './KidAvatar'
 // so a Firestore re-render NEVER resets selection — that's the sticker-bug fix.
 export default function KidSwitcher({ kids, activeKidId, boardId }) {
   const navigate = useNavigate()
-  const { boardId: currentBoardId } = useParams()
+  const location = useLocation()
   const [promptOpen, setPromptOpen] = useState(false)
   const toast = useToast()
 
   const setActive = (id) => {
-    navigate(`/board/${currentBoardId}?kid=${encodeURIComponent(id)}`, { replace: true })
+    const params = new URLSearchParams(location.search)
+    params.set('kid', id)
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true })
   }
 
   const addKid = async ({ name, avatarEmoji, theme, birthday }) => {
