@@ -27,6 +27,7 @@ if (!getApps().length) initializeApp()
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024
 const PREMIUM_PRODUCT_ID = 'weekly_superstar_premium_unlock'
 const APP_BUNDLE_ID = 'com.winkingstar.app'
+const APP_APPLE_ID = 6765767262
 const APPLE_PRODUCTION_API = 'https://api.storekit.apple.com'
 const APPLE_SANDBOX_API = 'https://api.storekit-sandbox.apple.com'
 const APPLE_ROOT_CERTIFICATE_PATHS = [
@@ -153,15 +154,7 @@ function appleEnvironmentForApiBaseUrl(apiBaseUrl: string) {
 }
 
 function productionAppAppleId() {
-  const raw = process.env.APP_APPLE_ID
-  const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN
-  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
-    throw new HttpsError(
-      'failed-precondition',
-      'APP_APPLE_ID is required to verify production App Store transactions',
-    )
-  }
-  return parsed
+  return APP_APPLE_ID
 }
 
 async function verifyAppleTransactionJws(
