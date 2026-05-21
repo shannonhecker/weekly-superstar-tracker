@@ -16,12 +16,23 @@
 //
 // Audit Q1.
 
-import { addDoc, collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  runTransaction,
+  serverTimestamp,
+  where,
+} from 'firebase/firestore'
 import { updateProfile } from 'firebase/auth'
 import { db } from './firebase'
 import { generateShareCode } from './codes'
 import { THEMES, DEFAULT_ACTIVITIES } from './themes'
 import { getWeekKey } from './week'
+
+export const PARENT_CONSENT_VERSION = '2026-05'
 
 /**
  * Returns the boards the user is a member of, ordered by createdAt
@@ -55,7 +66,13 @@ export async function findUserBoards(uid) {
 // regardless of how the user authed — only the credential source changes.
 // Keeping this in one place means tweaks to the default kid shape can't
 // drift between code paths.
-export async function createBoardForNewUser(user, { theme, kidName, birthday }) {
+export async function createBoardForNewUser(
+  user,
+  { theme, kidName, birthday, parentConsentAccepted, parentConsentVersion },
+) {
+  if (parentConsentAccepted !== true) {
+    throw new Error('Parent consent is required before creating a family board.')
+  }
   const trimmedKid = (kidName || '').trim()
   // Display name falls back to the kid's name so the board feels personal even
   // if we never collected an explicit parent name (we don't, in Direction B).
@@ -69,26 +86,38 @@ export async function createBoardForNewUser(user, { theme, kidName, birthday }) 
     adminId: user.uid,
     memberIds: [user.uid],
     shareCode: generateShareCode(),
+    parentConsentAcceptedAt: serverTimestamp(),
+    parentConsentVersion: parentConsentVersion || PARENT_CONSENT_VERSION,
+    parentConsentSource: 'web-onboarding',
+    parentConsentUid: user.uid,
+    kidCount: 0,
     createdAt: serverTimestamp(),
   })
 
   // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
-  await addDoc(collection(db, 'boards', board.id, 'kids'), {
-    name: trimmedKid || 'Superstar',
-    theme: theme || Object.keys(THEMES)[0],
-    order: 0,
-    birthday: birthday || null,
-    activities: DEFAULT_ACTIVITIES,
-    checks: {},
-    stickers: {},
-    badges: [],
-    petName: null,
-    reward: null,
-    weekKey: getWeekKey(),
-    weekHistory: {},
-    chainKey: null,
-    favoritePet: null,
-    createdAt: serverTimestamp(),
+  await runTransaction(db, async (tx) => {
+    const boardRef = doc(db, 'boards', board.id)
+    const boardSnap = await tx.get(boardRef)
+    if (!boardSnap.exists()) throw new Error('Board not found.')
+    const kidRef = doc(collection(db, 'boards', board.id, 'kids'))
+    tx.set(kidRef, {
+      name: trimmedKid || 'Superstar',
+      theme: theme || Object.keys(THEMES)[0],
+      order: 0,
+      birthday: birthday || null,
+      activities: DEFAULT_ACTIVITIES,
+      checks: {},
+      stickers: {},
+      badges: [],
+      petName: null,
+      reward: null,
+      weekKey: getWeekKey(),
+      weekHistory: {},
+      chainKey: null,
+      favoritePet: null,
+      createdAt: serverTimestamp(),
+    })
+    tx.update(boardRef, { kidCount: 1 })
   })
 
   return board.id

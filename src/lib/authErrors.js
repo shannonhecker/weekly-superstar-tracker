@@ -15,6 +15,8 @@ const OAUTH_OVERRIDES = {
     'An account with this email already exists with a different sign-in method. Try email + password, or contact support.',
   'auth/operation-not-allowed':
     "This sign-in method isn't enabled yet. Contact the admin.",
+  'auth/no-family-board':
+    'Create your family board first, then sign in here next time.',
   // Sentinel used by callers so they can distinguish "silent" cancellations
   // (e.g. user clicked the OAuth button twice in a row) from real errors.
   // Treat as falsy display.

@@ -18,6 +18,7 @@
     "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.1.1",
     "jsqr": "^1.4.0",

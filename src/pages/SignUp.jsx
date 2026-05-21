@@ -104,6 +104,10 @@ export default function SignUp() {
       setError('Use at least 8 characters for your password.')
       return
     }
+    if (!isUpgrade && !isInviteSignup && !parentConsent) {
+      setError('A grown-up needs to accept the family data notice before creating a board.')
+      return
+    }
     setLoading(true)
     try {
       // Upgrade path: anonymous guest converting to email/password. Preserves
@@ -121,7 +125,12 @@ export default function SignUp() {
         navigate(next, { replace: true })
         return
       }
-      const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
+      const boardId = await createBoardForNewUser(cred.user, {
+        theme,
+        kidName,
+        birthday,
+        parentConsentAccepted: parentConsent,
+      })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
       setError(friendlyAuthError(err, isUpgrade))
@@ -166,7 +175,16 @@ export default function SignUp() {
         navigate(`/board/${existing[0].id}`, { replace: true })
         return
       }
-      const boardId = await createBoardForNewUser(cred.user, { theme, kidName, birthday })
+      if (!parentConsent) {
+        setError('A grown-up needs to accept the family data notice before creating a board.')
+        return
+      }
+      const boardId = await createBoardForNewUser(cred.user, {
+        theme,
+        kidName,
+        birthday,
+        parentConsentAccepted: parentConsent,
+      })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
       // Treat duplicate popup-request as a no-op — the user just clicked twice
@@ -223,7 +241,16 @@ export default function SignUp() {
         navigate(`/board/${existing[0].id}`, { replace: true })
         return
       }
-      const boardId = await createBoardForNewUser(currentUser, { theme, kidName, birthday })
+      if (!parentConsent) {
+        setError('A grown-up needs to accept the family data notice before starting a board.')
+        return
+      }
+      const boardId = await createBoardForNewUser(currentUser, {
+        theme,
+        kidName,
+        birthday,
+        parentConsentAccepted: parentConsent,
+      })
       navigate(`/board/${boardId}`, { replace: true })
     } catch (err) {
       setError(formatAuthError(err))
@@ -647,7 +674,7 @@ function StepAccount({
 
       <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
         <a
-          href="mailto:hello@winkingstar.com?subject=Help%20with%20Winking%20Star%20signup"
+          href="mailto:winkingstarapp@gmail.com?subject=Help%20with%20Winking%20Star%20signup"
           className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
         >
           Need help?

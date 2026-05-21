@@ -7,26 +7,22 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
-import { createBoardForNewUser, findUserBoards } from '../lib/boards'
+import { findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { safeRedirect } from '../lib/safeRedirect'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import ThemeScene from '../components/ThemeScene'
 
-// First-time OAuth users on the SignIn page have no board yet — give them
-// sensible defaults so they land on a working board instead of the marketing
-// Landing page. Theme + kid name can be edited from the board itself.
-// Tradeoff documented in PR description: brand-new OAuth-via-SignIn users
-// skip the theme picker and start with the first theme + their displayName.
+// First-time OAuth users on the SignIn page have no board yet. Do not create
+// one here: board creation collects child data and must go through onboarding's
+// parental consent gate.
 async function ensureBoardForOAuthUser(user) {
   const boards = await findUserBoards(user.uid)
   if (boards.length > 0) return boards[0].id
-  return createBoardForNewUser(user, {
-    theme: null, // helper falls back to the first theme in THEMES
-    kidName: user.displayName || 'Your kid',
-    birthday: '',
-  })
+  const error = new Error('Create your family board first, then sign in here next time.')
+  error.code = 'auth/no-family-board'
+  throw error
 }
 
 export default function SignIn() {
@@ -256,7 +252,7 @@ export default function SignIn() {
 
           <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
             <a
-              href="mailto:hello@winkingstar.com?subject=Help%20signing%20in%20to%20Winking%20Star"
+              href="mailto:winkingstarapp@gmail.com?subject=Help%20signing%20in%20to%20Winking%20Star"
               className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
             >
               Need help?

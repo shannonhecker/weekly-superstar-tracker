@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { THEMES, DEFAULT_ACTIVITIES } from '../lib/themes'
 import { getWeekKey } from '../lib/week'
 import { useToast } from '../contexts/ToastContext'
 import NewKidModal from './NewKidModal'
 import { KidAvatar } from './KidAvatar'
+
+const FREE_KID_LIMIT = 2
+const PREMIUM_KID_LIMIT = 6
 
 // URL-driven kid selection. Active kid is stored in `?kid=<id>`,
 // so a Firestore re-render NEVER resets selection — that's the sticker-bug fix.
@@ -28,25 +31,40 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
     const themeKeys = Object.keys(THEMES)
     const resolvedTheme = theme && THEMES[theme] ? theme : themeKeys[kids.length % themeKeys.length]
     try {
-      await addDoc(collection(db, 'boards', boardId, 'kids'), {
-        name: trimmedName,
-        theme: resolvedTheme,
-        order: kids.length,
-        birthday: birthday || null,
-        activities: DEFAULT_ACTIVITIES,
-        checks: {},
-        stickers: {},
-        badges: [],
-        petName: null,
-        reward: null,
-        weekKey: getWeekKey(),
-        weekHistory: {},
-        chainKey: null,
-        favoritePet: null,
-        avatarKind: avatarEmoji ? 'preset' : 'theme',
-        avatarEmoji: avatarEmoji ?? null,
-        avatarUrl: null,
-        createdAt: serverTimestamp(),
+      await runTransaction(db, async (tx) => {
+        const boardRef = doc(db, 'boards', boardId)
+        const boardSnap = await tx.get(boardRef)
+        if (!boardSnap.exists()) throw new Error('Board not found.')
+
+        const board = boardSnap.data()
+        const currentKidCount = typeof board.kidCount === 'number' ? board.kidCount : kids.length
+        const limit = board.premium === true ? PREMIUM_KID_LIMIT : FREE_KID_LIMIT
+        if (currentKidCount >= limit) {
+          throw new Error('Unlock Winking Star to add more superstars.')
+        }
+
+        const kidRef = doc(collection(db, 'boards', boardId, 'kids'))
+        tx.set(kidRef, {
+          name: trimmedName,
+          theme: resolvedTheme,
+          order: currentKidCount,
+          birthday: birthday || null,
+          activities: DEFAULT_ACTIVITIES,
+          checks: {},
+          stickers: {},
+          badges: [],
+          petName: null,
+          reward: null,
+          weekKey: getWeekKey(),
+          weekHistory: {},
+          chainKey: null,
+          favoritePet: null,
+          avatarKind: avatarEmoji ? 'preset' : 'theme',
+          avatarEmoji: avatarEmoji ?? null,
+          avatarUrl: null,
+          createdAt: serverTimestamp(),
+        })
+        tx.update(boardRef, { kidCount: currentKidCount + 1 })
       })
       setPromptOpen(false)
     } catch (e) {

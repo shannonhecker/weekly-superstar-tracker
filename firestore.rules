@@ -26,6 +26,66 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    // Premium entitlement fields are written only by trusted server code
+    // after Apple transaction validation.
+    function premiumFields() {
+      return [
+        'premium',
+        'premiumProductId',
+        'premiumOriginalTransactionId',
+        'premiumTransactionId',
+        'premiumUnlockedAt',
+        'premiumUnlockedBy',
+        'premiumSource',
+        'premiumEnvironment'
+      ];
+    }
+
+    // Parental consent records are written at board creation and then locked.
+    function parentConsentFields() {
+      return [
+        'parentConsentAcceptedAt',
+        'parentConsentVersion',
+        'parentConsentSource',
+        'parentConsentUid'
+      ];
+    }
+
+    function hasParentConsentRecord() {
+      return request.resource.data.parentConsentAcceptedAt == request.time
+        && request.resource.data.parentConsentVersion is string
+        && request.resource.data.parentConsentSource is string
+        && request.resource.data.parentConsentUid == authedUid();
+    }
+
+    function kidLimitFor(boardData) {
+      return boardData.premium == true ? 6 : 2;
+    }
+
+    function boardDoc(boardId) {
+      return get(/databases/$(database)/documents/boards/$(boardId)).data;
+    }
+
+    function boardDocAfter(boardId) {
+      return getAfter(/databases/$(database)/documents/boards/$(boardId)).data;
+    }
+
+    function kidCountIncrementIsValid() {
+      return changedKeys().hasOnly(['kidCount'])
+        && resource.data.kidCount is int
+        && request.resource.data.kidCount == resource.data.kidCount + 1
+        && request.resource.data.kidCount <= kidLimitFor(resource.data);
+    }
+
+    function kidCreateIncrementsBoard(boardId) {
+      let before = boardDoc(boardId);
+      let after = boardDocAfter(boardId);
+      return before.kidCount is int
+        && after.kidCount == before.kidCount + 1
+        && after.kidCount <= kidLimitFor(before)
+        && request.resource.data.order == before.kidCount;
+    }
+
     // -----------------------------------------------------------------
     // /users/{userId} — self-only profile doc (currently unused by the
     // app but rules already permit; keep for forward-compat).
@@ -45,8 +105,8 @@ service cloud.firestore {
     //  S3 — Cloud Function redemption is implemented but cannot be deployed
     //       until the Firebase project is upgraded to Blaze. Until then,
     //       Join.jsx falls back to the client share-code lookup below.
-    //       After redeemShareCode is deployed, change list to false and remove
-    //       the non-member self-join update path.
+    //       After redeemShareCode is deployed, change list to member-only and
+    //       remove the non-member self-join update path.
     // -----------------------------------------------------------------
     match /boards/{boardId} {
 
@@ -61,7 +121,10 @@ service cloud.firestore {
       // contain the admin (no creating boards on behalf of others).
       allow create: if isSignedIn()
         && request.resource.data.adminId == authedUid()
-        && authedUid() in request.resource.data.memberIds;
+        && authedUid() in request.resource.data.memberIds
+        && hasParentConsentRecord()
+        && request.resource.data.kidCount == 0
+        && !request.resource.data.keys().hasAny(premiumFields());
 
       // Update — three legitimate client paths:
       //
@@ -86,6 +149,15 @@ service cloud.firestore {
           // Admin update — admin path
           isAdminOf(resource.data)
           && !('adminId' in changedKeys())
+          && !('kidCount' in changedKeys())
+          && !changedKeys().hasAny(premiumFields())
+          && !changedKeys().hasAny(parentConsentFields())
+        ) ||
+        (
+          // Kid creation transaction — members may only increment kidCount
+          // by one, and only up to the board's free/premium limit.
+          isMemberOf(resource.data)
+          && kidCountIncrementIsValid()
         ) ||
         (
           // Member self-leave
@@ -110,8 +182,13 @@ service cloud.firestore {
       // (multiple parents managing the same kid's stickers).
       // -----------------------------------------------------------------
       match /kids/{kidId} {
-        allow read, write: if isSignedIn()
-          && authedUid() in get(/databases/$(database)/documents/boards/$(boardId)).data.memberIds;
+        allow read: if isSignedIn()
+          && authedUid() in boardDoc(boardId).memberIds;
+        allow create: if isSignedIn()
+          && authedUid() in boardDoc(boardId).memberIds
+          && kidCreateIncrementsBoard(boardId);
+        allow update, delete: if isSignedIn()
+          && authedUid() in boardDoc(boardId).memberIds;
       }
 
       // -----------------------------------------------------------------
