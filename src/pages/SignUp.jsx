@@ -444,7 +444,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
         Pick a theme<br />for them
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-6">
-        You can change this anytime — it sets the vibe of their board.
+        You can change this anytime. It sets the vibe of their board.
       </p>
 
       <div
@@ -540,7 +540,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
       />
 
       <label htmlFor="kid-birthday" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-        Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">— optional</span>
+        Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">(optional)</span>
       </label>
       <input
         id="kid-birthday"

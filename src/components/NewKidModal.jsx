@@ -79,7 +79,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
 
           {/* Avatar */}
           <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Avatar <span className="font-normal normal-case text-earthy-cocoaSoft/70">— optional</span>
+            Avatar <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
           </label>
           <div className="bg-earthy-ivory border border-earthy-divider rounded-xl p-2 mb-5 grid grid-cols-8 gap-1">
             {KID_AVATARS.map((emoji) => {
@@ -144,7 +144,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
 
           {/* Birthday — optional */}
           <label htmlFor="new-kid-birthday" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">— optional</span>
+            Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
           </label>
           <EarthyDatePicker
             value={birthday}
