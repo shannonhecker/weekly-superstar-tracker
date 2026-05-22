@@ -393,7 +393,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
         {trimmed
-          ? `${trimmed}'s board is set up. You can save it with an email any time.`
+          ? `${trimmed}’s board is set up. You can save it with an email any time.`
           : 'Your board is set up. You can save it with an email any time.'}
       </p>
 
@@ -551,7 +551,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
         className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
       />
       <p id="birthday-help" className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
-        We use this to celebrate their birthday-week with a special banner. Skip if you'd rather not.
+        We use this to celebrate their birthday-week with a special banner. Skip if you’d rather not.
       </p>
 
       <div className="flex items-center gap-3">
