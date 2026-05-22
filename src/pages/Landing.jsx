@@ -48,20 +48,20 @@ export default function Landing() {
         <Link
           to="/signup"
           style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-          className="block w-full mb-3 px-6 py-4 rounded-pill font-bold text-base hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          className="block w-full mb-3 px-6 py-4 rounded-pill font-bold text-base hover:bg-[#4A2E25] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 focus-visible:outline-none transition-all"
         >
           Create a family board
         </Link>
         <Link
           to="/signin"
           style={{ color: '#5A3A2E', backgroundColor: '#F4C8A8' }}
-          className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-[#EAB892] active:scale-[0.99] transition-all"
+          className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-[#EAB892] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 focus-visible:outline-none transition-all"
         >
           Sign in
         </Link>
         <Link
           to="/signup?guest=1"
-          className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors"
+          className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
         >
           or try it first — no signup
         </Link>
