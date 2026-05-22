@@ -58,8 +58,13 @@ service cloud.firestore {
         && request.resource.data.parentConsentUid == authedUid();
     }
 
+    function isPremiumBoard(boardData) {
+      return boardData.keys().hasAny(['premium'])
+        && boardData.premium == true;
+    }
+
     function kidLimitFor(boardData) {
-      return boardData.premium == true ? 6 : 2;
+      return isPremiumBoard(boardData) ? 6 : 2;
     }
 
     function boardDoc(boardId) {
@@ -68,6 +73,10 @@ service cloud.firestore {
 
     function boardDocAfter(boardId) {
       return getAfter(/databases/$(database)/documents/boards/$(boardId)).data;
+    }
+
+    function boardExists(boardId) {
+      return exists(/databases/$(database)/documents/boards/$(boardId));
     }
 
     function kidCountIncrementIsValid() {
@@ -80,10 +89,23 @@ service cloud.firestore {
     function kidCreateIncrementsBoard(boardId) {
       let before = boardDoc(boardId);
       let after = boardDocAfter(boardId);
-      return before.kidCount is int
+      return boardExists(boardId)
+        && before.kidCount is int
         && after.kidCount == before.kidCount + 1
         && after.kidCount <= kidLimitFor(before)
         && request.resource.data.order == before.kidCount;
+    }
+
+    function starterKidCreateIsValid(boardId) {
+      let after = boardDocAfter(boardId);
+      return !boardExists(boardId)
+        && isMemberOf(after)
+        && after.kidCount is int
+        && after.kidCount >= 1
+        && after.kidCount <= kidLimitFor(after)
+        && request.resource.data.order is int
+        && request.resource.data.order >= 0
+        && request.resource.data.order < after.kidCount;
     }
 
     // -----------------------------------------------------------------
@@ -123,7 +145,9 @@ service cloud.firestore {
         && request.resource.data.adminId == authedUid()
         && authedUid() in request.resource.data.memberIds
         && hasParentConsentRecord()
-        && request.resource.data.kidCount == 0
+        && request.resource.data.kidCount is int
+        && request.resource.data.kidCount >= 0
+        && request.resource.data.kidCount <= 2
         && !request.resource.data.keys().hasAny(premiumFields());
 
       // Update — three legitimate client paths:
@@ -185,8 +209,11 @@ service cloud.firestore {
         allow read: if isSignedIn()
           && authedUid() in boardDoc(boardId).memberIds;
         allow create: if isSignedIn()
-          && authedUid() in boardDoc(boardId).memberIds
-          && kidCreateIncrementsBoard(boardId);
+          && authedUid() in boardDocAfter(boardId).memberIds
+          && (
+            kidCreateIncrementsBoard(boardId) ||
+            starterKidCreateIsValid(boardId)
+          );
         allow update, delete: if isSignedIn()
           && authedUid() in boardDoc(boardId).memberIds;
       }

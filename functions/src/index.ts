@@ -19,7 +19,6 @@ import {
 } from '@apple/app-store-server-library'
 import { createHash, createPrivateKey, sign as signJwt } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-import { processSheetPhoto } from './sheet-scan.js'
 import type { ScanRequest, SheetDetection } from './types.js'
 
 if (!getApps().length) initializeApp()
@@ -375,6 +374,7 @@ export const scanSheet = onCall<ScanRequest, Promise<SheetDetection>>(
     }
 
     try {
+      const { processSheetPhoto } = await import('./sheet-scan.js')
       return await processSheetPhoto(data, activityIds)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'scan failed'

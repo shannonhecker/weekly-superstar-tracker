@@ -17,14 +17,13 @@
 // Audit Q1.
 
 import {
-  addDoc,
   collection,
   doc,
   getDocs,
   query,
-  runTransaction,
   serverTimestamp,
   where,
+  writeBatch,
 } from 'firebase/firestore'
 import { updateProfile } from 'firebase/auth'
 import { db } from './firebase'
@@ -81,7 +80,9 @@ export async function createBoardForNewUser(
     try { await updateProfile(user, { displayName: trimmedKid }) } catch { /* non-fatal */ }
   }
 
-  const board = await addDoc(collection(db, 'boards'), {
+  const boardRef = doc(collection(db, 'boards'))
+  const batch = writeBatch(db)
+  batch.set(boardRef, {
     name: trimmedKid ? `${trimmedKid}'s board` : 'Our Family',
     adminId: user.uid,
     memberIds: [user.uid],
@@ -90,35 +91,29 @@ export async function createBoardForNewUser(
     parentConsentVersion: parentConsentVersion || PARENT_CONSENT_VERSION,
     parentConsentSource: 'web-onboarding',
     parentConsentUid: user.uid,
-    kidCount: 0,
+    kidCount: 1,
     createdAt: serverTimestamp(),
   })
 
   // Mirror the kid shape used by KidSwitcher — keeps Board.jsx happy on first render.
-  await runTransaction(db, async (tx) => {
-    const boardRef = doc(db, 'boards', board.id)
-    const boardSnap = await tx.get(boardRef)
-    if (!boardSnap.exists()) throw new Error('Board not found.')
-    const kidRef = doc(collection(db, 'boards', board.id, 'kids'))
-    tx.set(kidRef, {
-      name: trimmedKid || 'Superstar',
-      theme: theme || Object.keys(THEMES)[0],
-      order: 0,
-      birthday: birthday || null,
-      activities: DEFAULT_ACTIVITIES,
-      checks: {},
-      stickers: {},
-      badges: [],
-      petName: null,
-      reward: null,
-      weekKey: getWeekKey(),
-      weekHistory: {},
-      chainKey: null,
-      favoritePet: null,
-      createdAt: serverTimestamp(),
-    })
-    tx.update(boardRef, { kidCount: 1 })
+  batch.set(doc(collection(db, 'boards', boardRef.id, 'kids')), {
+    name: trimmedKid || 'Superstar',
+    theme: theme || Object.keys(THEMES)[0],
+    order: 0,
+    birthday: birthday || null,
+    activities: DEFAULT_ACTIVITIES,
+    checks: {},
+    stickers: {},
+    badges: [],
+    petName: null,
+    reward: null,
+    weekKey: getWeekKey(),
+    weekHistory: {},
+    chainKey: null,
+    favoritePet: null,
+    createdAt: serverTimestamp(),
   })
+  await batch.commit()
 
-  return board.id
+  return boardRef.id
 }
