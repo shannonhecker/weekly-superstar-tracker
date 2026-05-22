@@ -112,8 +112,8 @@ function ResetPassword({ oobCode }) {
     if (submitting) return
     setError('')
 
-    if (pw.length < 6) {
-      setError('Use at least 6 characters.')
+    if (pw.length < 8) {
+      setError('Use at least 8 characters.')
       return
     }
     if (pw !== confirm) {
