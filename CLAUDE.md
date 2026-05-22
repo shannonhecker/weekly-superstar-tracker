@@ -75,7 +75,7 @@ Project-specific facts surfaced from memory after burns or hard-won discoveries.
 - Workflow `deploy.yml` only runs `firebase deploy --only hosting`. Rules changes need manual Console publish.
 
 ### v1.1 redesign roadmap
-- 7 PRs · 8 dev days · cosmic theme + bottom tabs + daily goals + Treasure Chest + Pet Pals + decorative names.
+- 6 PRs · ~6 dev days · cosmic theme + bottom tabs + daily goals + Pet Pals + decorative names. Treasure Chest cut 2026-05-22 — redundant with pet + mystery boxes (see plan `i-think-the-treasure-rustling-perlis.md`).
 - User chose "ship v1.0 thin first, v1.1 in 2 weeks" 2026-05-08. See `project_winkingstar_v11_roadmap.md`.
 - PR-2 (daily goals + day-of-week scheduling) has the strongest family validation.
 
