@@ -1143,7 +1143,7 @@ function EmptyState({ boardId }) {
         No superstars yet
       </p>
       <p className="text-earthy-cocoaSoft font-bold mb-5 text-sm">
-        Add your first one above using the “+ Add” button.
+        Tap <span className="font-extrabold text-earthy-cocoa">+ Add</span> below to create your first superstar.
       </p>
       <KidSwitcher kids={[]} activeKidId={null} boardId={boardId} />
     </div>
