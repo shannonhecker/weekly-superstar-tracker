@@ -1142,10 +1142,12 @@ function EmptyState({ boardId }) {
       <p className="text-earthy-cocoa font-extrabold text-lg mb-1">
         No superstars yet
       </p>
-      <p className="text-earthy-cocoaSoft font-bold mb-5 text-sm">
-        Tap <span className="font-extrabold text-earthy-cocoa">+ Add</span> below to create your first superstar.
-      </p>
-      <KidSwitcher kids={[]} activeKidId={null} boardId={boardId} />
+      <KidSwitcher
+        kids={[]}
+        activeKidId={null}
+        boardId={boardId}
+        emptyAddLabel="Add your first superstar"
+      />
     </div>
   )
 }
