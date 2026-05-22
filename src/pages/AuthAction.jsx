@@ -112,8 +112,8 @@ function ResetPassword({ oobCode }) {
     if (submitting) return
     setError('')
 
-    if (pw.length < 6) {
-      setError('Use at least 6 characters.')
+    if (pw.length < 8) {
+      setError('Use at least 8 characters.')
       return
     }
     if (pw !== confirm) {
@@ -182,12 +182,12 @@ function ResetPassword({ oobCode }) {
         type="password"
         autoComplete="new-password"
         required
-        minLength={6}
+        minLength={8}
         value={pw}
         onChange={(e) => setPw(e.target.value)}
         autoFocus
       />
-      <p className="text-xs text-earthy-cocoaSoft/80 mb-4">At least 6 characters.</p>
+      <p className="text-xs text-earthy-cocoaSoft/80 mb-4">At least 8 characters.</p>
 
       <FieldLabel htmlFor="auth-confirm-password">Confirm</FieldLabel>
       <EarthyInput
@@ -195,7 +195,7 @@ function ResetPassword({ oobCode }) {
         type="password"
         autoComplete="new-password"
         required
-        minLength={6}
+        minLength={8}
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
       />
