@@ -2,10 +2,19 @@ import { describe, it, expect } from 'vitest'
 import { formatAuthError, isSilentAuthError } from './authErrors'
 
 // authErrors maps Firebase auth error codes to friendly user copy.
-// The OAuth-specific overrides are web-only; the rest delegates to the
-// shared formatter which iOS also uses.
+// Web-only OAuth overrides are layered on top of shared copy, and sensitive
+// sign-in failures are normalized to avoid email enumeration.
+
+const GENERIC_SIGN_IN_ERROR = 'Email or password is incorrect. Try again or reset your password.'
 
 describe('formatAuthError — OAuth overrides', () => {
+  it('maps credential failures to one generic sign-in message', () => {
+    expect(formatAuthError({ code: 'auth/user-not-found' })).toBe(GENERIC_SIGN_IN_ERROR)
+    expect(formatAuthError({ code: 'auth/wrong-password' })).toBe(GENERIC_SIGN_IN_ERROR)
+    expect(formatAuthError({ code: 'auth/invalid-credential' })).toBe(GENERIC_SIGN_IN_ERROR)
+    expect(formatAuthError({ code: 'auth/invalid-login-credentials' })).toBe(GENERIC_SIGN_IN_ERROR)
+  })
+
   it('maps popup-closed-by-user to friendly copy', () => {
     const err = { code: 'auth/popup-closed-by-user' }
     expect(formatAuthError(err)).toContain('closed before')
