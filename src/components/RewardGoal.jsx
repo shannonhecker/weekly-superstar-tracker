@@ -77,7 +77,7 @@ export default function RewardGoal({ kid, boardId, totalStars }) {
         <div className="font-bold text-xs truncate text-earthy-cocoa">🎁 {reward.label}</div>
         <button onClick={() => setOpen(true)} className="text-[10px] font-bold shrink-0 ml-2" style={{ color: theme.deeper }}>Edit</button>
       </div>
-      <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
+      <div className="h-3 rounded-full overflow-hidden bg-earthy-cream border border-earthy-dividerCream">
         <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
       </div>
       <div className="text-[10px] font-bold mt-1 flex justify-between" style={{ color: theme.deeper }}>

@@ -471,7 +471,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
       </p>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
           {error}
         </div>
       )}
@@ -499,8 +499,7 @@ function StepIntro({ onStart }) {
       <button
         type="button"
         onClick={onStart}
-        className="inline-flex items-center gap-2 px-8 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:bg-[color:var(--earthy-cocoa-hover,#4A2E25)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
-        style={{ ['--earthy-cocoa-hover']: '#4A2E25' }}
+        className="inline-flex items-center gap-2 px-8 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:bg-earthy-cocoaDark hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
       >
         Start <span aria-hidden="true">▶</span>
       </button>
@@ -718,7 +717,7 @@ function StepAccount({
       <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 8 characters.</p>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
           {error}
         </div>
       )}

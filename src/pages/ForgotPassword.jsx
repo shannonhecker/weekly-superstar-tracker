@@ -111,7 +111,7 @@ export default function ForgotPassword() {
             />
 
             {error && (
-              <div role="alert" className="mb-3 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+              <div role="alert" className="mb-3 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
                 {error}
               </div>
             )}
