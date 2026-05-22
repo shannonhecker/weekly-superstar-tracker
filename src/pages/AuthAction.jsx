@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
+import { supportMailto } from '../lib/support'
 import Logo from '../components/Logo'
 import PrimaryButton from '../components/PrimaryButton'
 
@@ -464,7 +465,7 @@ function HelpFooter() {
   return (
     <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
       <a
-        href="mailto:hello@winkingstar.com?subject=Help%20with%20Winking%20Star%20account"
+        href={supportMailto('Help with Winking Star account')}
         className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
       >
         Need help?

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
+import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 
 // Migrated to the earthy palette to match SignIn / SignUp / AuthAction.
@@ -134,7 +135,7 @@ export default function ForgotPassword() {
                 AuthAction, and now ForgotPassword. */}
             <p className="text-center mt-3 text-xs text-earthy-cocoaSoft">
               <a
-                href="mailto:hello@winkingstar.com?subject=Help%20resetting%20my%20Winking%20Star%20password"
+                href={supportMailto('Help resetting my Winking Star password')}
                 className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
               >
                 Need help?

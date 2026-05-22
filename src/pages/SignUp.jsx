@@ -17,6 +17,7 @@ import { THEMES } from '../lib/themes'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { safeRedirect } from '../lib/safeRedirect'
+import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import HeroStar from '../components/HeroStar'
 import ParentConsentGate from '../components/ParentConsentGate'
@@ -674,7 +675,7 @@ function StepAccount({
 
       <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
         <a
-          href="mailto:winkingstarapp@gmail.com?subject=Help%20with%20Winking%20Star%20signup"
+          href={supportMailto('Help with Winking Star signup')}
           className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
         >
           Need help?
