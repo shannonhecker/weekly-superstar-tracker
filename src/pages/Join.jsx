@@ -7,14 +7,69 @@ import { db, functions } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 import EmptyStateScene from '../components/EmptyStateScene'
 
+const INVITE_ERROR_COPY = {
+  expired: 'This invite has expired. Ask the family admin for a new link.',
+  malformed: "This invite link doesn't look right. Check the URL or ask for a new one.",
+  network: "We couldn't reach the server. Check your connection and try again.",
+}
+
+const NETWORK_ERROR_CODES = new Set([
+  'functions/unavailable',
+  'functions/deadline-exceeded',
+  'unavailable',
+  'deadline-exceeded',
+  'auth/network-request-failed',
+  'firestore/unavailable',
+  'firestore/deadline-exceeded',
+])
+
+function inviteError(code, message) {
+  const err = new Error(message || code)
+  err.code = code
+  return err
+}
+
+function errorCode(err) {
+  return (err && (err.code || err.message)) || ''
+}
+
+function isNetworkInviteError(err) {
+  const code = errorCode(err)
+  return NETWORK_ERROR_CODES.has(code) || code.includes('network') || code.includes('unavailable')
+}
+
+function inviteErrorState(err) {
+  const code = errorCode(err)
+  const message = String(err?.message || '').toLowerCase()
+
+  if (isNetworkInviteError(err)) {
+    return { message: INVITE_ERROR_COPY.network, retryable: true }
+  }
+  if (code === 'invite/expired' || message.includes('expired') || message.includes('used')) {
+    return { message: INVITE_ERROR_COPY.expired, retryable: false }
+  }
+  if (
+    code === 'invite/malformed' ||
+    code === 'invite/not-found' ||
+    code === 'functions/invalid-argument' ||
+    code === 'invalid-argument' ||
+    code === 'functions/not-found' ||
+    code === 'not-found'
+  ) {
+    return { message: INVITE_ERROR_COPY.malformed, retryable: false }
+  }
+
+  return { message: formatAuthError(err), retryable: false }
+}
+
 async function redeemShareCodeFromFirestore(code, uid) {
   const normalizedCode = String(code || '').trim()
-  if (!normalizedCode) throw new Error('Invite code is missing.')
+  if (!normalizedCode) throw inviteError('invite/malformed', 'invite code missing')
 
   const boardsRef = collection(db, 'boards')
   const shareCodeQuery = query(boardsRef, where('shareCode', '==', normalizedCode), limit(1))
   const snapshot = await getDocs(shareCodeQuery)
-  if (snapshot.empty) throw new Error('Invite could not be redeemed.')
+  if (snapshot.empty) throw inviteError('invite/not-found', 'invite code not found')
 
   const board = snapshot.docs[0]
   await updateDoc(doc(db, 'boards', board.id), {
@@ -28,7 +83,7 @@ async function redeemShareCode(code, uid) {
     const redeem = httpsCallable(functions, 'redeemShareCode')
     const result = await redeem({ code })
     const boardId = result.data?.boardId
-    if (!boardId) throw new Error('Invite could not be redeemed.')
+    if (!boardId) throw inviteError('invite/not-found', 'invite response missing board id')
     return boardId
   } catch (err) {
     const codeValue = err?.code || ''
@@ -44,24 +99,33 @@ export default function Join() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
   const [error, setError] = useState('')
+  const [retryable, setRetryable] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     if (loading) return
     if (!user) {
       setError('Sign in or create a parent account to join this family board.')
+      setRetryable(false)
       return
     }
     let cancelled = false
     ;(async () => {
       try {
+        setError('')
+        setRetryable(false)
         const boardId = await redeemShareCode(code, user.uid)
         if (!cancelled) navigate(`/board/${boardId}`, { replace: true })
       } catch (err) {
-        if (!cancelled) setError(formatAuthError(err))
+        if (!cancelled) {
+          const next = inviteErrorState(err)
+          setError(next.message)
+          setRetryable(next.retryable)
+        }
       }
     })()
     return () => { cancelled = true }
-  }, [loading, user, code, navigate])
+  }, [loading, user, code, navigate, attempt])
 
   return (
     <main id="main" className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
@@ -74,6 +138,15 @@ export default function Join() {
             ? (
                 <>
                   <p className="text-earthy-cocoa font-extrabold text-lg">{error}</p>
+                  {retryable && user && (
+                    <button
+                      type="button"
+                      onClick={() => setAttempt((value) => value + 1)}
+                      className="mt-5 w-full py-3 rounded-pill font-bold text-earthy-cream bg-earthy-cocoa hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center"
+                    >
+                      Try again
+                    </button>
+                  )}
                   {!user && (
                     <div className="mt-5 flex flex-col gap-2">
                       <Link
