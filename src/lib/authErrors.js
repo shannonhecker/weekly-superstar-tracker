@@ -1,13 +1,15 @@
 // Wrap the shared formatter with web-only OAuth-specific messages.
-// The shared package handles email/password codes; OAuth popup flows are
-// web-specific so we layer their friendlier copy on top of the shared map
-// instead of editing the shared package (kept stable for iOS parity).
+// Sensitive sign-in failures are normalized here so the UI does not reveal
+// whether an email address exists; OAuth popup flows stay web-specific.
 import { formatAuthError as sharedFormatAuthError } from '@weekly-superstar/shared/auth-errors'
 
+const GENERIC_SIGN_IN_ERROR = 'Email or password is incorrect. Try again or reset your password.'
+
 const OAUTH_OVERRIDES = {
-  'auth/user-not-found': 'Email or password is incorrect.',
-  'auth/wrong-password': 'Email or password is incorrect.',
-  'auth/invalid-credential': 'Email or password is incorrect.',
+  'auth/user-not-found': GENERIC_SIGN_IN_ERROR,
+  'auth/wrong-password': GENERIC_SIGN_IN_ERROR,
+  'auth/invalid-credential': GENERIC_SIGN_IN_ERROR,
+  'auth/invalid-login-credentials': GENERIC_SIGN_IN_ERROR,
   'auth/popup-closed-by-user': 'Sign-in window was closed before finishing.',
   'auth/popup-blocked':
     'Your browser blocked the sign-in popup. Allow popups for winkingstar.com and try again.',
