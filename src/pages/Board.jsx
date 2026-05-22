@@ -40,7 +40,7 @@ const HATCH_GOAL = 60
 const BOARD_SECTIONS = [
   { id: 'top', label: 'Home', icon: 'home' },
   { id: 'activity', label: 'Activities', icon: 'tasks' },
-  { id: 'treasure-progress', label: 'Treasure & Progress', icon: 'reward' },
+  { id: 'treasure-progress', label: 'Stars & Pet', icon: 'reward' },
 ]
 
 function boardSectionFromPath(pathname) {
@@ -898,7 +898,7 @@ function BoardSinglePage({
       </section>
 
       <section id="treasure-progress" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
-        <SectionHeading label="Treasure & Progress" />
+        <SectionHeading label="Stars & Pet" />
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <StreakCounter kid={activeKid} />

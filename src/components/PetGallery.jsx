@@ -86,9 +86,9 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
     <>
     <Modal open={open} onClose={onClose} emoji="🏆" title={`${kid?.name || ''}'s Collection`}>
       <div className="max-h-[65vh] overflow-y-auto">
-        {/* Treasures section — rare stickers + bonus stars from mystery boxes */}
+        {/* Bonus Goodies section: rare stickers + bonus stars from mystery boxes */}
         <div className="mb-4">
-          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🎁 Mystery Treasures</div>
+          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">✨ Bonus Goodies</div>
           {rareEntries.length === 0 && bonusStars === 0 ? (
             <p className="text-xs text-earthy-cocoaSoft font-bold py-2">
               Keep tapping stickers — mystery boxes appear once in a while!
