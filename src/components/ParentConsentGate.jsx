@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export default function ParentConsentGate({ onAccept, compact = false }) {
   const [confirmedAdult, setConfirmedAdult] = useState(false)
@@ -38,6 +39,17 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
           </span>
         </label>
       </div>
+
+      <p className="text-xs text-earthy-cocoaSoft mb-5">
+        <Link
+          to="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:text-earthy-cocoa"
+        >
+          Read our privacy policy
+        </Link>
+      </p>
 
       <button
         type="button"
