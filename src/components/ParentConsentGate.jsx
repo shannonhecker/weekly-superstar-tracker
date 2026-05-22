@@ -11,7 +11,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
         Grown-up check.
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-5">
-        A parent or legal guardian needs to continue before we collect a child's name, birthday, or photo.
+        A parent or legal guardian needs to continue before we collect a child’s name, birthday, or photo.
       </p>
 
       <div className="space-y-3 mb-6">
@@ -23,7 +23,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
             className="mt-1 h-4 w-4 accent-earthy-cocoa"
           />
           <span className="text-sm font-bold text-earthy-cocoa">
-            I am the child's parent or legal guardian and I am at least 18.
+            I am the child’s parent or legal guardian and I am at least 18.
           </span>
         </label>
         <label className="flex gap-3 rounded-2xl bg-earthy-ivory border border-earthy-divider p-4 text-left">
