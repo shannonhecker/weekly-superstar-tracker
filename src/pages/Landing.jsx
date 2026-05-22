@@ -72,6 +72,8 @@ export default function Landing() {
           <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
           {' · '}
           <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
+          {' · '}
+          <Link to="/support" className="underline underline-offset-2 hover:text-earthy-cocoa">Support</Link>
         </p>
         </div>
       </div>

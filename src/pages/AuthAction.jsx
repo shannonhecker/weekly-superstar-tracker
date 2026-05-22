@@ -464,7 +464,7 @@ function HelpFooter() {
   return (
     <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
       <a
-        href="mailto:hello@winkingstar.com?subject=Help%20with%20Winking%20Star%20account"
+        href="mailto:winkingstarapp@gmail.com?subject=Help%20with%20Winking%20Star%20account"
         className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
       >
         Need help?

@@ -134,7 +134,7 @@ export default function ForgotPassword() {
                 AuthAction, and now ForgotPassword. */}
             <p className="text-center mt-3 text-xs text-earthy-cocoaSoft">
               <a
-                href="mailto:hello@winkingstar.com?subject=Help%20resetting%20my%20Winking%20Star%20password"
+                href="mailto:winkingstarapp@gmail.com?subject=Help%20resetting%20my%20Winking%20Star%20password"
                 className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
               >
                 Need help?

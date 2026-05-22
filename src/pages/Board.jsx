@@ -560,6 +560,14 @@ export default function Board() {
                       <Icon name={muted ? 'volume-off' : 'volume-on'} size={18} />
                       <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
                     </button>
+                    <Link
+                      to="/support"
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
+                    >
+                      <Icon name="help" size={18} />
+                      <span>Support</span>
+                    </Link>
                     {user && (
                       <button
                         type="button"
