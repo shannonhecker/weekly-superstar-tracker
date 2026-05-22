@@ -10,6 +10,7 @@ import { auth } from '../lib/firebase'
 import { findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import { safeRedirect } from '../lib/safeRedirect'
+import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import ThemeScene from '../components/ThemeScene'
@@ -252,7 +253,7 @@ export default function SignIn() {
 
           <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
             <a
-              href="mailto:winkingstarapp@gmail.com?subject=Help%20signing%20in%20to%20Winking%20Star"
+              href={supportMailto('Help signing in to Winking Star')}
               className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
             >
               Need help?

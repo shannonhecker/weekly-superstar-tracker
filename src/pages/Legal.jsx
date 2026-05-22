@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
+import { SUPPORT_EMAIL } from '../lib/support'
 
 const UPDATED = 'May 15, 2026'
 
@@ -19,7 +20,7 @@ export function Privacy() {
         Family data is kept while the account or family board needs it. Deleting a child removes that child's saved data and avatar files. Deleting an account removes family spaces you manage and removes your membership from shared spaces managed by someone else, subject to short backup expiry.
       </p>
       <p>
-        Parents and guardians can request access, correction, or deletion by using the in-app controls or contacting <a href="mailto:hello@winkingstar.com">hello@winkingstar.com</a>.
+        Parents and guardians can request access, correction, or deletion by using the in-app controls or contacting <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
       </p>
     </LegalPage>
   )
@@ -38,7 +39,7 @@ export function Terms() {
         The service is provided as-is. We may update, suspend, or discontinue features to protect families, comply with law, or improve reliability.
       </p>
       <p>
-        You can stop using Winking Star at any time. Account deletion tools are available in the app, and support requests can be sent to <a href="mailto:hello@winkingstar.com">hello@winkingstar.com</a>.
+        You can stop using Winking Star at any time. Account deletion tools are available in the app, and support requests can be sent to <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
       </p>
     </LegalPage>
   )
