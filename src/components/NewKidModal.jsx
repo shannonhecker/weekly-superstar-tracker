@@ -6,7 +6,7 @@ import ParentConsentGate from './ParentConsentGate'
 
 // Single-screen "Add a superstar" modal: name + avatar emoji + theme +
 // optional birthday. Only the name is required. Replaces the legacy
-// "just-a-name prompt" path that auto-cycled themes — now the parent
+// "just-a-name prompt" path that auto-cycled themes. Now the parent
 // gets to pick all three choices up front.
 //
 // Defaults: theme cycles based on kid count (so siblings start visually
@@ -79,7 +79,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
 
           {/* Avatar */}
           <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Avatar <span className="font-normal normal-case text-earthy-cocoaSoft/70">— optional</span>
+            Avatar <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
           </label>
           <div className="bg-earthy-ivory border border-earthy-divider rounded-xl p-2 mb-5 grid grid-cols-8 gap-1">
             {KID_AVATARS.map((emoji) => {
@@ -142,9 +142,9 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
             })}
           </div>
 
-          {/* Birthday — optional */}
+          {/* Birthday (optional) */}
           <label htmlFor="new-kid-birthday" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">— optional</span>
+            Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
           </label>
           <EarthyDatePicker
             value={birthday}
