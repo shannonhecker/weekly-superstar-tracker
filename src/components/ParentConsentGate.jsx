@@ -37,6 +37,16 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
             I consent to Winking Star saving family board data for app functionality.
           </span>
         </label>
+        <p className="text-xs text-earthy-cocoaSoft mt-3">
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-earthy-cocoa"
+          >
+            Read our privacy policy
+          </a>
+        </p>
       </div>
 
       <button
