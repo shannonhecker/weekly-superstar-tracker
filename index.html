@@ -11,6 +11,29 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260516" />
     <link rel="manifest" href="/manifest.webmanifest?v=20260516" />
 
+    <!-- SEO / share previews. Marketing site is a JS-only SPA, so these
+         tags are the only signal crawlers (Google, Apple App Review,
+         iMessage, WhatsApp, Slack) get before JS runs. Keep them in
+         sync with privacy.html and support.html. -->
+    <meta name="description" content="Winking Star is a warm, ad-free habit tracker for families. Kids check off daily routines, earn stars, and grow a Mystery Pet each week. Free on the App Store." />
+    <meta name="keywords" content="habit tracker, chore chart, kids routine, family planner, checklist, homeschool, mystery pet" />
+    <meta name="author" content="Shannon Hecker" />
+    <link rel="canonical" href="https://winkingstar.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://winkingstar.com/" />
+    <meta property="og:title" content="Winking Star: habit tracker for kid routines" />
+    <meta property="og:description" content="Ad-free family habit tracker. Kids check off daily routines, earn stars, grow a Mystery Pet." />
+    <meta property="og:image" content="https://winkingstar.com/winking-star.png" />
+    <meta property="og:site_name" content="Winking Star" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Winking Star: habit tracker for kid routines" />
+    <meta name="twitter:description" content="Ad-free family habit tracker. Kids check off daily routines, earn stars, grow a Mystery Pet." />
+    <meta name="twitter:image" content="https://winkingstar.com/winking-star.png" />
+
     <!-- Cross-origin preconnects — start the TCP+TLS handshake to these
          hosts in parallel with HTML parsing, before the JS bundle even
          requests them. Saves ~150-300 ms on first paint of any page that
