@@ -24,7 +24,16 @@ import type { ScanRequest, SheetDetection } from './types.js'
 if (!getApps().length) initializeApp()
 
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024
-const PREMIUM_PRODUCT_ID = 'weekly_superstar_premium_unlock'
+// IAP product ID. Originally `weekly_superstar_premium_unlock` was created in
+// ASC with the wrong type (CONSUMABLE) and Apple does not allow type changes
+// after creation. The replacement product `weekly_superstar_lifetime` was
+// created as NON_CONSUMABLE (PR weekly-superstar-ios#158, 2026-05-26).
+// The client now sends the new ID; the server must validate against it.
+//
+// The OLD id has not been released to any production user — no in-flight
+// purchases need backwards-compat allowlisting. The stale ASC record is
+// being deprecated after the new IAP's first approval.
+const PREMIUM_PRODUCT_ID = 'weekly_superstar_lifetime'
 const APP_BUNDLE_ID = 'com.winkingstar.app'
 const APP_APPLE_ID = 6765767262
 const APPLE_PRODUCTION_API = 'https://api.storekit.apple.com'
