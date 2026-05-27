@@ -21,7 +21,7 @@ export async function createCheckoutSessionHandler(
   _getStripe: GetStripeOverride = defaultGetStripe,
 ): Promise<CreateCheckoutSessionResponse> {
   if (!req.auth?.uid) {
-    throw new HttpsError('unauthenticated', 'unauthenticated: sign in required')
+    throw new HttpsError('unauthenticated', 'Sign in required')
   }
   const { boardId } = req.data ?? {}
   if (!boardId) throw new HttpsError('invalid-argument', 'boardId required')

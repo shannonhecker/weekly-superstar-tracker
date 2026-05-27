@@ -48,7 +48,7 @@ test('rejects unauthenticated calls', async () => {
         fakeFirestore(null),
         fakeStripe({ id: '', url: '' }),
       ),
-    /unauthenticated/i,
+    (err: Error & { code?: string }) => err.code === 'unauthenticated',
   )
 })
 
