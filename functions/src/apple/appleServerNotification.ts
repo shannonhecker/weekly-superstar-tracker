@@ -3,8 +3,24 @@
 import { onRequest, type Request } from 'firebase-functions/v2/https'
 import type { Response } from 'express'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
+import { readFileSync } from 'node:fs'
 
 const REVOCATION_TYPES = new Set(['REFUND', 'REVOKE', 'EXPIRED'])
+
+const APPLE_ROOT_CERTIFICATE_PATHS = [
+  '../../certs/apple-root/AppleIncRootCertificate.cer',
+  '../../certs/apple-root/AppleRootCA-G2.cer',
+  '../../certs/apple-root/AppleRootCA-G3.cer',
+]
+
+let cachedAppleRootCertificates: Buffer[] | null = null
+
+export function appleRootCertificates(): Buffer[] {
+  cachedAppleRootCertificates ??= APPLE_ROOT_CERTIFICATE_PATHS.map((path) =>
+    readFileSync(new URL(path, import.meta.url)),
+  )
+  return cachedAppleRootCertificates
+}
 
 interface DecodedNotification {
   notificationType?: string
@@ -21,18 +37,15 @@ type VerifyNotificationOverride = (signedPayload: string) => Promise<DecodedNoti
 
 async function defaultVerifyNotification(signedPayload: string): Promise<DecodedNotification> {
   // Defer the Apple library import to runtime to keep cold starts smaller.
-  // The library validates the JWS signed payload against Apple's root certs.
-  //
-  // Root certs must be injected from Secret Manager in production.
-  // Constructor signature matches @apple/app-store-server-library ^3.1.0.
+  // The library validates the JWS signed payload against Apple's root certs,
+  // loaded from functions/certs/apple-root/ (same set used by verifyPremiumUnlock).
   const { SignedDataVerifier } = await import('@apple/app-store-server-library')
   const APPLE_BUNDLE_ID = 'com.winkingstar.app'
   const APPLE_APP_APPLE_ID = 6765767262
-  const rootCerts: Buffer[] = [] // production: inject from secret manager
   const enableOnlineCheck = true
   const environment = 'Production'
   const verifier = new SignedDataVerifier(
-    rootCerts,
+    appleRootCertificates(),
     enableOnlineCheck,
     environment as never,
     APPLE_BUNDLE_ID,
