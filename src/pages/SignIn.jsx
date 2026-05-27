@@ -9,11 +9,17 @@ import {
 import { auth } from '../lib/firebase'
 import { findUserBoards } from '../lib/boards'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
+import {
+  extractRecoveryInfo,
+  getExistingSignInMethods,
+  linkPendingCredential,
+} from '../lib/accountLinkRecovery'
 import { safeRedirect } from '../lib/safeRedirect'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import ThemeScene from '../components/ThemeScene'
+import LinkAccountModal from '../components/LinkAccountModal'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -37,6 +43,9 @@ export default function SignIn() {
   const [failedAttempts, setFailedAttempts] = useState(0)
   const [lockedUntil, setLockedUntil] = useState(0)
   const [showPassword, setShowPassword] = useState(false)
+  const [recovery, setRecovery] = useState(null)
+  const [linking, setLinking] = useState(false)
+  const [recoveryError, setRecoveryError] = useState('')
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -72,22 +81,61 @@ export default function SignIn() {
     }
   }
 
-  const onOAuth = async (provider) => {
+  const completeOAuthSignIn = async (user) => {
+    if (next) {
+      navigate(next, { replace: true })
+      return
+    }
+    const boardId = await ensureBoardForOAuthUser(user)
+    navigate(`/board/${boardId}`, { replace: true })
+  }
+
+  const onOAuth = async (provider, attemptedProviderId) => {
     if (loading) return
     setError('')
     setLoading(true)
     try {
       const cred = await signInWithPopup(auth, provider)
-      if (next) {
-        navigate(next, { replace: true })
-        return
-      }
-      const boardId = await ensureBoardForOAuthUser(cred.user)
-      navigate(`/board/${boardId}`, { replace: true })
+      await completeOAuthSignIn(cred.user)
     } catch (err) {
-      if (!isSilentAuthError(err)) setError(formatAuthError(err))
+      const info = extractRecoveryInfo(err, attemptedProviderId)
+      if (info) {
+        try {
+          const existingMethods = await getExistingSignInMethods(info.email)
+          setRecovery({ ...info, existingMethods })
+        } catch {
+          setError(formatAuthError(err))
+        }
+      } else if (!isSilentAuthError(err)) {
+        setError(formatAuthError(err))
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const onConfirmLink = async (originalProviderId) => {
+    if (!recovery || linking) return
+    setLinking(true)
+    setRecoveryError('')
+    try {
+      const provider =
+        originalProviderId === 'google.com'
+          ? new GoogleAuthProvider()
+          : (() => {
+              const p = new OAuthProvider('apple.com')
+              p.addScope('email')
+              p.addScope('name')
+              return p
+            })()
+      const cred = await signInWithPopup(auth, provider)
+      await linkPendingCredential(cred.user, recovery.pendingCredential)
+      setRecovery(null)
+      await completeOAuthSignIn(cred.user)
+    } catch (err) {
+      if (!isSilentAuthError(err)) setRecoveryError(formatAuthError(err))
+    } finally {
+      setLinking(false)
     }
   }
 
@@ -95,9 +143,9 @@ export default function SignIn() {
     const provider = new OAuthProvider('apple.com')
     provider.addScope('email')
     provider.addScope('name')
-    onOAuth(provider)
+    onOAuth(provider, 'apple.com')
   }
-  const onGoogle = () => onOAuth(new GoogleAuthProvider())
+  const onGoogle = () => onOAuth(new GoogleAuthProvider(), 'google.com')
 
   return (
     <main id="main" className="min-h-screen bg-earthy-ivory px-5 py-6 sm:py-10 font-jakarta">
@@ -261,6 +309,20 @@ export default function SignIn() {
           </p>
         </form>
       </div>
+      <LinkAccountModal
+        open={!!recovery}
+        email={recovery?.email}
+        existingMethods={recovery?.existingMethods}
+        attemptedProviderId={recovery?.attemptedProviderId}
+        busy={linking}
+        error={recoveryError}
+        onConfirm={onConfirmLink}
+        onClose={() => {
+          if (linking) return
+          setRecovery(null)
+          setRecoveryError('')
+        }}
+      />
     </main>
   )
 }

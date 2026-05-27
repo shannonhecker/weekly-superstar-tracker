@@ -16,11 +16,17 @@ import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
+import {
+  extractRecoveryInfo,
+  getExistingSignInMethods,
+  linkPendingCredential,
+} from '../lib/accountLinkRecovery'
 import { safeRedirect } from '../lib/safeRedirect'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import HeroStar from '../components/HeroStar'
 import ParentConsentGate from '../components/ParentConsentGate'
+import LinkAccountModal from '../components/LinkAccountModal'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -87,6 +93,9 @@ export default function SignUp() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [recovery, setRecovery] = useState(null)
+  const [linking, setLinking] = useState(false)
+  const [recoveryError, setRecoveryError] = useState('')
 
   useEffect(() => {
     const prev = prevStepRef.current
@@ -147,7 +156,30 @@ export default function SignUp() {
   // /signup flow orphans the original board and the user perceives data loss.
   // (One real user lost visibility of "The Hecker Family" board this way on
   // 2026-04-28 — board still in Firestore but app routed to a fresh duplicate.)
-  const onOAuth = async (provider) => {
+  const completeOAuthSignUp = async (user) => {
+    if (next) {
+      navigate(next, { replace: true })
+      return
+    }
+    const existing = await findUserBoards(user.uid)
+    if (existing.length > 0) {
+      navigate(`/board/${existing[0].id}`, { replace: true })
+      return
+    }
+    if (!parentConsent) {
+      setError('A grown-up needs to accept the family data notice before creating a board.')
+      return
+    }
+    const boardId = await createBoardForNewUser(user, {
+      theme,
+      kidName,
+      birthday,
+      parentConsentAccepted: parentConsent,
+    })
+    navigate(`/board/${boardId}`, { replace: true })
+  }
+
+  const onOAuth = async (provider, attemptedProviderId) => {
     if (loading) return
     setError('')
     setLoading(true)
@@ -163,36 +195,46 @@ export default function SignUp() {
         return
       }
       const cred = await signInWithPopup(auth, provider)
-      if (next) {
-        navigate(next, { replace: true })
-        return
-      }
-      // Existing-user guard: if Firestore has any board where this user is a
-      // member (admin or family member), route to their original — earliest
-      // by createdAt — so a returning user doesn't get a fresh duplicate
-      // board on top of their existing data. (See PR #30 incident.)
-      const existing = await findUserBoards(cred.user.uid)
-      if (existing.length > 0) {
-        navigate(`/board/${existing[0].id}`, { replace: true })
-        return
-      }
-      if (!parentConsent) {
-        setError('A grown-up needs to accept the family data notice before creating a board.')
-        return
-      }
-      const boardId = await createBoardForNewUser(cred.user, {
-        theme,
-        kidName,
-        birthday,
-        parentConsentAccepted: parentConsent,
-      })
-      navigate(`/board/${boardId}`, { replace: true })
+      await completeOAuthSignUp(cred.user)
     } catch (err) {
-      // Treat duplicate popup-request as a no-op — the user just clicked twice
-      // before the first popup resolved. No banner, just clear the spinner.
-      if (!isSilentAuthError(err)) setError(friendlyAuthError(err, isUpgrade))
+      const info = !isUpgrade ? extractRecoveryInfo(err, attemptedProviderId) : null
+      if (info) {
+        try {
+          const existingMethods = await getExistingSignInMethods(info.email)
+          setRecovery({ ...info, existingMethods })
+        } catch {
+          setError(friendlyAuthError(err, isUpgrade))
+        }
+      } else if (!isSilentAuthError(err)) {
+        setError(friendlyAuthError(err, isUpgrade))
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const onConfirmLink = async (originalProviderId) => {
+    if (!recovery || linking) return
+    setLinking(true)
+    setRecoveryError('')
+    try {
+      const provider =
+        originalProviderId === 'google.com'
+          ? new GoogleAuthProvider()
+          : (() => {
+              const p = new OAuthProvider('apple.com')
+              p.addScope('email')
+              p.addScope('name')
+              return p
+            })()
+      const cred = await signInWithPopup(auth, provider)
+      await linkPendingCredential(cred.user, recovery.pendingCredential)
+      setRecovery(null)
+      await completeOAuthSignUp(cred.user)
+    } catch (err) {
+      if (!isSilentAuthError(err)) setRecoveryError(friendlyAuthError(err, isUpgrade))
+    } finally {
+      setLinking(false)
     }
   }
 
@@ -200,9 +242,9 @@ export default function SignUp() {
     const provider = new OAuthProvider('apple.com')
     provider.addScope('email')
     provider.addScope('name')
-    onOAuth(provider)
+    onOAuth(provider, 'apple.com')
   }
-  const onGoogle = () => onOAuth(new GoogleAuthProvider())
+  const onGoogle = () => onOAuth(new GoogleAuthProvider(), 'google.com')
 
   // Surface a friendlier message in upgrade mode when the parent's email
   // (or Google/Apple account) is already a Winking Star user. The "Use
@@ -380,6 +422,20 @@ export default function SignUp() {
           </>
         )}
       </p>
+      <LinkAccountModal
+        open={!!recovery}
+        email={recovery?.email}
+        existingMethods={recovery?.existingMethods}
+        attemptedProviderId={recovery?.attemptedProviderId}
+        busy={linking}
+        error={recoveryError}
+        onConfirm={onConfirmLink}
+        onClose={() => {
+          if (linking) return
+          setRecovery(null)
+          setRecoveryError('')
+        }}
+      />
     </main>
   )
 }
