@@ -1,6 +1,7 @@
 // functions/src/stripe/createCheckoutSession.ts
 
 import { onCall, HttpsError, type CallableRequest } from 'firebase-functions/v2/https'
+import { defineSecret } from 'firebase-functions/params'
 import { getFirestore } from 'firebase-admin/firestore'
 import Stripe from 'stripe'
 import { verifyParentalGate } from './parentalGate.js'
@@ -11,6 +12,9 @@ import type {
 
 // Matches the pinned version in this SDK install (Stripe.LatestApiVersion)
 const stripeApiVersion = '2025-02-24.acacia' as const
+
+const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY')
+const STRIPE_PRICE_ID = defineSecret('STRIPE_PRICE_ID')
 
 type GetFirestoreOverride = () => FirebaseFirestore.Firestore
 type GetStripeOverride = () => Stripe
@@ -69,4 +73,10 @@ function defaultGetStripe(): Stripe {
 export const createCheckoutSession = onCall<
   CreateCheckoutSessionRequest,
   Promise<CreateCheckoutSessionResponse>
->({ region: 'us-central1' }, (req) => createCheckoutSessionHandler(req))
+>(
+  {
+    region: 'us-central1',
+    secrets: [STRIPE_SECRET_KEY, STRIPE_PRICE_ID],
+  },
+  (req) => createCheckoutSessionHandler(req),
+)

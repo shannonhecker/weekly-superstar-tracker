@@ -1,12 +1,16 @@
 // functions/src/stripe/stripeWebhookHandler.ts
 
 import { onRequest, type Request } from 'firebase-functions/v2/https'
+import { defineSecret } from 'firebase-functions/params'
 import type { Response } from 'express'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 import Stripe from 'stripe'
 
 // Matches the pinned version in this SDK install (Stripe.LatestApiVersion)
 const stripeApiVersion = '2025-02-24.acacia' as const
+
+const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY')
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET')
 
 function defaultGetStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
@@ -137,6 +141,9 @@ async function handleChargeRefunded(
 }
 
 export const stripeWebhookHandler = onRequest(
-  { region: 'us-central1' },
+  {
+    region: 'us-central1',
+    secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET],
+  },
   (req, res) => stripeWebhookHandlerImpl(req, res),
 )
