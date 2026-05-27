@@ -43,7 +43,18 @@ function mockRes() {
   }
 }
 
-const { appleServerNotificationImpl } = await import('./appleServerNotification.js')
+const { appleServerNotificationImpl, appleRootCertificates } = await import('./appleServerNotification.js')
+
+test('appleRootCertificates loads all three Apple root certs as non-empty DER buffers', () => {
+  const certs = appleRootCertificates()
+  assert.equal(certs.length, 3, 'expected 3 root certs (G1, G2, G3)')
+  for (const buf of certs) {
+    assert.ok(Buffer.isBuffer(buf), 'each cert is a Buffer')
+    assert.ok(buf.length > 0, 'each cert is non-empty')
+    // DER-encoded X.509 certs start with 0x30 (ASN.1 SEQUENCE tag).
+    assert.equal(buf[0], 0x30, 'each cert begins with the DER SEQUENCE tag')
+  }
+})
 
 test('rejects when signedPayload missing', async () => {
   const { getFs } = makeFakeFirestore()
