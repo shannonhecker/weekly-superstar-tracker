@@ -69,4 +69,4 @@ function defaultGetStripe(): Stripe {
 export const createCheckoutSession = onCall<
   CreateCheckoutSessionRequest,
   Promise<CreateCheckoutSessionResponse>
->({ region: 'us-central1' }, createCheckoutSessionHandler)
+>({ region: 'us-central1' }, (req) => createCheckoutSessionHandler(req))

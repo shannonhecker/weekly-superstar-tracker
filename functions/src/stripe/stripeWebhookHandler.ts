@@ -1,7 +1,7 @@
 // functions/src/stripe/stripeWebhookHandler.ts
 
 import { onRequest, type Request } from 'firebase-functions/v2/https'
-import type { Response } from 'firebase-functions/v2/https'
+import type { Response } from 'express'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 import Stripe from 'stripe'
 
@@ -138,5 +138,5 @@ async function handleChargeRefunded(
 
 export const stripeWebhookHandler = onRequest(
   { region: 'us-central1' },
-  stripeWebhookHandlerImpl,
+  (req, res) => stripeWebhookHandlerImpl(req, res),
 )

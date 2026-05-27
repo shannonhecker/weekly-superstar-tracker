@@ -437,3 +437,6 @@ export const redeemShareCode = onCall<RedeemShareCodeRequest, Promise<RedeemShar
     return { boardId: boardDoc.id }
   },
 )
+
+export { createCheckoutSession } from './stripe/createCheckoutSession.js'
+export { stripeWebhookHandler } from './stripe/stripeWebhookHandler.js'
