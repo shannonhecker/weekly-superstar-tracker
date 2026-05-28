@@ -423,7 +423,7 @@ export default function SignUp() {
         {isUpgrade ? (
           <>
             Already a member?{' '}
-            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
               Use your existing account →
             </Link>
             <br />
@@ -432,7 +432,7 @@ export default function SignUp() {
         ) : (
           <>
             Already have an account?{' '}
-            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
               Sign in
             </Link>
           </>
