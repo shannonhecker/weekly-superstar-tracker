@@ -7,13 +7,14 @@ import { getWeekKey } from '../lib/week'
 import { useToast } from '../contexts/ToastContext'
 import NewKidModal from './NewKidModal'
 import { KidAvatar } from './KidAvatar'
+import PrimaryButton from './PrimaryButton'
 
 const FREE_KID_LIMIT = 2
 const PREMIUM_KID_LIMIT = 6
 
 // URL-driven kid selection. Active kid is stored in `?kid=<id>`,
 // so a Firestore re-render NEVER resets selection — that's the sticker-bug fix.
-export default function KidSwitcher({ kids, activeKidId, boardId }) {
+export default function KidSwitcher({ kids, activeKidId, boardId, emptyAddLabel = '' }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [promptOpen, setPromptOpen] = useState(false)
@@ -72,6 +73,26 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
     }
   }
 
+  const modal = (
+    <NewKidModal
+      open={promptOpen}
+      onClose={() => setPromptOpen(false)}
+      onSubmit={addKid}
+      kidCount={kids.length}
+    />
+  )
+
+  if (emptyAddLabel && kids.length === 0) {
+    return (
+      <div className="max-w-xs mx-auto mb-4 font-jakarta">
+        <PrimaryButton type="button" onClick={() => setPromptOpen(true)}>
+          {emptyAddLabel}
+        </PrimaryButton>
+        {modal}
+      </div>
+    )
+  }
+
   return (
     <div className="flex gap-3 justify-center mb-4 overflow-x-auto pb-1 -mx-3 px-3 flex-wrap font-jakarta">
       {kids.map((kid) => {
@@ -115,12 +136,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId }) {
         <span className="text-xs font-bold text-earthy-cocoaSoft">Add</span>
       </button>
 
-      <NewKidModal
-        open={promptOpen}
-        onClose={() => setPromptOpen(false)}
-        onSubmit={addKid}
-        kidCount={kids.length}
-      />
+      {modal}
     </div>
   )
 }
