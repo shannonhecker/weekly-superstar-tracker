@@ -29,6 +29,7 @@ import PrimaryButton from '../components/PrimaryButton'
 import HeroStar from '../components/HeroStar'
 import ParentConsentGate from '../components/ParentConsentGate'
 import LinkAccountModal from '../components/LinkAccountModal'
+import EarthyDatePicker from '../components/EarthyDatePicker'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -626,18 +627,18 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
         className="w-full px-4 py-3 mb-5 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa placeholder:text-earthy-cocoaSoft/60 transition-colors"
       />
 
-      <label htmlFor="kid-birthday" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+      <label className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
         Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">(optional)</span>
       </label>
-      <input
-        id="kid-birthday"
-        type="date"
-        value={birthday}
-        onChange={(e) => setBirthday(e.target.value)}
-        aria-describedby="birthday-help"
-        className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-      />
-      <p id="birthday-help" className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
+      <div className="mb-2">
+        <EarthyDatePicker
+          value={birthday}
+          onChange={setBirthday}
+          placeholder="Add a birthday"
+          ariaLabel="Pick a birthday"
+        />
+      </div>
+      <p className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
         We use this to celebrate their birthday-week with a special banner. Skip if you’d rather not.
       </p>
 
