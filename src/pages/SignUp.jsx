@@ -475,7 +475,7 @@ function StepIntro({ onStart }) {
         <HeroStar size={88} />
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
-        meet your<br />weekly superstar.
+        Meet your weekly superstar.
       </h1>
       <p className="text-earthy-cocoaSoft text-base sm:text-lg leading-relaxed max-w-sm mx-auto mb-10">
         a tiny ritual for kids who are crushing their week.
@@ -498,7 +498,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
   return (
     <div>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Pick a theme<br />for them
+        Pick a theme for them.
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-6">
         You can change this anytime. It sets the vibe of their board.
@@ -575,7 +575,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
       className="pt-2"
     >
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Tell me about<br />them
+        Tell me about them.
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
         For ages 3 to 12. You can add more kids after this.
