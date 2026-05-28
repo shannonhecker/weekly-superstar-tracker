@@ -578,7 +578,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
         Tell me about<br />them
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        For ages 3–12. You can add more kids after this.
+        For ages 3 to 12. You can add more kids after this.
       </p>
 
       <label htmlFor="kid-name" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
