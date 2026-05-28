@@ -490,11 +490,7 @@ function StepIntro({ onStart }) {
   return (
     <div className="text-center pt-2">
       <div className="mb-6 max-w-md mx-auto">
-        <WizardHero
-          illustration="intro-welcome"
-          height={240}
-          objectPosition="right top"
-        />
+        <WizardHero illustration="intro-welcome" height={220} />
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
         Meet your weekly superstar.
