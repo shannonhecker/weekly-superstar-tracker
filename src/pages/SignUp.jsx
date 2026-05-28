@@ -30,6 +30,7 @@ import HeroStar from '../components/HeroStar'
 import ParentConsentGate from '../components/ParentConsentGate'
 import LinkAccountModal from '../components/LinkAccountModal'
 import EarthyDatePicker from '../components/EarthyDatePicker'
+import WizardShell from '../components/wizard/WizardShell'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -313,9 +314,10 @@ export default function SignUp() {
       : 'animate-[onb-slide-in-left_220ms_ease-out]'
 
   return (
+    <WizardShell step={step} direction={direction}>
     <main
       id="main"
-      className="min-h-screen flex flex-col px-5 pb-6 relative"
+      className="min-h-screen flex flex-col px-5 pb-6 relative lg:min-h-0 lg:px-0"
       style={{ backgroundColor: '#FCEEE1' }}
     >
       {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
@@ -464,6 +466,7 @@ export default function SignUp() {
         }}
       />
     </main>
+    </WizardShell>
   )
 }
 
