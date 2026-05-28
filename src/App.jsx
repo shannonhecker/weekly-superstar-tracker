@@ -50,6 +50,7 @@ class RouteErrorBoundary extends Component {
 // — needs to be in the initial bundle so the loading state can render
 // before any chunk arrives.
 const Landing = lazy(() => import('./pages/Landing'))
+const LandingV2 = lazy(() => import('./pages/LandingV2'))
 const SignIn = lazy(() => import('./pages/SignIn'))
 const SignUp = lazy(() => import('./pages/SignUp'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
@@ -92,6 +93,7 @@ export default function App() {
       <RouteErrorBoundary>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/landing-v2" element={<LandingV2 />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

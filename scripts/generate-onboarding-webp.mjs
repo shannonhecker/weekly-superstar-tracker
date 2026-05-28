@@ -30,7 +30,9 @@ const DEFAULT_CROP = { left: 0, top: 0, width: 941, height: 600 }
 
 // Per-image overrides — leave empty if DEFAULT_CROP is right for the source.
 const CROP_OVERRIDES = {
-  // 'intro-cake': { left: 0, top: 60, width: 941, height: 640 },
+  // home-star-hero is already a landscape banner (1672×941) — no portrait
+  // crop needed, use full source dimensions.
+  'home-star-hero': { left: 0, top: 0, width: 1672, height: 941 },
 }
 
 async function main() {
