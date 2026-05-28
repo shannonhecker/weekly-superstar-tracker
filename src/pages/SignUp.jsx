@@ -476,7 +476,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
         </div>
       )}
 
-      <PrimaryButton type="button" onClick={onStart} disabled={loading}>
+      <PrimaryButton type="button" onClick={onStart} disabled={loading} aria-disabled={loading}>
         {loading ? 'Setting up…' : 'Start your board'}
       </PrimaryButton>
     </div>
@@ -572,6 +572,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
         type="button"
         onClick={onContinue}
         disabled={!selected}
+        aria-disabled={!selected}
         className={[
           'w-full py-4 rounded-pill font-bold text-base transition-all',
           selected
@@ -645,6 +646,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
         <button
           type="submit"
           disabled={!canContinue}
+          aria-disabled={!canContinue}
           className={[
             'ml-auto px-7 py-3 rounded-pill font-bold text-base transition-all',
             canContinue
@@ -720,7 +722,7 @@ function StepAccount({
         </div>
       )}
 
-      <PrimaryButton type="submit" disabled={loading}>
+      <PrimaryButton type="submit" disabled={loading} aria-disabled={loading}>
         {loading ? 'Creating…' : 'Create →'}
       </PrimaryButton>
 
@@ -736,6 +738,7 @@ function StepAccount({
           type="button"
           onClick={onApple}
           disabled={loading}
+          aria-disabled={loading}
           aria-label="Continue with Apple"
           className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
@@ -745,6 +748,7 @@ function StepAccount({
           type="button"
           onClick={onGoogle}
           disabled={loading}
+          aria-disabled={loading}
           aria-label="Continue with Google"
           className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
