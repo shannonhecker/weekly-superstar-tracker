@@ -344,9 +344,25 @@ export default function SignUp() {
               <span aria-hidden="true">←</span> Back
             </button>
           ) : <span />}
-          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
-            {step} / {TOTAL_STEPS}
-          </span>
+          <div
+            className="flex items-center gap-1.5"
+            role="progressbar"
+            aria-label={`Step ${step} of ${TOTAL_STEPS}`}
+            aria-valuenow={step}
+            aria-valuemin={1}
+            aria-valuemax={TOTAL_STEPS}
+          >
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                className={[
+                  'block h-1.5 rounded-full transition-all',
+                  i + 1 <= step ? 'w-6 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider',
+                ].join(' ')}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -407,7 +423,7 @@ export default function SignUp() {
         {isUpgrade ? (
           <>
             Already a member?{' '}
-            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
               Use your existing account →
             </Link>
             <br />
@@ -416,7 +432,7 @@ export default function SignUp() {
         ) : (
           <>
             Already have an account?{' '}
-            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2">
+            <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
               Sign in
             </Link>
           </>
@@ -460,7 +476,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
         </div>
       )}
 
-      <PrimaryButton type="button" onClick={onStart} disabled={loading}>
+      <PrimaryButton type="button" onClick={onStart} disabled={loading} aria-disabled={loading}>
         {loading ? 'Setting up…' : 'Start your board'}
       </PrimaryButton>
     </div>
@@ -475,7 +491,7 @@ function StepIntro({ onStart }) {
         <HeroStar size={88} />
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
-        meet your<br />weekly superstar.
+        Meet your weekly superstar.
       </h1>
       <p className="text-earthy-cocoaSoft text-base sm:text-lg leading-relaxed max-w-sm mx-auto mb-10">
         a tiny ritual for kids who are crushing their week.
@@ -498,7 +514,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
   return (
     <div>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Pick a theme<br />for them
+        Pick a theme for them.
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-6">
         You can change this anytime. It sets the vibe of their board.
@@ -507,10 +523,14 @@ function StepTheme({ selected, onSelect, onContinue }) {
       <div
         role="radiogroup"
         aria-label="Choose a theme"
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8 mx-auto max-w-2xl"
       >
-        {entries.map(([key, t]) => {
+        {entries.map(([key, t], idx) => {
           const isSelected = selected === key
+          const isLast = idx === entries.length - 1
+          const orphanLg = entries.length % 4 === 1 && isLast
+          const orphanSm = entries.length % 3 === 1 && isLast
+          const orphanMobile = entries.length % 2 === 1 && isLast
           return (
             <button
               key={key}
@@ -522,10 +542,14 @@ function StepTheme({ selected, onSelect, onContinue }) {
                 'group relative flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 min-h-[112px]',
                 'bg-earthy-ivory border-2 transition-all',
                 'hover:-translate-y-0.5 active:translate-y-0',
+                orphanMobile && 'col-span-2 max-w-[180px] mx-auto',
+                orphanMobile && 'sm:col-span-1 sm:max-w-none sm:mx-0',
+                orphanSm && 'sm:col-start-2',
+                orphanLg && 'lg:col-start-2 lg:col-span-2 lg:justify-self-center lg:max-w-[180px]',
                 isSelected
                   ? 'border-earthy-cocoa ring-2 ring-earthy-cocoa shadow-earthy-card'
                   : 'border-earthy-divider hover:border-earthy-cocoaSoft',
-              ].join(' ')}
+              ].filter(Boolean).join(' ')}
             >
               <span
                 className="w-10 h-10 rounded-full flex items-center justify-center text-2xl"
@@ -549,6 +573,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
         type="button"
         onClick={onContinue}
         disabled={!selected}
+        aria-disabled={!selected}
         className={[
           'w-full py-4 rounded-pill font-bold text-base transition-all',
           selected
@@ -575,7 +600,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
       className="pt-2"
     >
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Tell me about<br />them
+        Tell me about them.
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
         For ages 3 to 12. You can add more kids after this.
@@ -622,6 +647,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
         <button
           type="submit"
           disabled={!canContinue}
+          aria-disabled={!canContinue}
           className={[
             'ml-auto px-7 py-3 rounded-pill font-bold text-base transition-all',
             canContinue
@@ -697,7 +723,7 @@ function StepAccount({
         </div>
       )}
 
-      <PrimaryButton type="submit" disabled={loading}>
+      <PrimaryButton type="submit" disabled={loading} aria-disabled={loading}>
         {loading ? 'Creating…' : 'Create →'}
       </PrimaryButton>
 
@@ -713,6 +739,7 @@ function StepAccount({
           type="button"
           onClick={onApple}
           disabled={loading}
+          aria-disabled={loading}
           aria-label="Continue with Apple"
           className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
@@ -722,6 +749,7 @@ function StepAccount({
           type="button"
           onClick={onGoogle}
           disabled={loading}
+          aria-disabled={loading}
           aria-label="Continue with Google"
           className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
         >
