@@ -543,7 +543,8 @@ function StepTheme({ selected, onSelect, onContinue }) {
                 'bg-earthy-ivory border-2 transition-all',
                 'hover:-translate-y-0.5 active:translate-y-0',
                 orphanMobile && 'col-span-2 max-w-[180px] mx-auto',
-                orphanSm && 'sm:col-start-2 sm:col-span-1 sm:max-w-none sm:mx-0',
+                orphanMobile && 'sm:col-span-1 sm:max-w-none sm:mx-0',
+                orphanSm && 'sm:col-start-2',
                 orphanLg && 'lg:col-start-2 lg:col-span-2 lg:justify-self-center lg:max-w-[180px]',
                 isSelected
                   ? 'border-earthy-cocoa ring-2 ring-earthy-cocoa shadow-earthy-card'
