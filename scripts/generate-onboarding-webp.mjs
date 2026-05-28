@@ -1,15 +1,16 @@
 /**
  * Onboarding-art image optimisation pipeline.
  *
- * Parallel to generate-banner-webp.mjs but for `public/onboarding-art/`.
- * Reads every PNG in that folder, generates WebP at three widths
- * (376, 768, 1500) for responsive srcset. Source PNGs are kept as the
- * final fallback in the <picture> tag.
+ * Reads portrait iOS source PNGs from `public/onboarding-art/_source/`,
+ * crops them to landscape (top 600px, full width — captures the mascot +
+ * top decorative corners while dropping the iOS empty-middle text-overlay
+ * area), writes the cropped landscape PNG to `public/onboarding-art/<key>.png`,
+ * and generates 376w + 768w WebP variants for responsive serving.
  *
  * Run via `npm run onboarding:build`.
  *
- * Quality 78 + effort 6 matches the banner pipeline — visually
- * indistinguishable from source for these illustrations, ~70% smaller.
+ * Per-image crop overrides live in CROP_OVERRIDES below — drop a key/value
+ * to tune just one image without breaking the others.
  */
 import sharp from 'sharp'
 import { readdir, stat } from 'node:fs/promises'
@@ -17,55 +18,79 @@ import { join, basename, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
-const SRC_DIR = join(ROOT, 'public', 'onboarding-art')
-const WIDTHS = [376, 768, 1500]
+const OUT_DIR = join(ROOT, 'public', 'onboarding-art')
+const SRC_DIR = join(OUT_DIR, '_source')
+const WIDTHS = [376, 768]
 const WEBP_QUALITY = 78
+
+// iOS portrait sources are 941×1672. The mascot + framing decorations live in
+// the top ~600px; the lower 1000px is empty negative space designed for iOS
+// text overlay. Default crop preserves the framed top.
+const DEFAULT_CROP = { left: 0, top: 0, width: 941, height: 600 }
+
+// Per-image overrides — leave empty if DEFAULT_CROP is right for the source.
+const CROP_OVERRIDES = {
+  // 'intro-cake': { left: 0, top: 60, width: 941, height: 640 },
+}
 
 async function main() {
   const entries = await readdir(SRC_DIR)
-  const sources = entries.filter((f) => f.endsWith('.png') && !f.match(/-(\d+)w\./))
+  const sources = entries.filter((f) => f.endsWith('.png'))
 
   if (sources.length === 0) {
     console.log('[onboarding] no source PNGs found in', SRC_DIR)
     return
   }
 
-  console.log(`[onboarding] processing ${sources.length} source images at widths ${WIDTHS.join(', ')}…`)
+  console.log(`[onboarding] processing ${sources.length} sources from _source/ → landscape PNG + WebP variants at ${WIDTHS.join(', ')}w…`)
 
-  let totalOriginal = 0
   let totalGenerated = 0
 
   for (const file of sources) {
     const srcPath = join(SRC_DIR, file)
     const key = basename(file, extname(file))
-    const srcStat = await stat(srcPath)
-    totalOriginal += srcStat.size
+    const crop = CROP_OVERRIDES[key] || DEFAULT_CROP
 
     const meta = await sharp(srcPath).metadata()
-    const srcWidth = meta.width || 0
+    const srcW = meta.width || 0
+    const srcH = meta.height || 0
 
+    if (srcW < crop.left + crop.width || srcH < crop.top + crop.height) {
+      console.log(`  skip ${key} — source ${srcW}×${srcH} smaller than crop ${crop.left + crop.width}×${crop.top + crop.height}`)
+      continue
+    }
+
+    // Step 1: write the cropped landscape PNG as the <picture> fallback.
+    const outPng = join(OUT_DIR, `${key}.png`)
+    await sharp(srcPath)
+      .extract(crop)
+      .png({ quality: 90, compressionLevel: 9 })
+      .toFile(outPng)
+    const pngStat = await stat(outPng)
+    totalGenerated += pngStat.size
+    console.log(`  ✓ ${key}.png  ${(pngStat.size / 1024).toFixed(0)} KB  (${crop.width}×${crop.height} landscape crop)`)
+
+    // Step 2: WebP variants at responsive widths, all from the cropped source.
     for (const width of WIDTHS) {
-      if (srcWidth < width) {
-        console.log(`  skip ${key}-${width}w (source is only ${srcWidth}w)`)
+      if (crop.width < width) {
+        console.log(`    skip ${key}-${width}w (cropped is only ${crop.width}w)`)
         continue
       }
-
-      const outPath = join(SRC_DIR, `${key}-${width}w.webp`)
+      const outWebp = join(OUT_DIR, `${key}-${width}w.webp`)
       await sharp(srcPath)
+        .extract(crop)
         .resize({ width, withoutEnlargement: true })
         .webp({ quality: WEBP_QUALITY, effort: 6 })
-        .toFile(outPath)
-      const outStat = await stat(outPath)
-      totalGenerated += outStat.size
-      const pctSmaller = ((1 - outStat.size / srcStat.size) * 100).toFixed(0)
-      console.log(`  ✓ ${key}-${width}w.webp  ${(outStat.size / 1024).toFixed(0)} KB  (-${pctSmaller}% vs source)`)
+        .toFile(outWebp)
+      const webpStat = await stat(outWebp)
+      totalGenerated += webpStat.size
+      const pctSmaller = ((1 - webpStat.size / pngStat.size) * 100).toFixed(0)
+      console.log(`    ✓ ${key}-${width}w.webp  ${(webpStat.size / 1024).toFixed(0)} KB  (-${pctSmaller}% vs cropped PNG)`)
     }
   }
 
   console.log()
-  console.log(`[onboarding] ${sources.length} sources × ${WIDTHS.length} widths = ${sources.length * WIDTHS.length} variants`)
-  console.log(`[onboarding] sources total: ${(totalOriginal / 1024 / 1024).toFixed(1)} MB`)
-  console.log(`[onboarding] generated total: ${(totalGenerated / 1024 / 1024).toFixed(1)} MB`)
+  console.log(`[onboarding] generated total: ${(totalGenerated / 1024 / 1024).toFixed(2)} MB`)
 }
 
 main().catch((err) => {

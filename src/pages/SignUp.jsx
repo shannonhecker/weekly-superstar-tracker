@@ -15,6 +15,7 @@ import { auth } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
 import ThemeCardArt from '../components/ThemeCardArt'
+import WizardHero from '../components/wizard/WizardHero'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import {
@@ -487,9 +488,9 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
 /* ---------- Step 1 — value prop ---------- */
 function StepIntro({ onStart }) {
   return (
-    <div className="text-center pt-6">
-      <div className="flex justify-center mb-6">
-        <HeroStar size={88} />
+    <div className="text-center pt-2">
+      <div className="mb-6 max-w-md mx-auto">
+        <WizardHero illustration="intro-welcome" height={220} />
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
         Meet your weekly superstar.
