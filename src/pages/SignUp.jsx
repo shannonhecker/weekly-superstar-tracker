@@ -14,7 +14,6 @@ import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { auth } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
-import ThemeCardArt from '../components/ThemeCardArt'
 import WizardHero from '../components/wizard/WizardHero'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
@@ -312,7 +311,11 @@ export default function SignUp() {
       : 'animate-[onb-slide-in-left_220ms_ease-out]'
 
   return (
-    <main id="main" className="min-h-screen bg-earthy-cream flex flex-col px-5 py-6">
+    <main
+      id="main"
+      className="min-h-screen flex flex-col px-5 pb-6"
+      style={{ backgroundColor: '#FCEEE1' }}
+    >
       {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
           Scoped to (prefers-reduced-motion: no-preference) so reduced-motion users
           get no enter animation: the .animate-[...] class still applies but the
@@ -545,8 +548,8 @@ function StepTheme({ selected, onSelect, onContinue }) {
               aria-checked={isSelected}
               onClick={() => onSelect(key)}
               className={[
-                'group relative flex flex-col items-stretch gap-2 rounded-2xl p-2 pb-3 min-h-[148px]',
-                'bg-earthy-ivory border-2 transition-all overflow-hidden',
+                'group relative flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 min-h-[112px]',
+                'bg-earthy-ivory border-2 transition-all',
                 'hover:-translate-y-0.5 active:translate-y-0',
                 orphanMobile && 'col-span-2 max-w-[180px] mx-auto',
                 orphanMobile && 'sm:col-span-1 sm:max-w-none sm:mx-0',
@@ -557,10 +560,14 @@ function StepTheme({ selected, onSelect, onContinue }) {
                   : 'border-earthy-divider hover:border-earthy-cocoaSoft',
               ].filter(Boolean).join(' ')}
             >
-              <div className="w-full overflow-hidden rounded-xl" aria-hidden="true">
-                <ThemeCardArt themeKey={key} height={80} animated={false} />
-              </div>
-              <span className="text-center font-display font-black text-earthy-cocoa text-sm tracking-tight">
+              <span
+                className="w-10 h-10 rounded-full flex items-center justify-center text-2xl"
+                style={{ backgroundColor: t.accent }}
+                aria-hidden="true"
+              >
+                {t.emoji}
+              </span>
+              <span className="font-display font-black text-earthy-cocoa text-sm tracking-tight">
                 {t.label}
               </span>
               {isSelected && (
