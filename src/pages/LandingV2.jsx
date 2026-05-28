@@ -6,11 +6,14 @@ import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
 import AnimatedRasterBanner from '../components/AnimatedRasterBanner'
 
-// Sibling Landing prototype — swaps the ThemeCardArt bear SVG for the iOS
-// home-star-hero raster banner. Lives at /landing-v2 so the live `/` route
+// Sibling Landing prototype — full-bleed marketing shell on cream (#FCEEE1)
+// matching the wizard background. Lives at /landing-v2 so the live `/` route
 // stays on the existing Landing while we iterate on this direction. See
 // project hard rule: hero rewrites are high-risk by default — prototype in
 // a sibling page before touching live index/landing.
+//
+// PR-3 of the desktop tiered layout plan. Promotion to `/` is a separate
+// follow-up PR (PR-3b) requiring explicit user go.
 export default function LandingV2() {
   const { user, loading } = useAuth()
   const [boardId, setBoardId] = useState(null)
@@ -32,36 +35,51 @@ export default function LandingV2() {
   if (user && boardId) return <Navigate to={`/board/${boardId}`} replace />
 
   return (
-    <main id="main" className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory">
-      <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center font-jakarta overflow-hidden">
-        <div className="w-[82%] mx-auto mt-6 mb-2">
+    <main
+      id="main"
+      className="min-h-screen flex flex-col font-jakarta"
+      style={{ backgroundColor: '#FCEEE1' }}
+    >
+      <nav className="flex items-center justify-between px-5 sm:px-8 py-4">
+        <div className="flex items-center gap-2">
+          <Logo size={40} />
+          <span className="text-lg sm:text-xl font-extrabold text-earthy-cocoa">
+            Winking Star
+          </span>
+        </div>
+        <Link
+          to="/signin"
+          className="text-sm sm:text-base font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-2 transition-colors"
+        >
+          Sign in
+        </Link>
+      </nav>
+
+      <section className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto px-5 sm:px-8 pt-4 pb-8 text-center">
+        <div className="w-full">
           <AnimatedRasterBanner
             source="/onboarding-art/home-star-hero.png"
-            webpSrcSet="/onboarding-art/home-star-hero-376w.webp 376w, /onboarding-art/home-star-hero-768w.webp 768w"
-            sizes="(max-width: 768px) 100vw, 400px"
+            webpSrcSet="/onboarding-art/home-star-hero-376w.webp 376w, /onboarding-art/home-star-hero-768w.webp 768w, /onboarding-art/home-star-hero-1440w.webp 1440w"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 768px, 1280px"
             loading="eager"
             accessibilityLabel="Winking Star hero illustration"
-            height={200}
-            borderRadius={20}
+            height={400}
+            borderRadius={24}
             animated
             effect="sparkles"
           />
         </div>
-        <div className="p-8 pt-4">
-          <div className="flex justify-center mb-3">
-            <Logo size={56} />
-          </div>
-          <h1 className="text-3xl font-extrabold text-earthy-cocoa mb-2 tracking-tight">
-            Winking Star
-          </h1>
-          <p className="text-earthy-cocoaSoft text-sm mb-7 leading-relaxed">
-            A weekly achievement tracker the whole family can share.<br/>
-            Track habits, earn badges, grow pets together.
-          </p>
+        <h1 className="mt-8 text-4xl sm:text-5xl font-extrabold tracking-tight text-earthy-cocoa">
+          Winking Star
+        </h1>
+        <p className="mt-4 text-base sm:text-lg font-bold text-earthy-cocoaSoft leading-relaxed max-w-xl">
+          A weekly achievement tracker the whole family can share. Track habits, earn badges, grow pets together.
+        </p>
+        <div className="mt-8 w-full max-w-md space-y-3">
           <Link
             to="/signup"
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-            className="block w-full mb-3 px-6 py-4 rounded-pill font-bold text-base hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
+            className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
           >
             Create a family board
           </Link>
@@ -74,19 +92,22 @@ export default function LandingV2() {
           </Link>
           <Link
             to="/signup?guest=1"
-            className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill"
+            className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill text-center"
           >
             Try it first. No sign-up needed.
           </Link>
-          <p className="mt-4 text-xs text-earthy-cocoaSoft/70">
-            Got an invite link? Tap it and sign in to join.
-          </p>
-          <p className="mt-3 text-[11px] text-earthy-cocoaSoft/70 font-bold">
-            <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
-            {' · '}
-            <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
-          </p>
         </div>
+      </section>
+
+      <div className="mt-auto px-5 sm:px-8 pb-6 text-center">
+        <p className="text-xs text-earthy-cocoaSoft/70">
+          Got an invite link? Tap it and sign in to join.
+        </p>
+        <p className="mt-3 text-[11px] text-earthy-cocoaSoft/70 font-bold">
+          <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
+          {' · '}
+          <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
+        </p>
       </div>
     </main>
   )
