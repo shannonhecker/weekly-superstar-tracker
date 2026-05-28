@@ -23,6 +23,29 @@ const SRC_DIR = join(OUT_DIR, '_source')
 const WIDTHS = [376, 768]
 const WEBP_QUALITY = 78
 
+// CLI flag parsing — backwards-compatible. Defaults preserve historical
+// behaviour exactly (all sources, [376, 768] widths). Flags:
+//   --widths 1440,2400   override WIDTHS for this run only
+//   --only home-star-hero  process only the source whose basename matches
+function parseArgs(argv) {
+  const args = { widths: null, only: null }
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]
+    if (a === '--widths' && argv[i + 1]) {
+      const parsed = argv[i + 1]
+        .split(',')
+        .map((s) => parseInt(s.trim(), 10))
+        .filter((n) => Number.isFinite(n) && n > 0)
+      if (parsed.length > 0) args.widths = parsed
+      i++
+    } else if (a === '--only' && argv[i + 1]) {
+      args.only = argv[i + 1].trim()
+      i++
+    }
+  }
+  return args
+}
+
 // iOS portrait sources are 941×1672. The mascot + framing decorations live in
 // the top ~600px; the lower 1000px is empty negative space designed for iOS
 // text overlay. Default crop preserves the framed top.
@@ -36,15 +59,27 @@ const CROP_OVERRIDES = {
 }
 
 async function main() {
+  const cli = parseArgs(process.argv.slice(2))
+  const widths = cli.widths || WIDTHS
+
   const entries = await readdir(SRC_DIR)
-  const sources = entries.filter((f) => f.endsWith('.png'))
+  let sources = entries.filter((f) => f.endsWith('.png'))
+
+  if (cli.only) {
+    sources = sources.filter((f) => basename(f, extname(f)) === cli.only)
+    if (sources.length === 0) {
+      console.log(`[onboarding] --only "${cli.only}" matched no source PNGs in ${SRC_DIR}`)
+      return
+    }
+  }
 
   if (sources.length === 0) {
     console.log('[onboarding] no source PNGs found in', SRC_DIR)
     return
   }
 
-  console.log(`[onboarding] processing ${sources.length} sources from _source/ → landscape PNG + WebP variants at ${WIDTHS.join(', ')}w…`)
+  const filterLabel = cli.only ? ` (filtered to "${cli.only}")` : ''
+  console.log(`[onboarding] processing ${sources.length} sources from _source/${filterLabel} → landscape PNG + WebP variants at ${widths.join(', ')}w…`)
 
   let totalGenerated = 0
 
@@ -73,7 +108,7 @@ async function main() {
     console.log(`  ✓ ${key}.png  ${(pngStat.size / 1024).toFixed(0)} KB  (${crop.width}×${crop.height} landscape crop)`)
 
     // Step 2: WebP variants at responsive widths, all from the cropped source.
-    for (const width of WIDTHS) {
+    for (const width of widths) {
       if (crop.width < width) {
         console.log(`    skip ${key}-${width}w (cropped is only ${crop.width}w)`)
         continue
