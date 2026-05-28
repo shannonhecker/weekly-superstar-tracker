@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "deploy": "vite build && firebase deploy --only hosting",
     "banners:build": "node scripts/generate-banner-webp.mjs",
+    "onboarding:build": "node scripts/generate-onboarding-webp.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
