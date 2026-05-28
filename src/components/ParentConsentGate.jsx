@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import WizardHero from './wizard/WizardHero'
 
 export default function ParentConsentGate({ onAccept, compact = false }) {
   const [confirmedAdult, setConfirmedAdult] = useState(false)
@@ -8,6 +9,11 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
 
   return (
     <div className={compact ? '' : 'pt-2'}>
+      {!compact ? (
+        <div className="mb-6 max-w-md mx-auto">
+          <WizardHero illustration="intro-house" height={170} />
+        </div>
+      ) : null}
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
         Grown-up check.
       </h2>
