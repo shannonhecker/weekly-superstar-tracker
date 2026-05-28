@@ -15,6 +15,7 @@ import { auth } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
 import WizardHero from '../components/wizard/WizardHero'
+import ThemeBannerArt from '../components/ThemeBannerArt'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import {
@@ -525,62 +526,142 @@ function StepIntro({ onStart }) {
 /* ---------- Step 2 — pick theme ---------- */
 function StepTheme({ selected, onSelect, onContinue }) {
   const entries = Object.entries(THEMES)
+  const scrollerRef = useRef(null)
+  const itemRefs = useRef({})
+
+  // On mount, auto-select the first theme if none chosen yet so Continue
+  // works as soon as the user lands. They can swipe to change it.
+  useEffect(() => {
+    if (!selected && entries.length > 0) {
+      onSelect(entries[0][0])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Track which banner is centered in the scroller — that's the selected theme.
+  // IntersectionObserver scoped to the scroller's root so we ignore the rest
+  // of the page. We use intersectionRatio (not isIntersecting) so we pick the
+  // card that's MOST in view, not just any partially-visible card.
+  useEffect(() => {
+    const root = scrollerRef.current
+    if (!root) return
+    const observer = new IntersectionObserver(
+      () => {
+        let bestKey = null
+        let bestRatio = 0
+        const rootRect = root.getBoundingClientRect()
+        const rootCenter = rootRect.left + rootRect.width / 2
+        for (const [key, el] of Object.entries(itemRefs.current)) {
+          if (!el) continue
+          const rect = el.getBoundingClientRect()
+          const cardCenter = rect.left + rect.width / 2
+          // Score by inverse distance from the scroller's center
+          const distance = Math.abs(cardCenter - rootCenter)
+          const score = 1 / (1 + distance)
+          if (score > bestRatio) {
+            bestRatio = score
+            bestKey = key
+          }
+        }
+        if (bestKey) onSelect(bestKey)
+      },
+      { root, threshold: [0, 0.25, 0.5, 0.75, 1] }
+    )
+    Object.values(itemRefs.current).forEach((el) => el && observer.observe(el))
+    return () => observer.disconnect()
+  }, [onSelect])
+
+  // Click a card OR a pagination dot → scroll-snap that card into view.
+  const scrollToTheme = (key) => {
+    const el = itemRefs.current[key]
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }
+
+  const selectedTheme = selected ? THEMES[selected] : null
+  const selectedIdx = selected ? entries.findIndex(([k]) => k === selected) : 0
+
   return (
-    <div>
+    <div className="pt-14">
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
         Pick a theme for them.
       </h2>
-      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-6">
-        You can change this anytime. It sets the vibe of their board.
+      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-5">
+        Swipe to explore. You can change this anytime.
       </p>
 
+      {/* Horizontal swipe. Scroll-snap centers whichever card is in view; the
+          IntersectionObserver above updates `selected` to match. Negative margin
+          + matching px lets the scroller extend edge-to-edge of the wizard
+          padding without breaking the snap math. */}
       <div
+        ref={scrollerRef}
         role="radiogroup"
         aria-label="Choose a theme"
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8 mx-auto max-w-2xl"
+        className="-mx-5 px-[15%] sm:px-[20%] flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
-        {entries.map(([key, t], idx) => {
+        <style>{`
+          /* Hide native scrollbar inside the swiper without affecting other scrollers. */
+          [role="radiogroup"][aria-label="Choose a theme"]::-webkit-scrollbar { display: none; }
+        `}</style>
+        {entries.map(([key, t]) => {
           const isSelected = selected === key
-          const isLast = idx === entries.length - 1
-          const orphanLg = entries.length % 4 === 1 && isLast
-          const orphanSm = entries.length % 3 === 1 && isLast
-          const orphanMobile = entries.length % 2 === 1 && isLast
           return (
             <button
               key={key}
               type="button"
               role="radio"
               aria-checked={isSelected}
-              onClick={() => onSelect(key)}
+              aria-label={`${t.label} theme`}
+              ref={(el) => { itemRefs.current[key] = el }}
+              onClick={() => { onSelect(key); scrollToTheme(key) }}
               className={[
-                'group relative flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 min-h-[112px]',
-                'bg-earthy-ivory border-2 transition-all',
-                'hover:-translate-y-0.5 active:translate-y-0',
-                orphanMobile && 'col-span-2 max-w-[180px] mx-auto',
-                orphanMobile && 'sm:col-span-1 sm:max-w-none sm:mx-0',
-                orphanSm && 'sm:col-start-2',
-                orphanLg && 'lg:col-start-2 lg:col-span-2 lg:justify-self-center lg:max-w-[180px]',
+                'snap-center shrink-0 w-[260px] sm:w-[340px]',
+                'rounded-3xl overflow-hidden transition-all',
+                'border-2',
                 isSelected
-                  ? 'border-earthy-cocoa ring-2 ring-earthy-cocoa shadow-earthy-card'
-                  : 'border-earthy-divider hover:border-earthy-cocoaSoft',
+                  ? 'border-earthy-cocoa shadow-earthy-card scale-100'
+                  : 'border-transparent opacity-70 scale-95',
               ].filter(Boolean).join(' ')}
             >
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-2xl"
-                style={{ backgroundColor: t.accent }}
-                aria-hidden="true"
-              >
-                {t.emoji}
-              </span>
-              <span className="font-display font-black text-earthy-cocoa text-sm tracking-tight">
-                {t.label}
-              </span>
-              {isSelected && (
-                <span className="absolute top-2 right-2 text-earthy-cocoa text-xs" aria-hidden="true">●</span>
-              )}
+              <ThemeBannerArt
+                themeKey={key}
+                height={200}
+                animated={isSelected}
+                loading={isSelected ? 'eager' : 'lazy'}
+              />
             </button>
           )
         })}
+      </div>
+
+      {/* Selected theme label + pagination dots */}
+      <div className="text-center mt-4 mb-6">
+        <p
+          className="font-display font-black text-earthy-cocoa text-2xl tracking-tight min-h-[2rem]"
+          aria-live="polite"
+        >
+          {selectedTheme?.label || ' '}
+        </p>
+        <div className="flex justify-center items-center gap-1.5 mt-3" aria-hidden="true">
+          {entries.map(([key], idx) => (
+            <button
+              key={key}
+              type="button"
+              tabIndex={-1}
+              onClick={() => scrollToTheme(key)}
+              className={[
+                'block h-1.5 rounded-full transition-all',
+                idx === selectedIdx ? 'w-4 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider hover:bg-earthy-cocoaSoft',
+              ].join(' ')}
+              aria-label={`Jump to theme ${idx + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
       <button
