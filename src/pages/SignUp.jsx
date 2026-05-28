@@ -675,6 +675,9 @@ function StepAccount({
 }) {
   return (
     <form onSubmit={onSubmit} className="pt-2">
+      <div className="mb-6 max-w-md mx-auto">
+        <WizardHero illustration="intro-cake" height={180} />
+      </div>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
         {isUpgrade ? 'Save your board.' : isInviteSignup ? 'Join your family.' : 'One last step.'}
       </h2>
