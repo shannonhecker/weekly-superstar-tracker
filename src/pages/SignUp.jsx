@@ -523,10 +523,14 @@ function StepTheme({ selected, onSelect, onContinue }) {
       <div
         role="radiogroup"
         aria-label="Choose a theme"
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8 mx-auto max-w-2xl"
       >
-        {entries.map(([key, t]) => {
+        {entries.map(([key, t], idx) => {
           const isSelected = selected === key
+          const isLast = idx === entries.length - 1
+          const orphanLg = entries.length % 4 === 1 && isLast
+          const orphanSm = entries.length % 3 === 1 && isLast
+          const orphanMobile = entries.length % 2 === 1 && isLast
           return (
             <button
               key={key}
@@ -538,10 +542,13 @@ function StepTheme({ selected, onSelect, onContinue }) {
                 'group relative flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 min-h-[112px]',
                 'bg-earthy-ivory border-2 transition-all',
                 'hover:-translate-y-0.5 active:translate-y-0',
+                orphanMobile && 'col-span-2 max-w-[180px] mx-auto',
+                orphanSm && 'sm:col-start-2 sm:col-span-1 sm:max-w-none sm:mx-0',
+                orphanLg && 'lg:col-start-2 lg:col-span-2 lg:justify-self-center lg:max-w-[180px]',
                 isSelected
                   ? 'border-earthy-cocoa ring-2 ring-earthy-cocoa shadow-earthy-card'
                   : 'border-earthy-divider hover:border-earthy-cocoaSoft',
-              ].join(' ')}
+              ].filter(Boolean).join(' ')}
             >
               <span
                 className="w-10 h-10 rounded-full flex items-center justify-center text-2xl"
