@@ -601,6 +601,9 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
       onSubmit={(e) => { e.preventDefault(); if (canContinue) onNext() }}
       className="pt-2"
     >
+      <div className="mb-6 max-w-md mx-auto">
+        <WizardHero illustration="intro-friend" height={180} />
+      </div>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
         Tell me about them.
       </h2>
