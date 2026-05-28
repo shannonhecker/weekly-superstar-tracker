@@ -314,7 +314,7 @@ export default function SignUp() {
   return (
     <main
       id="main"
-      className="min-h-screen flex flex-col px-5 pb-6"
+      className="min-h-screen flex flex-col px-5 pb-6 relative"
       style={{ backgroundColor: '#FCEEE1' }}
     >
       {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
@@ -336,43 +336,47 @@ export default function SignUp() {
       `}</style>
 
       {/* Top bar — back link (steps 2-4) + step counter on the right for orientation.
-          Hidden in upgrade mode: there's no wizard to step back through and the
-          "4/4" counter would be confusing for a one-screen flow. */}
+          Floats absolute over the wizard hero (iOS pattern) so the banner can sit
+          flush against the top edge of the page. Hidden in upgrade mode: there's
+          no wizard to step back through and the "4/4" counter would be confusing
+          for a one-screen flow. */}
       {!isUpgrade && !isInviteSignup && (
-        <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={goBack}
-              className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
-              aria-label="Go to previous step"
+        <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4">
+          <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={goBack}
+                className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
+                aria-label="Go to previous step"
+              >
+                <span aria-hidden="true">←</span> Back
+              </button>
+            ) : <span />}
+            <div
+              className="flex items-center gap-1.5"
+              role="progressbar"
+              aria-label={`Step ${step} of ${TOTAL_STEPS}`}
+              aria-valuenow={step}
+              aria-valuemin={1}
+              aria-valuemax={TOTAL_STEPS}
             >
-              <span aria-hidden="true">←</span> Back
-            </button>
-          ) : <span />}
-          <div
-            className="flex items-center gap-1.5"
-            role="progressbar"
-            aria-label={`Step ${step} of ${TOTAL_STEPS}`}
-            aria-valuenow={step}
-            aria-valuemin={1}
-            aria-valuemax={TOTAL_STEPS}
-          >
-            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-              <span
-                key={i}
-                aria-hidden="true"
-                className={[
-                  'block h-1.5 rounded-full transition-all',
-                  i + 1 <= step ? 'w-6 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider',
-                ].join(' ')}
-              />
-            ))}
+              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className={[
+                    'block h-1.5 rounded-full transition-all',
+                    i + 1 <= step ? 'w-6 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider',
+                  ].join(' ')}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="flex-1 flex items-center justify-center w-full">
+      <div className="flex-1 flex items-start justify-center w-full">
         <div key={step} className={`w-full max-w-lg ${enterClasses}`}>
           {step === 1 && <StepIntro onStart={goNext} />}
           {step === 2 && (
@@ -492,7 +496,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
 /* ---------- Step 1 — value prop ---------- */
 function StepIntro({ onStart }) {
   return (
-    <div className="text-center pt-2">
+    <div className="text-center">
       <div className="mb-6 max-w-md mx-auto">
         <WizardHero
           illustration="intro-welcome"
