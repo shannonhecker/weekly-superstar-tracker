@@ -494,7 +494,7 @@ export default function Board() {
                 aria-label="Board menu"
                 aria-expanded={menuOpen}
                 style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-                className="w-11 h-11 rounded-full text-sm font-bold hover:bg-[#4A2E25] active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
+                className="w-11 h-11 rounded-full text-sm font-bold hover:bg-earthy-cocoaDark active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
               >
                 <Icon name="menu-more" size={22} />
               </button>
@@ -574,7 +574,7 @@ export default function Board() {
                       <button
                         type="button"
                         onClick={() => { setMenuOpen(false); requestDeleteAccount() }}
-                        className="w-full text-left px-3 py-3 text-sm font-bold text-[#B85450] hover:bg-[#F8E5DF] flex items-center gap-2"
+                        className="w-full text-left px-3 py-3 text-sm font-bold text-semantic-danger hover:bg-semantic-errorBg flex items-center gap-2"
                       >
                         <Icon name="delete" size={18} />
                         <span>Delete account</span>
@@ -672,7 +672,7 @@ export default function Board() {
               to="/signup?upgrade=1"
               onClick={() => setSignOutOpen(false)}
               style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+              className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"
             >
               Save with email
             </Link>
@@ -680,10 +680,11 @@ export default function Board() {
           <button
             type="button"
             onClick={async () => { setSignOutOpen(false); await onSignOut() }}
-            style={isAnonymous
-              ? { color: '#8A3A2E', backgroundColor: '#F8E5DF' }
-              : { color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all"
+            className={`w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all ${
+              isAnonymous
+                ? 'bg-semantic-errorBg text-semantic-errorText'
+                : 'bg-earthy-cocoa text-earthy-ivory'
+            }`}
           >
             {isAnonymous ? 'Sign out and discard' : 'Sign out'}
           </button>
@@ -729,7 +730,7 @@ export default function Board() {
             </p>
           )}
           {deleteError && (
-            <div role="alert" className="px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold">
+            <div role="alert" className="px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
               {deleteError}
             </div>
           )}
@@ -737,8 +738,7 @@ export default function Board() {
             type="button"
             onClick={onDeleteAccount}
             disabled={deleteBusy}
-            style={{ color: '#FFFAF0', backgroundColor: '#B85450' }}
-            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all disabled:opacity-50"
+            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all disabled:opacity-50 bg-semantic-danger text-earthy-ivory"
           >
             {deleteBusy ? 'Deleting…' : 'Delete my account'}
           </button>
@@ -762,7 +762,7 @@ export default function Board() {
             to="/signup?upgrade=1"
             onClick={() => setShareGateOpen(false)}
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-            className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center block"
+            className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"
           >
             Save with email
           </Link>
@@ -888,7 +888,7 @@ function BoardSinglePage({
           <button
             type="button"
             onClick={onEditTasks}
-            className="min-h-11 px-4 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+            className="min-h-11 px-4 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
           >
             <Icon name="tasks" size={18} />
             <span>Edit tasks</span>
@@ -921,7 +921,7 @@ function BoardSinglePage({
         <button
           type="button"
           onClick={onOpenCollection}
-          className="mt-4 min-h-11 w-full sm:w-auto px-5 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          className="mt-4 min-h-11 w-full sm:w-auto px-5 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
         >
           <Icon name="reward" size={18} />
           <span>Open pet collection</span>
@@ -950,7 +950,7 @@ function TodayCard({ kid, activeTheme, actionHref }) {
           {today.day?.label}
         </div>
       </div>
-      <div className="h-3 rounded-full overflow-hidden mt-3" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
+      <div className="h-3 rounded-full overflow-hidden mt-3 bg-earthy-cream border border-earthy-dividerCream">
         <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -1054,7 +1054,7 @@ function TreasureProgressCard({ kid, activeStars, activeTheme }) {
       <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
         {remaining === 0 ? 'Ready' : `${remaining} to hatch`}
       </div>
-      <div className="h-3 rounded-full overflow-hidden mt-3" style={{ backgroundColor: '#F8F1E4', border: '1px solid #EFE1C8' }}>
+      <div className="h-3 rounded-full overflow-hidden mt-3 bg-earthy-cream border border-earthy-dividerCream">
         <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
       </div>
       <div className="grid grid-cols-2 gap-2 mt-4">

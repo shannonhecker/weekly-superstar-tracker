@@ -30,7 +30,7 @@ class RouteErrorBoundary extends Component {
               type="button"
               onClick={() => { window.location.reload() }}
               style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="px-5 py-3 rounded-pill font-bold text-sm hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+              className="px-5 py-3 rounded-pill font-bold text-sm hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
             >
               Reload
             </button>

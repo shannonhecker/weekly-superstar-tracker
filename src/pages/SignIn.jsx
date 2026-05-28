@@ -254,7 +254,7 @@ export default function SignIn() {
           </div>
 
           {error && (
-            <div role="alert" className="mt-4 rounded-2xl bg-[#F8E5DF] px-4 py-3 text-sm font-bold text-[#8A3A2E]">
+            <div role="alert" className="mt-4 rounded-2xl bg-semantic-errorBg px-4 py-3 text-sm font-bold text-semantic-errorText">
               {error}
             </div>
           )}

@@ -33,7 +33,7 @@ export default function MysteryBox({ open, onClose, prize }) {
         <button
           onClick={onClose}
           style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-          className="w-full mt-2 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
+          className="w-full mt-2 py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
         >
           Awesome!
         </button>

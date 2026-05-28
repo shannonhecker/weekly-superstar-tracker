@@ -169,7 +169,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
           onClick={() => setConfirmingDelete(true)}
           aria-label="Delete this superstar"
           title="Delete this superstar"
-          className="absolute top-3 right-3 w-8 h-8 rounded-full text-earthy-cocoaSoft hover:text-[#B85450] hover:bg-[#B85450]/10 flex items-center justify-center transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full text-earthy-cocoaSoft hover:text-semantic-danger hover:bg-semantic-danger/10 flex items-center justify-center transition-colors"
         >
           <Icon name="delete" size={18} />
         </button>
@@ -298,8 +298,8 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         {/* Delete confirmation — only renders once the corner trash icon is tapped */}
         {confirmingDelete && (
           <div className="mt-6">
-            <div className="bg-[#B85450]/10 rounded-xl p-3">
-              <p className="text-sm font-bold text-[#B85450] mb-2">
+            <div className="bg-semantic-danger/10 rounded-xl p-3">
+              <p className="text-sm font-bold text-semantic-danger mb-2">
                 This cannot be undone. Type <span className="font-extrabold">{kid.name}</span> to confirm.
               </p>
               <input
@@ -307,7 +307,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
                 onChange={(e) => setDeleteTyped(e.target.value)}
                 placeholder={kid.name}
                 autoFocus
-                className="w-full px-3 py-2 rounded-lg border-2 border-[#B85450]/30 focus:border-[#B85450] focus:outline-none font-bold bg-earthy-ivory text-earthy-cocoa"
+                className="w-full px-3 py-2 rounded-lg border-2 border-semantic-danger/30 focus:border-semantic-danger focus:outline-none font-bold bg-earthy-ivory text-earthy-cocoa"
               />
               <div className="flex gap-2 mt-3">
                 <button
@@ -320,8 +320,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
                 <button
                   onClick={handleDelete}
                   disabled={!canDelete || busy}
-                  style={{ color: '#FFFAF0', backgroundColor: '#B85450' }}
-                  className="flex-1 py-2 rounded-pill font-bold disabled:opacity-40"
+                  className="flex-1 py-2 rounded-pill font-bold disabled:opacity-40 bg-semantic-danger text-earthy-ivory"
                 >
                   {busy ? 'Deleting…' : 'Delete forever'}
                 </button>
@@ -335,7 +334,7 @@ export default function KidEditModal({ open, onClose, kid, kids, boardId, onDele
         onClick={onClose}
         disabled={busy}
         style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-        className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all disabled:opacity-50"
+        className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all disabled:opacity-50"
       >
         Done
       </button>

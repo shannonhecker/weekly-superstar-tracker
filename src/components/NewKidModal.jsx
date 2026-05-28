@@ -164,7 +164,7 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
               : undefined}
             className={`w-full py-3 rounded-pill font-bold transition-all ${
               canSubmit
-                ? 'hover:bg-[#4A2E25] active:scale-[0.99]'
+                ? 'hover:bg-earthy-cocoaDark active:scale-[0.99]'
                 : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed'
             }`}
           >

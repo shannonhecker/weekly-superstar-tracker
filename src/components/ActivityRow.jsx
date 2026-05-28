@@ -83,7 +83,7 @@ export default function ActivityRow({
         type="button"
         onClick={() => onDelete(activity.id)}
         aria-label="Delete task"
-        className="w-8 h-8 rounded-full bg-[#B85450]/10 text-[#B85450] flex items-center justify-center shrink-0 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-[#B85450]/40"
+        className="w-8 h-8 rounded-full bg-semantic-danger/10 text-semantic-danger flex items-center justify-center shrink-0 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-semantic-danger/40"
       >
         <Icon name="delete" size={16} />
       </button>

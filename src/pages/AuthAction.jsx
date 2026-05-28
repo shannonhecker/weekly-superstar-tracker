@@ -448,13 +448,13 @@ function VerifyingState({ label }) {
 }
 
 // Inline error pill — same colors and shape as the onboarding error strip
-// (#F8E5DF fill, #8A3A2E text). These two hex literals match SignUp.jsx
+// (bg-semantic-errorBg + text-semantic-errorText). These two hex literals match SignUp.jsx
 // exactly and intentionally aren't tokenised yet (flagged there too).
 function ErrorPill({ children }) {
   return (
     <div
       role="alert"
-      className="mb-4 px-4 py-3 rounded-xl bg-[#F8E5DF] text-[#8A3A2E] text-sm font-bold"
+      className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold"
     >
       {children}
     </div>

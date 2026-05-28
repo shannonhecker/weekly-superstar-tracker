@@ -150,7 +150,7 @@ export default function Join() {
                       <Link
                         to={`/signin?next=${encodeURIComponent(`/join/${code}`)}`}
                         style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-                        className="w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all text-center"
+                        className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center"
                       >
                         Sign in
                       </Link>
