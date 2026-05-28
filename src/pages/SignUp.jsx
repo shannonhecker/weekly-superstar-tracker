@@ -344,9 +344,25 @@ export default function SignUp() {
               <span aria-hidden="true">←</span> Back
             </button>
           ) : <span />}
-          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">
-            {step} / {TOTAL_STEPS}
-          </span>
+          <div
+            className="flex items-center gap-1.5"
+            role="progressbar"
+            aria-label={`Step ${step} of ${TOTAL_STEPS}`}
+            aria-valuenow={step}
+            aria-valuemin={1}
+            aria-valuemax={TOTAL_STEPS}
+          >
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                className={[
+                  'block h-1.5 rounded-full transition-all',
+                  i + 1 <= step ? 'w-6 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider',
+                ].join(' ')}
+              />
+            ))}
+          </div>
         </div>
       )}
 
