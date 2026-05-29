@@ -11,7 +11,7 @@ function DoodleImage({ name, alt, className = '', sizes = '(max-width: 768px) 80
         alt={alt}
         loading="eager"
         decoding="async"
-        className="h-full w-full object-contain"
+        className="w-full object-contain"
       />
     </picture>
   )
