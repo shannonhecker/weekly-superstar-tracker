@@ -32,9 +32,9 @@ export default function WizardShell({ children, step, direction }) {
       : 'animate-[brand-parallax-down_220ms_ease-out]'
 
   return (
-    <div className="contents lg:mx-auto lg:grid lg:w-full lg:max-w-6xl lg:grid-cols-[1fr_0.86fr] lg:gap-5 lg:items-stretch lg:px-5 lg:py-6">
+    <div className="contents lg:mx-auto lg:grid lg:w-full lg:max-w-6xl lg:grid-cols-[1fr_0.86fr] lg:gap-5 lg:items-stretch lg:px-5 lg:py-6 lg:bg-[#FCEEE1]">
       <aside
-        className="hidden lg:flex lg:min-h-[720px] lg:flex-col"
+        className="hidden lg:flex lg:flex-col"
         aria-label="Winking Star"
       >
         <style>{`
@@ -51,7 +51,7 @@ export default function WizardShell({ children, step, direction }) {
         `}</style>
         <div
           key={step}
-          className={`flex flex-1 flex-col justify-between p-8 ${parallaxClass}`}
+          className={`flex flex-1 flex-col justify-start p-8 ${parallaxClass}`}
         >
           <div>
             <div className="rounded-3xl overflow-hidden">
