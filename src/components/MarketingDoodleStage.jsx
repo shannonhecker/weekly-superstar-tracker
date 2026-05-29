@@ -21,7 +21,7 @@ function StarDot({ className = '', delay = '0ms' }) {
   return (
     <span
       aria-hidden="true"
-      className={`marketing-star-twinkle absolute rounded-full bg-earthy-sun ${className}`}
+      className={`marketing-star-twinkle absolute rounded-full bg-earthy-terracotta ${className}`}
       style={{ animationDelay: delay }}
     />
   )
@@ -43,7 +43,7 @@ function MiniBoard() {
             key={index}
             className={[
               'h-3 rounded-full',
-              index % 5 === 0 ? 'bg-earthy-sun' : index % 3 === 0 ? 'bg-earthy-sage' : 'bg-earthy-divider',
+              index % 5 === 0 ? 'bg-earthy-terracotta' : index % 3 === 0 ? 'bg-earthy-sage' : 'bg-earthy-divider',
             ].join(' ')}
           />
         ))}
