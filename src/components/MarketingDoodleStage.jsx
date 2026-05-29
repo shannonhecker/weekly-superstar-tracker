@@ -64,6 +64,10 @@ export default function MarketingDoodleStage({ className = '', compact = false }
       ].filter(Boolean).join(' ')}
     >
       <div className="absolute inset-0 bg-earthy-ivory/50" aria-hidden="true" />
+      <div
+        aria-hidden="true"
+        className="absolute bottom-0 left-0 right-0 h-24 bg-earthy-card/55"
+      />
       <DoodleImage
         name="intro-house"
         alt=""
@@ -89,10 +93,6 @@ export default function MarketingDoodleStage({ className = '', compact = false }
       <StarDot className="left-[18%] top-[14%] h-3 w-3" />
       <StarDot className="right-[18%] top-[30%] h-2.5 w-2.5 bg-earthy-sage" delay="260ms" />
       <StarDot className="bottom-[26%] left-[48%] h-2 w-2 bg-earthy-terracottaSoft" delay="520ms" />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 left-0 right-0 h-24 bg-earthy-card/55"
-      />
     </div>
   )
 }
