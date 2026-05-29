@@ -17,11 +17,11 @@ function DoodleImage({ name, alt, className = '', sizes = '(max-width: 768px) 80
   )
 }
 
-function StarDot({ className = '', delay = '0ms' }) {
+function StarDot({ className = '', delay = '0ms', tone = 'bg-earthy-terracotta' }) {
   return (
     <span
       aria-hidden="true"
-      className={`marketing-star-twinkle absolute rounded-full bg-earthy-terracotta ${className}`}
+      className={`marketing-star-twinkle absolute rounded-full ${tone} ${className}`}
       style={{ animationDelay: delay }}
     />
   )
@@ -91,8 +91,8 @@ export default function MarketingDoodleStage({ className = '', compact = false }
       />
       <MiniBoard />
       <StarDot className="left-[18%] top-[14%] h-3 w-3" />
-      <StarDot className="right-[18%] top-[30%] h-2.5 w-2.5 bg-earthy-sage" delay="260ms" />
-      <StarDot className="bottom-[26%] left-[48%] h-2 w-2 bg-earthy-terracottaSoft" delay="520ms" />
+      <StarDot className="right-[18%] top-[30%] h-2.5 w-2.5" tone="bg-earthy-sage" delay="260ms" />
+      <StarDot className="bottom-[26%] left-[48%] h-2 w-2" tone="bg-earthy-terracottaSoft" delay="520ms" />
     </div>
   )
 }
