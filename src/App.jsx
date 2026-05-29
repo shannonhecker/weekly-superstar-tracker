@@ -62,6 +62,16 @@ const StyleGuide = lazy(() => import('./pages/StyleGuide'))
 const Privacy = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
 const Terms = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms })))
 
+// Dev-only peek routes. These render presentational mocks of Board / Pet /
+// Reward at phone-bezel dimensions so we can screenshot them for the signup
+// wizard's banner peek slot. They bypass auth + Firestore — feeding the live
+// components fakes was more invasive than rendering visually-faithful stubs.
+// Lazy-loaded like the other routes, and only registered when
+// `import.meta.env.DEV` so production builds don't ship them.
+const PeekBoard = lazy(() => import('./dev/peek/PeekBoard'))
+const PeekPet = lazy(() => import('./dev/peek/PeekPet'))
+const PeekReward = lazy(() => import('./dev/peek/PeekReward'))
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LogoLoader />
@@ -130,6 +140,13 @@ export default function App() {
           }
         />
         <Route path="/style-guide" element={<StyleGuide />} />
+        {import.meta.env.DEV && (
+          <>
+            <Route path="/dev/peek/board" element={<PeekBoard />} />
+            <Route path="/dev/peek/pet" element={<PeekPet />} />
+            <Route path="/dev/peek/reward" element={<PeekReward />} />
+          </>
+        )}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RouteErrorBoundary>
