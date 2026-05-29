@@ -183,10 +183,10 @@ export default function SignIn() {
                 </span>
               </div>
               <h1 className="max-w-xl text-4xl font-extrabold leading-tight text-earthy-cocoa">
-                Back to the family board.
+                Welcome back to your family board.
               </h1>
               <p className="mt-4 max-w-lg text-base font-bold leading-relaxed text-earthy-cocoaSoft">
-                Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+                Open today's chart, add stars, and celebrate the wins waiting for your superstar.
               </p>
             </div>
             <TrustPills className="mt-8" />
@@ -213,10 +213,10 @@ export default function SignIn() {
             Sign in
           </h2>
           <p className="mt-2 text-sm font-bold leading-relaxed text-earthy-cocoaSoft sm:text-base">
-            Use the parent account connected to your family board.
+            Keep today's stars moving from any device.
           </p>
 
-          {/* Social auth — primary path per spec Q2 */}
+          {/* Social auth: primary path per spec Q2 */}
           <div className="mt-7 grid gap-3">
             <button
               type="button"
@@ -240,7 +240,7 @@ export default function SignIn() {
             </button>
           </div>
 
-          {/* Email-collapse toggle — defaults closed; expands on click */}
+          {/* Email-collapse toggle: defaults closed; expands on click */}
           <div className="mt-5 flex items-center gap-3" role="presentation">
             <span className="h-px flex-1 bg-earthy-divider" />
             <button
@@ -317,16 +317,20 @@ export default function SignIn() {
             </div>
           )}
 
-          <p className="mt-7 text-center text-sm font-bold text-earthy-cocoaSoft">
-            No account?{' '}
-            <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
-              Create one
+          <div className="mt-7 rounded-2xl border border-earthy-divider bg-earthy-ivory p-4 text-center">
+            <p className="text-sm font-extrabold text-earthy-cocoa">
+              New to Winking Star?
+            </p>
+            <Link
+              to="/signup?guest=1"
+              className="mt-3 inline-flex min-h-[46px] w-full items-center justify-center rounded-pill bg-earthy-cocoa px-4 py-3 text-sm font-extrabold text-earthy-cream shadow-earthy-soft transition-all hover:-translate-y-0.5 hover:bg-earthy-cocoaDark active:translate-y-0"
+            >
+              Try a sample board
             </Link>
-          </p>
-
-          <p className="mt-2 text-center text-xs text-earthy-cocoaSoft">
-            New here? <Link to="/" className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors">Try it first.</Link>
-          </p>
+            <p className="mt-3 text-xs font-bold text-earthy-cocoaSoft">
+              Ready to save one? <Link to="/signup" className="underline underline-offset-2 hover:text-earthy-cocoa">Create account</Link>
+            </p>
+          </div>
 
           <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
             <a
