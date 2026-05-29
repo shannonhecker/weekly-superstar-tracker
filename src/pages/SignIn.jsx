@@ -18,8 +18,9 @@ import { safeRedirect } from '../lib/safeRedirect'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
-import ThemeScene from '../components/ThemeScene'
 import LinkAccountModal from '../components/LinkAccountModal'
+
+const BANNER_BASE = '/onboarding-art/banner/signin-board'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -155,7 +156,20 @@ export default function SignIn() {
           aria-label="Winking Star"
         >
           <div className="h-[320px] overflow-hidden">
-            <ThemeScene themeKey="animals" height="320px" />
+            <picture>
+              <source
+                type="image/webp"
+                srcSet={`${BANNER_BASE}-768w.webp 768w, ${BANNER_BASE}-1200w.webp 1200w`}
+                sizes="(min-width: 1024px) 540px, 0px"
+              />
+              <img
+                src={`${BANNER_BASE}.png`}
+                alt="Winking Star board with weekly stars filling up"
+                loading="eager"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            </picture>
           </div>
           <div className="flex flex-1 flex-col justify-between p-8">
             <div>
