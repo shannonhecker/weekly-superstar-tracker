@@ -20,7 +20,7 @@ import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import LinkAccountModal from '../components/LinkAccountModal'
 
-const BANNER_BASE = '/onboarding-art/banner/signin-board'
+const HERO_BASE = '/onboarding-art/hero/family-hero'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -155,16 +155,16 @@ export default function SignIn() {
           className="hidden overflow-hidden rounded-3xl border border-earthy-divider bg-earthy-card shadow-earthy-lifted lg:flex lg:flex-col"
           aria-label="Winking Star"
         >
-          <div className="h-[320px] overflow-hidden">
+          <div className="h-[320px] overflow-hidden bg-earthy-cream">
             <picture>
               <source
                 type="image/webp"
-                srcSet={`${BANNER_BASE}-768w.webp 768w, ${BANNER_BASE}-1200w.webp 1200w`}
-                sizes="(min-width: 1024px) 540px, 0px"
+                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w, ${HERO_BASE}-1200w.webp 1200w`}
+                sizes="(min-width: 1024px) 540px, 100vw"
               />
               <img
-                src={`${BANNER_BASE}.png`}
-                alt="Winking Star board with weekly stars filling up"
+                src={`${HERO_BASE}.png`}
+                alt="Winking Star family achievement board with stars and pets"
                 loading="eager"
                 decoding="async"
                 className="h-full w-full object-cover"
