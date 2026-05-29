@@ -19,8 +19,9 @@ import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import LinkAccountModal from '../components/LinkAccountModal'
+import TrustPills from '../components/TrustPills'
 
-const BANNER_BASE = '/onboarding-art/banner/signin-board'
+const HERO_BASE = '/onboarding-art/hero/family-hero'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -47,6 +48,7 @@ export default function SignIn() {
   const [recovery, setRecovery] = useState(null)
   const [linking, setLinking] = useState(false)
   const [recoveryError, setRecoveryError] = useState('')
+  const [showEmailForm, setShowEmailForm] = useState(false)
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -104,6 +106,7 @@ export default function SignIn() {
         try {
           const existingMethods = await getExistingSignInMethods(info.email)
           setRecovery({ ...info, existingMethods })
+          setShowEmailForm(true)
         } catch {
           setError(formatAuthError(err))
         }
@@ -155,16 +158,16 @@ export default function SignIn() {
           className="hidden overflow-hidden rounded-3xl border border-earthy-divider bg-earthy-card shadow-earthy-lifted lg:flex lg:flex-col"
           aria-label="Winking Star"
         >
-          <div className="h-[320px] overflow-hidden">
+          <div className="h-[320px] overflow-hidden bg-earthy-cream">
             <picture>
               <source
                 type="image/webp"
-                srcSet={`${BANNER_BASE}-768w.webp 768w, ${BANNER_BASE}-1200w.webp 1200w`}
-                sizes="(min-width: 1024px) 540px, 0px"
+                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w, ${HERO_BASE}-1200w.webp 1200w`}
+                sizes="(min-width: 1024px) 540px, 100vw"
               />
               <img
-                src={`${BANNER_BASE}.png`}
-                alt="Winking Star board with weekly stars filling up"
+                src={`${HERO_BASE}.png`}
+                alt="Winking Star family achievement board with stars and pets"
                 loading="eager"
                 decoding="async"
                 className="h-full w-full object-cover"
@@ -186,13 +189,7 @@ export default function SignIn() {
                 Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
               </p>
             </div>
-            <div className="mt-8 grid grid-cols-3 gap-3 text-center">
-              {['Big taps', 'Weekly view', 'Pet pals'].map((label) => (
-                <div key={label} className="rounded-2xl border border-earthy-divider bg-earthy-ivory px-3 py-3 text-sm font-extrabold text-earthy-cocoa">
-                  {label}
-                </div>
-              ))}
-            </div>
+            <TrustPills className="mt-8" />
           </div>
         </section>
 
@@ -219,71 +216,8 @@ export default function SignIn() {
             Use the parent account connected to your family board.
           </p>
 
-          <div className="mt-7">
-            <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
-              Email
-            </label>
-            <input
-              id="signin-email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
-            />
-          </div>
-
-          <div className="mt-5">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
-                Password
-              </label>
-              <Link
-                to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-                className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <div className="relative">
-              <input
-                id="signin-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((visible) => !visible)}
-                className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div role="alert" className="mt-4 rounded-2xl bg-semantic-errorBg px-4 py-3 text-sm font-bold text-semantic-errorText">
-              {error}
-            </div>
-          )}
-
-          <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
-            {loading ? 'Signing in...' : 'Sign in'}
-          </PrimaryButton>
-
-          <div className="my-6 flex items-center gap-3" role="presentation">
-            <span className="h-px flex-1 bg-earthy-divider" />
-            <span className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">or</span>
-            <span className="h-px flex-1 bg-earthy-divider" />
-          </div>
-
-          <div className="grid gap-3">
+          {/* Social auth — primary path per spec Q2 */}
+          <div className="mt-7 grid gap-3">
             <button
               type="button"
               onClick={onApple}
@@ -306,11 +240,92 @@ export default function SignIn() {
             </button>
           </div>
 
+          {/* Email-collapse toggle — defaults closed; expands on click */}
+          <div className="mt-5 flex items-center gap-3" role="presentation">
+            <span className="h-px flex-1 bg-earthy-divider" />
+            <button
+              type="button"
+              onClick={() => setShowEmailForm((open) => !open)}
+              aria-expanded={showEmailForm}
+              aria-controls="signin-email-form"
+              className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft hover:text-earthy-cocoa transition-colors"
+            >
+              {showEmailForm ? 'Hide email form' : 'Use email instead'}
+            </button>
+            <span className="h-px flex-1 bg-earthy-divider" />
+          </div>
+
+          {showEmailForm && (
+            <div id="signin-email-form">
+              <div className="mt-5">
+                <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
+                  Email
+                </label>
+                <input
+                  id="signin-email"
+                  type="email"
+                  autoComplete="email"
+                  required={showEmailForm}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                />
+              </div>
+
+              <div className="mt-5">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
+                    Password
+                  </label>
+                  <Link
+                    to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                    className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    id="signin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required={showEmailForm}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div role="alert" className="mt-4 rounded-2xl bg-semantic-errorBg px-4 py-3 text-sm font-bold text-semantic-errorText">
+                  {error}
+                </div>
+              )}
+
+              <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
+                {loading ? 'Signing in...' : 'Sign in'}
+              </PrimaryButton>
+            </div>
+          )}
+
           <p className="mt-7 text-center text-sm font-bold text-earthy-cocoaSoft">
             No account?{' '}
             <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
               Create one
             </Link>
+          </p>
+
+          <p className="mt-2 text-center text-xs text-earthy-cocoaSoft">
+            New here? <Link to="/" className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors">Try it first.</Link>
           </p>
 
           <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
