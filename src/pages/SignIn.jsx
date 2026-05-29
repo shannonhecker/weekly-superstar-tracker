@@ -21,7 +21,7 @@ import Logo from '../components/Logo'
 import LinkAccountModal from '../components/LinkAccountModal'
 import TrustPills from '../components/TrustPills'
 
-const HERO_BASE = '/onboarding-art/hero/family-hero'
+const HERO_BASE = '/onboarding-art/intro-house'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -162,12 +162,12 @@ export default function SignIn() {
             <picture>
               <source
                 type="image/webp"
-                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w, ${HERO_BASE}-1200w.webp 1200w`}
+                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w`}
                 sizes="(min-width: 1024px) 540px, 100vw"
               />
               <img
                 src={`${HERO_BASE}.png`}
-                alt="Winking Star family achievement board with stars and pets"
+                alt="Illustrated cozy house with a hot-air balloon floating above"
                 loading="eager"
                 decoding="async"
                 className="h-full w-full object-cover"
