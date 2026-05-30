@@ -671,7 +671,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
                 ref={(el) => { itemRefs.current[key] = el }}
                 onClick={() => { onSelect(key); scrollToTheme(key) }}
                 className={[
-                  'snap-center shrink-0 w-[260px] sm:w-[340px]',
+                  'block snap-center shrink-0 w-[260px] sm:w-[340px]',
                   'rounded-3xl overflow-hidden transition-all',
                   'border-2',
                   isSelected
@@ -684,6 +684,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
                   height={200}
                   animated={isSelected}
                   loading={isSelected ? 'eager' : 'lazy'}
+                  imageScale={1.14}
                 />
               </button>
             )

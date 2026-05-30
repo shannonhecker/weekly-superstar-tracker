@@ -20,8 +20,7 @@ import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
 import LinkAccountModal from '../components/LinkAccountModal'
 import TrustPills from '../components/TrustPills'
-
-const HERO_BASE = '/onboarding-art/intro-house'
+import ProductPreview from '../components/wizard/ProductPreview'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -152,191 +151,163 @@ export default function SignIn() {
   const onGoogle = () => onOAuth(new GoogleAuthProvider(), 'google.com')
 
   return (
-    <main id="main" className="min-h-screen bg-earthy-card px-5 py-6 sm:py-10 font-jakarta">
-      <div className="mx-auto grid w-full max-w-5xl items-stretch gap-5 lg:grid-cols-[1fr_0.86fr]">
-        <section
-          className="hidden overflow-hidden rounded-3xl border border-earthy-dividerCream bg-white shadow-earthy-soft lg:flex lg:flex-col"
-          aria-label="Winking Star"
-        >
-          <div className="h-[320px] overflow-hidden bg-earthy-cream">
-            <picture>
-              <source
-                type="image/webp"
-                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w`}
-                sizes="(min-width: 1024px) 540px, 100vw"
-              />
-              <img
-                src={`${HERO_BASE}.png`}
-                alt="Illustrated cozy house with a hot-air balloon floating above"
-                loading="eager"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            </picture>
+    <main id="main" className="min-h-screen bg-earthy-card font-jakarta text-earthy-cocoa">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-5 sm:px-8 lg:px-10">
+        <section className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.88fr)] lg:gap-14 lg:py-10">
+          <div className="order-2 hidden min-w-0 lg:order-1 lg:block">
+            <ProductPreview variant="board" className="mx-auto max-w-[560px]" />
           </div>
-          <div className="flex flex-1 flex-col justify-between p-8">
-            <div>
-              <div className="mb-5 flex items-center gap-3">
-                <Logo size={52} />
-                <span className="text-2xl font-extrabold text-earthy-cocoa">
-                  Winking Star
-                </span>
+
+          <form
+            onSubmit={onSubmit}
+            className="order-1 mx-auto w-full max-w-md text-center lg:order-2"
+          >
+            <div className="mx-auto mb-6 max-w-md lg:hidden">
+              <ProductPreview compact variant="board" />
+            </div>
+
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <Logo size={48} />
+              <span className="text-2xl font-black text-earthy-cocoa">Winking Star</span>
+            </div>
+
+            <h1 className="font-display text-4xl font-black leading-[1.05] tracking-normal text-earthy-cocoa sm:text-5xl">
+              Sign in
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-base font-bold leading-relaxed text-earthy-cocoaSoft sm:text-lg">
+              Keep today&apos;s stars moving from any device.
+            </p>
+            <TrustPills className="mt-5" />
+
+            {/* Social auth — primary path per spec Q2 */}
+            <div className="mt-8 grid gap-3">
+              <button
+                type="button"
+                onClick={onApple}
+                disabled={loading}
+                aria-label="Continue with Apple"
+                className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
+              >
+                <span aria-hidden="true" className="text-base">A</span>
+                Continue with Apple
+              </button>
+              <button
+                type="button"
+                onClick={onGoogle}
+                disabled={loading}
+                aria-label="Continue with Google"
+                className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
+              >
+                <span aria-hidden="true" className="text-base">G</span>
+                Continue with Google
+              </button>
+            </div>
+
+            {/* Email-collapse toggle — defaults closed; expands on click */}
+            <div className="mt-5 flex items-center gap-3" role="presentation">
+              <span className="h-px flex-1 bg-earthy-dividerCream" />
+              <button
+                type="button"
+                onClick={() => setShowEmailForm((open) => !open)}
+                aria-expanded={showEmailForm}
+                aria-controls="signin-email-form"
+                className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft hover:text-earthy-cocoa transition-colors"
+              >
+                {showEmailForm ? 'Hide email form' : 'Use email instead'}
+              </button>
+              <span className="h-px flex-1 bg-earthy-dividerCream" />
+            </div>
+
+            {error && (
+              <div role="alert" className="mt-5 rounded-2xl bg-semantic-errorBg px-4 py-3 text-left text-sm font-bold text-semantic-errorText">
+                {error}
               </div>
-              <h1 className="max-w-xl text-4xl font-extrabold leading-tight text-earthy-cocoa">
-                Back to the family board.
-              </h1>
-              <p className="mt-4 max-w-lg text-base font-bold leading-relaxed text-earthy-cocoaSoft">
-                Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+            )}
+
+            {showEmailForm && (
+              <div id="signin-email-form" className="text-left">
+                <div className="mt-5">
+                  <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
+                    Email
+                  </label>
+                  <input
+                    id="signin-email"
+                    type="email"
+                    autoComplete="email"
+                    required={showEmailForm}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                  />
+                </div>
+
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
+                      Password
+                    </label>
+                    <Link
+                      to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                      className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="signin-password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required={showEmailForm}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+
+                <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
+                  {loading ? 'Signing in...' : 'Sign in'}
+                </PrimaryButton>
+              </div>
+            )}
+
+            <div className="mt-8 rounded-3xl border border-earthy-dividerCream bg-white/55 p-4">
+              <p className="text-sm font-extrabold text-earthy-cocoaSoft">
+                New to Winking Star?
+              </p>
+              <Link
+                to="/signup?guest=1"
+                className="mt-3 inline-flex min-h-[48px] w-full items-center justify-center rounded-pill bg-earthy-cocoa px-5 py-3 text-sm font-extrabold text-earthy-ivory shadow-earthy-soft transition-all hover:-translate-y-0.5 hover:bg-earthy-cocoaDark active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
+              >
+                Try a sample board
+              </Link>
+              <p className="mt-3 text-xs font-bold text-earthy-cocoaSoft">
+                Ready to save one?{' '}
+                <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
+                  Create account
+                </Link>
               </p>
             </div>
-            <TrustPills align="start" className="mt-8" />
-          </div>
+
+            <p className="mt-5 text-xs text-earthy-cocoaSoft">
+              <a
+                href={supportMailto('Help signing in to Winking Star')}
+                className="underline underline-offset-2 transition-colors hover:text-earthy-cocoa"
+              >
+                Need help?
+              </a>
+            </p>
+          </form>
         </section>
-
-        <form
-          onSubmit={onSubmit}
-          className="flex min-h-[calc(100vh-48px)] flex-col justify-center rounded-3xl border border-earthy-dividerCream bg-white p-6 shadow-earthy-soft sm:p-8 lg:min-h-[720px]"
-        >
-          <div className="mb-7 flex items-center gap-3 lg:hidden">
-            <Logo size={48} />
-            <div>
-              <div className="text-xl font-extrabold text-earthy-cocoa">
-                Winking Star
-              </div>
-              <div className="text-sm font-bold text-earthy-cocoaSoft">
-                Family achievement board
-              </div>
-            </div>
-          </div>
-
-          <h2 className="text-3xl font-extrabold tracking-tight text-earthy-cocoa sm:text-4xl">
-            Sign in
-          </h2>
-          <p className="mt-2 text-sm font-bold leading-relaxed text-earthy-cocoaSoft sm:text-base">
-            Use the parent account connected to your family board.
-          </p>
-
-          {/* Social auth — primary path per spec Q2 */}
-          <div className="mt-7 grid gap-3">
-            <button
-              type="button"
-              onClick={onApple}
-              disabled={loading}
-              aria-label="Continue with Apple"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
-            >
-              <span aria-hidden="true" className="text-base">A</span>
-              Continue with Apple
-            </button>
-            <button
-              type="button"
-              onClick={onGoogle}
-              disabled={loading}
-              aria-label="Continue with Google"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
-            >
-              <span aria-hidden="true" className="text-base">G</span>
-              Continue with Google
-            </button>
-          </div>
-
-          {/* Email-collapse toggle — defaults closed; expands on click */}
-          <div className="mt-5 flex items-center gap-3" role="presentation">
-            <span className="h-px flex-1 bg-earthy-dividerCream" />
-            <button
-              type="button"
-              onClick={() => setShowEmailForm((open) => !open)}
-              aria-expanded={showEmailForm}
-              aria-controls="signin-email-form"
-              className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft hover:text-earthy-cocoa transition-colors"
-            >
-              {showEmailForm ? 'Hide email form' : 'Use email instead'}
-            </button>
-            <span className="h-px flex-1 bg-earthy-dividerCream" />
-          </div>
-
-          {showEmailForm && (
-            <div id="signin-email-form">
-              <div className="mt-5">
-                <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
-                  Email
-                </label>
-                <input
-                  id="signin-email"
-                  type="email"
-                  autoComplete="email"
-                  required={showEmailForm}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
-                />
-              </div>
-
-              <div className="mt-5">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
-                    Password
-                  </label>
-                  <Link
-                    to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-                    className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <input
-                    id="signin-password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required={showEmailForm}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((visible) => !visible)}
-                    className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div role="alert" className="mt-4 rounded-2xl bg-semantic-errorBg px-4 py-3 text-sm font-bold text-semantic-errorText">
-                  {error}
-                </div>
-              )}
-
-              <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
-                {loading ? 'Signing in...' : 'Sign in'}
-              </PrimaryButton>
-            </div>
-          )}
-
-          <p className="mt-7 text-center text-sm font-bold text-earthy-cocoaSoft">
-            No account?{' '}
-            <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
-              Create one
-            </Link>
-          </p>
-
-          <p className="mt-2 text-center text-xs text-earthy-cocoaSoft">
-            New here? <Link to="/" className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors">Try it first.</Link>
-          </p>
-
-          <p className="mt-3 text-center text-xs text-earthy-cocoaSoft">
-            <a
-              href={supportMailto('Help signing in to Winking Star')}
-              className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
-            >
-              Need help?
-            </a>
-          </p>
-        </form>
       </div>
       <LinkAccountModal
         open={!!recovery}

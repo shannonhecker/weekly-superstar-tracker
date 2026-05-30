@@ -49,4 +49,18 @@ describe('AnimatedRasterBanner', () => {
     expect(directImg).not.toBeUndefined()
     expect(directImg.getAttribute('src')).toBe('/theme-banners/garden.png')
   })
+
+  it('exposes an image scale variable for tightly cropped banner placements', () => {
+    const { container } = render(
+      <AnimatedRasterBanner
+        source="/theme-banners/garden.png"
+        height={160}
+        animated={false}
+        imageScale={1.14}
+      />
+    )
+
+    const wrapper = container.querySelector('.ws-raster-banner')
+    expect(wrapper.style.getPropertyValue('--ws-image-scale')).toBe('1.14')
+  })
 })
