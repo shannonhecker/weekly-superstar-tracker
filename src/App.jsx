@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import LogoLoader from './components/LogoLoader'
 
@@ -50,9 +50,7 @@ class RouteErrorBoundary extends Component {
 // — needs to be in the initial bundle so the loading state can render
 // before any chunk arrives.
 const Landing = lazy(() => import('./pages/Landing'))
-const LandingV2 = lazy(() => import('./pages/LandingV2'))
 const SignIn = lazy(() => import('./pages/SignIn'))
-const SignUp = lazy(() => import('./pages/SignUp'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const AuthAction = lazy(() => import('./pages/AuthAction'))
 const Join = lazy(() => import('./pages/Join'))
@@ -79,6 +77,11 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+function RedirectToRoot() {
+  const { search, hash } = useLocation()
+  return <Navigate to={{ pathname: '/', search, hash }} replace />
+}
+
 export default function App() {
   const protectedBoard = (
     <ProtectedRoute>
@@ -103,9 +106,9 @@ export default function App() {
       <RouteErrorBoundary>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/landing-v2" element={<LandingV2 />} />
+        <Route path="/landing-v2" element={<RedirectToRoot />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup" element={<RedirectToRoot />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/action" element={<AuthAction />} />
         <Route path="/join/:code" element={<Join />} />

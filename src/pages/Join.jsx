@@ -156,7 +156,7 @@ export default function Join() {
                         Sign in to join
                       </Link>
                       <Link
-                        to={`/signup?next=${encodeURIComponent(`/join/${code}`)}`}
+                        to={`/?next=${encodeURIComponent(`/join/${code}`)}`}
                         className="w-full py-3 rounded-pill border-2 border-earthy-divider bg-earthy-ivory text-earthy-cocoa font-bold hover:border-earthy-cocoaSoft active:scale-[0.99] transition-all text-center"
                       >
                         Create account

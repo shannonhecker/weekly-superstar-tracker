@@ -1,20 +1,16 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import WizardShell from './WizardShell'
 
-// ThemeBannerArt pulls in AnimatedRasterBanner + raster assets which JSDOM
-// can't load. Stub it out so we only test WizardShell's own composition.
-vi.mock('../ThemeBannerArt', () => ({
-  default: ({ themeKey }) => (
-    <div data-testid="theme-banner-art" data-theme={themeKey} />
-  ),
+// ProductPreview owns its own illustrative UI and animation styles. Stub it so
+// these tests stay focused on WizardShell's composition.
+vi.mock('./ProductPreview', () => ({
+  default: ({ variant }) => <div data-testid="product-preview" data-variant={variant} />,
 }))
 
-// Logo is a thin <img> wrapper but its asset path means JSDOM will surface
-// a network warning. Stub for cleanliness — Logo's own tests cover it.
-vi.mock('../Logo', () => ({
-  default: ({ size }) => <div data-testid="logo" data-size={size} />,
-}))
+afterEach(() => {
+  cleanup()
+})
 
 describe('WizardShell', () => {
   it('renders children unchanged (mobile pass-through)', () => {
@@ -32,33 +28,27 @@ describe('WizardShell', () => {
     expect(screen.getByText('Step body')).toBeInTheDocument()
   })
 
-  it('renders the brand-column heading', () => {
+  it('renders the rotating product preview on the intro step', () => {
     render(
       <WizardShell step={1} direction="forward">
         <main />
       </WizardShell>
     )
-    const heading = screen.getByRole('heading', {
-      level: 2,
-      name: 'A family achievement board.',
-    })
-    expect(heading).toBeInTheDocument()
+    expect(screen.getByTestId('product-preview')).toHaveAttribute('data-variant', 'board')
   })
 
-  it('renders the three trust pills', () => {
+  it('keeps later steps as a single-column flow without the preview aside', () => {
     render(
-      <WizardShell step={1} direction="forward">
+      <WizardShell step={2} direction="forward">
         <main />
       </WizardShell>
     )
-    expect(screen.getByText('Weekly view')).toBeInTheDocument()
-    expect(screen.getByText('No ads, ever')).toBeInTheDocument()
-    expect(screen.getByText('Ages 3 to 12')).toBeInTheDocument()
+    expect(screen.queryByTestId('product-preview')).not.toBeInTheDocument()
   })
 
   it('applies forward parallax keyframe when direction is forward', () => {
     const { container } = render(
-      <WizardShell step={2} direction="forward">
+      <WizardShell step={1} direction="forward">
         <main />
       </WizardShell>
     )

@@ -669,7 +669,7 @@ export default function Board() {
           )}
           {isAnonymous && (
             <Link
-              to="/signup?upgrade=1"
+              to="/?upgrade=1"
               onClick={() => setSignOutOpen(false)}
               style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
               className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"
@@ -759,7 +759,7 @@ export default function Board() {
             Save your board first so the link still works when your family opens it.
           </p>
           <Link
-            to="/signup?upgrade=1"
+            to="/?upgrade=1"
             onClick={() => setShareGateOpen(false)}
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
             className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"

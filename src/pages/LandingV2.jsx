@@ -77,7 +77,7 @@ export default function LandingV2() {
         </p>
         <div className="mt-8 w-full max-w-md space-y-3">
           <Link
-            to="/signup"
+            to="/"
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
             className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
           >
@@ -91,7 +91,7 @@ export default function LandingV2() {
             Sign in
           </Link>
           <Link
-            to="/signup?guest=1"
+            to="/?guest=1"
             className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill text-center"
           >
             Try it first. No sign-up needed.

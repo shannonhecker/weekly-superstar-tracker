@@ -17,6 +17,7 @@ export default function WizardHero({
   effect,
   themeColors,
   objectPosition = 'center',
+  loading = 'lazy',
   style,
 }) {
   const src = `${BASE}/${illustration}.png`
@@ -27,7 +28,7 @@ export default function WizardHero({
       source={src}
       webpSrcSet={webpSrcSet}
       sizes={DEFAULT_SIZES}
-      loading="lazy"
+      loading={loading}
       accessibilityLabel={alt}
       height={height}
       borderRadius={borderRadius}
