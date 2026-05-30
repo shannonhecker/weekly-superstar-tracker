@@ -49,6 +49,7 @@ export default function AnimatedRasterBanner({
   const wrapperStyle = {
     height,
     borderRadius,
+    '--ws-image-scale': imageScale,
     ...style,
   }
 
