@@ -31,8 +31,8 @@
 }
 
 @keyframes ws-breathe {
-  0%, 100% { transform: scale(1.0); }
-  50%      { transform: scale(1.02); }
+  0%, 100% { transform: scale(var(--ws-image-scale, 1)); }
+  50%      { transform: scale(calc(var(--ws-image-scale, 1) + 0.02)); }
 }
 
 .ws-particle-layer {

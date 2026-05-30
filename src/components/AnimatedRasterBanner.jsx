@@ -39,6 +39,7 @@ export default function AnimatedRasterBanner({
   // Default 'center' keeps Board behaviour. PrintSheet passes 'center top'
   // so character heads stay visible when vertical cropping happens.
   objectPosition = 'center',
+  imageScale = 1,
   style,
 }) {
   const profile = EFFECT_PROFILES[effect] || EFFECT_PROFILES.petals
@@ -60,7 +61,10 @@ export default function AnimatedRasterBanner({
       alt=""
       loading={loading}
       decoding="async"
-      style={{ objectPosition }}
+      style={{
+        objectPosition,
+        '--ws-image-scale': imageScale,
+      }}
     />
   )
 

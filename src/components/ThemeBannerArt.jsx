@@ -46,6 +46,7 @@ export default function ThemeBannerArt({
   // 14:1 strip cuts character heads, so it passes 'center top' to keep
   // faces visible.
   objectPosition,
+  imageScale = 1,
   // Pass 'lazy' when many banners render at once (theme picker grid,
   // PetGallery banner backgrounds). Default 'eager' for the active Board
   // banner which is on the critical path.
@@ -86,6 +87,7 @@ export default function ThemeBannerArt({
         themeColors={{ accent: theme.accent, deeper: theme.deeper }}
         accessibilityLabel={`${label} theme banner`}
         objectPosition={objectPosition}
+        imageScale={imageScale}
       />
       <BannerPet emoji={favoritePet?.emoji} animated={animated} />
     </div>

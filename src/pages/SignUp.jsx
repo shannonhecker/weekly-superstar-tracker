@@ -684,6 +684,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
                   height={200}
                   animated={isSelected}
                   loading={isSelected ? 'eager' : 'lazy'}
+                  imageScale={1.16}
                 />
               </button>
             )
