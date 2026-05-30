@@ -21,7 +21,7 @@ import Logo from '../components/Logo'
 import LinkAccountModal from '../components/LinkAccountModal'
 import TrustPills from '../components/TrustPills'
 
-const HERO_BASE = '/onboarding-art/hero/family-hero'
+const HERO_BASE = '/onboarding-art/intro-house'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -152,22 +152,22 @@ export default function SignIn() {
   const onGoogle = () => onOAuth(new GoogleAuthProvider(), 'google.com')
 
   return (
-    <main id="main" className="min-h-screen bg-earthy-ivory px-5 py-6 sm:py-10 font-jakarta">
+    <main id="main" className="min-h-screen bg-earthy-card px-5 py-6 sm:py-10 font-jakarta">
       <div className="mx-auto grid w-full max-w-5xl items-stretch gap-5 lg:grid-cols-[1fr_0.86fr]">
         <section
-          className="hidden overflow-hidden rounded-3xl border border-earthy-divider bg-earthy-card shadow-earthy-lifted lg:flex lg:flex-col"
+          className="hidden overflow-hidden rounded-3xl border border-earthy-dividerCream bg-white shadow-earthy-soft lg:flex lg:flex-col"
           aria-label="Winking Star"
         >
           <div className="h-[320px] overflow-hidden bg-earthy-cream">
             <picture>
               <source
                 type="image/webp"
-                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w, ${HERO_BASE}-1200w.webp 1200w`}
+                srcSet={`${HERO_BASE}-376w.webp 376w, ${HERO_BASE}-768w.webp 768w`}
                 sizes="(min-width: 1024px) 540px, 100vw"
               />
               <img
                 src={`${HERO_BASE}.png`}
-                alt="Winking Star family achievement board with stars and pets"
+                alt="Illustrated cozy house with a hot-air balloon floating above"
                 loading="eager"
                 decoding="async"
                 className="h-full w-full object-cover"
@@ -189,13 +189,13 @@ export default function SignIn() {
                 Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
               </p>
             </div>
-            <TrustPills className="mt-8" />
+            <TrustPills align="start" className="mt-8" />
           </div>
         </section>
 
         <form
           onSubmit={onSubmit}
-          className="flex min-h-[calc(100vh-48px)] flex-col justify-center rounded-3xl border border-earthy-divider bg-earthy-card p-6 shadow-earthy-lifted sm:p-8 lg:min-h-[720px]"
+          className="flex min-h-[calc(100vh-48px)] flex-col justify-center rounded-3xl border border-earthy-dividerCream bg-white p-6 shadow-earthy-soft sm:p-8 lg:min-h-[720px]"
         >
           <div className="mb-7 flex items-center gap-3 lg:hidden">
             <Logo size={48} />
@@ -223,7 +223,7 @@ export default function SignIn() {
               onClick={onApple}
               disabled={loading}
               aria-label="Continue with Apple"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
             >
               <span aria-hidden="true" className="text-base">A</span>
               Continue with Apple
@@ -233,7 +233,7 @@ export default function SignIn() {
               onClick={onGoogle}
               disabled={loading}
               aria-label="Continue with Google"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
             >
               <span aria-hidden="true" className="text-base">G</span>
               Continue with Google
@@ -242,7 +242,7 @@ export default function SignIn() {
 
           {/* Email-collapse toggle — defaults closed; expands on click */}
           <div className="mt-5 flex items-center gap-3" role="presentation">
-            <span className="h-px flex-1 bg-earthy-divider" />
+            <span className="h-px flex-1 bg-earthy-dividerCream" />
             <button
               type="button"
               onClick={() => setShowEmailForm((open) => !open)}
@@ -252,7 +252,7 @@ export default function SignIn() {
             >
               {showEmailForm ? 'Hide email form' : 'Use email instead'}
             </button>
-            <span className="h-px flex-1 bg-earthy-divider" />
+            <span className="h-px flex-1 bg-earthy-dividerCream" />
           </div>
 
           {showEmailForm && (
@@ -268,7 +268,7 @@ export default function SignIn() {
                   required={showEmailForm}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                  className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-base font-bold text-earthy-cocoa outline-none transition-colors placeholder:text-earthy-cocoaSoft/60 focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
                 />
               </div>
 
@@ -292,7 +292,7 @@ export default function SignIn() {
                     required={showEmailForm}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="min-h-[52px] w-full rounded-2xl border-2 border-earthy-divider bg-earthy-ivory py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+                    className="min-h-[52px] w-full rounded-2xl border border-earthy-dividerCream bg-earthy-card py-3 pl-4 pr-20 text-base font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
                   />
                   <button
                     type="button"

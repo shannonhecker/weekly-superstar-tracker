@@ -14,7 +14,7 @@ describe('TrustPills', () => {
     const pills = Array.from(container.querySelectorAll('[data-testid="trust-pill"]'))
     expect(pills[0].textContent).toBe('Ages 3 to 12')
     expect(pills[1].textContent).toBe('No ads, ever')
-    expect(pills[2].textContent).toBe('Free to try')
+    expect(pills[2].textContent).toBe('Free starter board')
   })
 
   it('forwards an accessibility-friendly role to the wrapper for grouping', () => {
@@ -29,5 +29,12 @@ describe('TrustPills', () => {
     const { container } = render(<TrustPills className="custom-spacing" />)
     const wrapper = container.firstChild
     expect(wrapper.className).toContain('custom-spacing')
+  })
+
+  it('can align the row to the start for editorial layouts', () => {
+    const { container } = render(<TrustPills align="start" />)
+    const wrapper = container.firstChild
+    expect(wrapper.className).toContain('justify-start')
+    expect(wrapper.className).toContain('text-left')
   })
 })

@@ -14,8 +14,8 @@ import { createBoardForNewUser, findUserBoards } from '../lib/boards'
 import { auth } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { THEMES } from '../lib/themes'
-import WizardHero from '../components/wizard/WizardHero'
 import ThemeBannerArt from '../components/ThemeBannerArt'
+import ProductPreview from '../components/wizard/ProductPreview'
 import { flagUpgradeSuccess } from '../lib/upgrade-flag'
 import { formatAuthError, isSilentAuthError } from '../lib/authErrors'
 import {
@@ -26,11 +26,14 @@ import {
 import { safeRedirect } from '../lib/safeRedirect'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
-import HeroStar from '../components/HeroStar'
 import ParentConsentGate from '../components/ParentConsentGate'
 import LinkAccountModal from '../components/LinkAccountModal'
 import EarthyDatePicker from '../components/EarthyDatePicker'
 import WizardShell from '../components/wizard/WizardShell'
+import WizardStepCard from '../components/wizard/WizardStepCard'
+import Icon from '../components/Icon'
+import Logo from '../components/Logo'
+import TrustPills from '../components/TrustPills'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -109,6 +112,11 @@ export default function SignUp() {
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1))
   const goBack = () => setStep((s) => Math.max(1, s - 1))
+  const goGuest = () => {
+    setError('')
+    if (!isGuest) navigate('/signup?guest=1')
+    setStep((s) => (s === 1 ? 2 : s))
+  }
 
   const onCreate = async (e) => {
     e.preventDefault()
@@ -317,8 +325,7 @@ export default function SignUp() {
     <WizardShell step={step} direction={direction}>
     <main
       id="main"
-      className="min-h-screen flex flex-col px-5 pb-6 relative lg:min-h-0 lg:px-0"
-      style={{ backgroundColor: '#FCEEE1' }}
+      className="min-h-screen flex flex-col px-5 pb-6 relative bg-earthy-card lg:min-h-[720px] lg:px-0 lg:py-8"
     >
       {/* Inline keyframes — keeps the file self-contained without touching tailwind config.
           Scoped to (prefers-reduced-motion: no-preference) so reduced-motion users
@@ -339,13 +346,13 @@ export default function SignUp() {
       `}</style>
 
       {/* Top bar — back link (steps 2-4) + step counter on the right for orientation.
-          Floats absolute over the wizard hero (iOS pattern) so the banner can sit
-          flush against the top edge of the page. Hidden in upgrade mode: there's
-          no wizard to step back through and the "4/4" counter would be confusing
-          for a one-screen flow. */}
-      {!isUpgrade && !isInviteSignup && (
-        <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4">
-          <div className="w-full max-w-lg mx-auto flex items-center justify-between min-h-[28px]">
+          It stays in normal layout flow so the row has breathing room above
+          the card/banner instead of overlaying the full-bleed artwork. Hidden
+          in upgrade mode: there's no wizard to step back through and the
+          "4/4" counter would be confusing for a one-screen flow. */}
+      {step > 1 && !isUpgrade && !isInviteSignup && (
+        <div className="z-10 w-full max-w-lg mx-auto pt-5 mb-5 lg:pt-0">
+          <div className="mx-auto flex min-h-[28px] w-full max-w-lg items-center justify-between">
             {step > 1 ? (
               <button
                 type="button"
@@ -379,9 +386,15 @@ export default function SignUp() {
         </div>
       )}
 
-      <div className="flex-1 flex items-start justify-center w-full">
+      <div className="flex-1 flex items-start justify-center w-full lg:items-center">
         <div key={step} className={`w-full max-w-lg ${enterClasses}`}>
-          {step === 1 && <StepIntro onStart={goNext} />}
+          {step === 1 && (
+            <StepIntro
+              isGuest={isGuest}
+              onStart={goNext}
+              onTryGuest={!isGuest && !isUpgrade && !isInviteSignup ? goGuest : null}
+            />
+          )}
           {step === 2 && (
             <StepTheme
               selected={theme}
@@ -422,6 +435,7 @@ export default function SignUp() {
               onGoogle={onGoogle}
               isUpgrade={isUpgrade}
               isInviteSignup={isInviteSignup}
+              onTryGuest={!isUpgrade && !isInviteSignup ? goGuest : null}
             />
           )}
         </div>
@@ -475,53 +489,74 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
   const trimmed = (kidName || '').trim()
   return (
     <div className="pt-2">
-      <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Ready when you are.
-      </h2>
-      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        {trimmed
-          ? `${trimmed}’s board is set up. You can save it with an email any time.`
-          : 'Your board is set up. You can save it with an email any time.'}
-      </p>
+      <WizardStepCard illustration="intro-cake" heroHeight={178}>
+        <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
+          Ready when you are.
+        </h2>
+        <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
+          {trimmed
+            ? `${trimmed}’s board is set up. You can save it with an email any time.`
+            : 'Your board is set up. You can save it with an email any time.'}
+        </p>
 
-      {error && (
-        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
+            {error}
+          </div>
+        )}
 
-      <PrimaryButton type="button" onClick={onStart} disabled={loading} aria-disabled={loading}>
-        {loading ? 'Setting up…' : 'Start your board'}
-      </PrimaryButton>
+        <PrimaryButton type="button" onClick={onStart} disabled={loading} aria-disabled={loading}>
+          {loading ? 'Setting up…' : 'Start your board'}
+        </PrimaryButton>
+      </WizardStepCard>
     </div>
   )
 }
 
 /* ---------- Step 1 — value prop ---------- */
-function StepIntro({ onStart }) {
+function StepIntro({ isGuest, onStart, onTryGuest }) {
   return (
     <div className="text-center">
-      <div className="mb-6 max-w-md mx-auto">
-        <WizardHero
-          illustration="intro-welcome"
-          height={220}
-          animated
-          effect="sparkles"
-        />
+      <div className="mb-6 max-w-md mx-auto lg:hidden">
+        <ProductPreview compact />
+      </div>
+      <div className="mb-5 flex items-center justify-center gap-3">
+        <Logo size={48} />
+        <span className="text-2xl font-black text-earthy-cocoa">Winking Star</span>
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
         Meet your weekly superstar.
       </h1>
-      <p className="text-earthy-cocoaSoft text-base sm:text-lg leading-relaxed max-w-sm mx-auto mb-10">
-        a tiny ritual for kids who are crushing their week.
+      <p className="text-earthy-cocoaSoft text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-5">
+        <span className="block text-xl font-black leading-snug text-earthy-cocoa sm:text-2xl">
+          A family achievement board.
+        </span>
+        <span className="mt-3 block">
+          Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+        </span>
       </p>
-      <button
-        type="button"
-        onClick={onStart}
-        className="inline-flex items-center gap-2 px-8 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:bg-earthy-cocoaDark hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
-      >
-        Start <span aria-hidden="true">▶</span>
-      </button>
+      <TrustPills className="mb-4" />
+      <p className="mb-9 text-[11px] font-extrabold uppercase tracking-[0.12em] text-earthy-cocoaSoft sm:text-xs">
+        Web app · Also available on iPhone
+      </p>
+      <div className="flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={onStart}
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:bg-earthy-cocoaDark hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
+        >
+          {isGuest ? 'Set up a test board' : 'Start'} <span aria-hidden="true">▶</span>
+        </button>
+        {onTryGuest ? (
+          <button
+            type="button"
+            onClick={onTryGuest}
+            className="text-sm font-extrabold text-earthy-cocoaSoft underline underline-offset-4 transition-colors hover:text-earthy-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill"
+          >
+            Try the board first, no sign-up
+          </button>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -582,6 +617,18 @@ function StepTheme({ selected, onSelect, onContinue }) {
 
   const selectedTheme = selected ? THEMES[selected] : null
   const selectedIdx = selected ? entries.findIndex(([k]) => k === selected) : 0
+  const activeIdx = Math.max(0, selectedIdx)
+  const canGoPrevious = activeIdx > 0
+  const canGoNext = activeIdx < entries.length - 1
+
+  const moveTheme = (delta) => {
+    if (entries.length === 0) return
+    const nextIdx = Math.min(entries.length - 1, Math.max(0, activeIdx + delta))
+    const [nextKey] = entries[nextIdx]
+    if (!nextKey || nextIdx === activeIdx) return
+    onSelect(nextKey)
+    scrollToTheme(nextKey)
+  }
 
   return (
     <div className="pt-14">
@@ -596,50 +643,87 @@ function StepTheme({ selected, onSelect, onContinue }) {
           IntersectionObserver above updates `selected` to match. Negative margin
           + matching px lets the scroller extend edge-to-edge of the wizard
           padding without breaking the snap math. */}
-      <div
-        ref={scrollerRef}
-        role="radiogroup"
-        aria-label="Choose a theme"
-        className="-mx-5 px-[15%] sm:px-[20%] flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2"
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        <style>{`
-          /* Hide native scrollbar inside the swiper without affecting other scrollers. */
-          [role="radiogroup"][aria-label="Choose a theme"]::-webkit-scrollbar { display: none; }
-        `}</style>
-        {entries.map(([key, t]) => {
-          const isSelected = selected === key
-          return (
+      <div className="relative">
+        <div
+          ref={scrollerRef}
+          role="radiogroup"
+          aria-label="Choose a theme"
+          className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[15%] pb-2 sm:px-[20%]"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <style>{`
+            /* Hide native scrollbar inside the swiper without affecting other scrollers. */
+            [role="radiogroup"][aria-label="Choose a theme"]::-webkit-scrollbar { display: none; }
+          `}</style>
+          {entries.map(([key, t]) => {
+            const isSelected = selected === key
+            return (
+              <button
+                key={key}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                aria-label={`${t.label} theme`}
+                ref={(el) => { itemRefs.current[key] = el }}
+                onClick={() => { onSelect(key); scrollToTheme(key) }}
+                className={[
+                  'snap-center shrink-0 w-[260px] sm:w-[340px]',
+                  'rounded-3xl overflow-hidden transition-all',
+                  'border-2',
+                  isSelected
+                    ? 'border-earthy-cocoa shadow-earthy-card scale-100'
+                    : 'border-transparent opacity-70 scale-95',
+                ].filter(Boolean).join(' ')}
+              >
+                <ThemeBannerArt
+                  themeKey={key}
+                  height={200}
+                  animated={isSelected}
+                  loading={isSelected ? 'eager' : 'lazy'}
+                />
+              </button>
+            )
+          })}
+        </div>
+
+        {entries.length > 1 && (
+          <>
             <button
-              key={key}
               type="button"
-              role="radio"
-              aria-checked={isSelected}
-              aria-label={`${t.label} theme`}
-              ref={(el) => { itemRefs.current[key] = el }}
-              onClick={() => { onSelect(key); scrollToTheme(key) }}
+              onClick={() => moveTheme(-1)}
+              disabled={!canGoPrevious}
+              aria-label="Previous theme"
               className={[
-                'snap-center shrink-0 w-[260px] sm:w-[340px]',
-                'rounded-3xl overflow-hidden transition-all',
-                'border-2',
-                isSelected
-                  ? 'border-earthy-cocoa shadow-earthy-card scale-100'
-                  : 'border-transparent opacity-70 scale-95',
-              ].filter(Boolean).join(' ')}
+                'absolute left-[12%] top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full',
+                'border border-earthy-dividerCream bg-white/95 text-earthy-cocoa shadow-earthy-card backdrop-blur-sm transition-all sm:flex',
+                canGoPrevious
+                  ? 'hover:border-earthy-cocoaSoft hover:bg-white hover:shadow-earthy-soft active:scale-95'
+                  : 'cursor-not-allowed opacity-35',
+              ].join(' ')}
             >
-              <ThemeBannerArt
-                themeKey={key}
-                height={200}
-                animated={isSelected}
-                loading={isSelected ? 'eager' : 'lazy'}
-              />
+              <Icon name="chevron-left" size={24} />
             </button>
-          )
-        })}
+            <button
+              type="button"
+              onClick={() => moveTheme(1)}
+              disabled={!canGoNext}
+              aria-label="Next theme"
+              className={[
+                'absolute right-[12%] top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full',
+                'border border-earthy-dividerCream bg-white/95 text-earthy-cocoa shadow-earthy-card backdrop-blur-sm transition-all sm:flex',
+                canGoNext
+                  ? 'hover:border-earthy-cocoaSoft hover:bg-white hover:shadow-earthy-soft active:scale-95'
+                  : 'cursor-not-allowed opacity-35',
+              ].join(' ')}
+            >
+              <Icon name="chevron-right" size={24} />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Selected theme label + pagination dots */}
@@ -659,7 +743,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
               onClick={() => scrollToTheme(key)}
               className={[
                 'block h-1.5 rounded-full transition-all',
-                idx === selectedIdx ? 'w-4 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider hover:bg-earthy-cocoaSoft',
+                idx === activeIdx ? 'w-4 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider hover:bg-earthy-cocoaSoft',
               ].join(' ')}
               aria-label={`Jump to theme ${idx + 1}`}
             />
@@ -697,68 +781,67 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
       onSubmit={(e) => { e.preventDefault(); if (canContinue) onNext() }}
       className="pt-2"
     >
-      <div className="mb-6 max-w-md mx-auto">
-        <WizardHero illustration="intro-friend" height={180} />
-      </div>
-      <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Tell me about them.
-      </h2>
-      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        For ages 3 to 12. You can add more kids after this.
-      </p>
+      <WizardStepCard illustration="intro-friend" heroHeight={184}>
+        <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
+          Tell me about them.
+        </h2>
+        <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
+          For ages 3 to 12. You can add more kids after this.
+        </p>
 
-      <label htmlFor="kid-name" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-        Their name
-      </label>
-      <input
-        id="kid-name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        autoComplete="off"
-        autoFocus
-        placeholder="What do they go by?"
-        required
-        className="w-full px-4 py-3 mb-5 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa placeholder:text-earthy-cocoaSoft/60 transition-colors"
-      />
-
-      <label className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-        Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">(optional)</span>
-      </label>
-      <div className="mb-2">
-        <EarthyDatePicker
-          value={birthday}
-          onChange={setBirthday}
-          placeholder="Add a birthday"
-          ariaLabel="Pick a birthday"
+        <label htmlFor="kid-name" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Their name
+        </label>
+        <input
+          id="kid-name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="off"
+          autoFocus
+          placeholder="What do they go by?"
+          required
+          className="w-full px-4 py-3 mb-5 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa placeholder:text-earthy-cocoaSoft/60 transition-colors"
         />
-      </div>
-      <p className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
-        We use this to celebrate their birthday-week with a special banner. Skip if you’d rather not.
-      </p>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onSkip}
-          className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm underline underline-offset-2 transition-colors"
-        >
-          Skip birthday
-        </button>
-        <button
-          type="submit"
-          disabled={!canContinue}
-          aria-disabled={!canContinue}
-          className={[
-            'ml-auto px-7 py-3 rounded-pill font-bold text-base transition-all',
-            canContinue
-              ? 'bg-earthy-cocoa text-earthy-cream shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0'
-              : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed',
-          ].join(' ')}
-        >
-          Next ▶
-        </button>
-      </div>
+        <label className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">(optional)</span>
+        </label>
+        <div className="mb-2">
+          <EarthyDatePicker
+            value={birthday}
+            onChange={setBirthday}
+            placeholder="Add a birthday"
+            ariaLabel="Pick a birthday"
+          />
+        </div>
+        <p className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
+          We use this to celebrate their birthday-week with a special banner. Skip if you’d rather not.
+        </p>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm underline underline-offset-2 transition-colors"
+          >
+            Skip birthday
+          </button>
+          <button
+            type="submit"
+            disabled={!canContinue}
+            aria-disabled={!canContinue}
+            className={[
+              'ml-auto px-7 py-3 rounded-pill font-bold text-base transition-all',
+              canContinue
+                ? 'bg-earthy-cocoa text-earthy-cream shadow-earthy-soft hover:-translate-y-0.5 active:translate-y-0'
+                : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed',
+            ].join(' ')}
+          >
+            Next ▶
+          </button>
+        </div>
+      </WizardStepCard>
     </form>
   )
 }
@@ -776,99 +859,111 @@ function StepAccount({
   onGoogle,
   isUpgrade,
   isInviteSignup,
+  onTryGuest,
 }) {
   return (
     <form onSubmit={onSubmit} className="pt-2">
-      <div className="mb-6 max-w-md mx-auto">
-        <WizardHero illustration="intro-cake" height={180} />
-      </div>
-      <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        {isUpgrade ? 'Save your board.' : isInviteSignup ? 'Join your family.' : 'One last step.'}
-      </h2>
-      <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-        {isUpgrade
-          ? 'Add an email so you can come back to it from any device.'
-          : isInviteSignup
-            ? 'Create a parent account, then we will add you to the shared board.'
-          : 'Create your account so we can save their board.'}
-      </p>
+      <WizardStepCard illustration="intro-cake" heroHeight={184}>
+        <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
+          {isUpgrade ? 'Save your board.' : isInviteSignup ? 'Join your family.' : 'One last step.'}
+        </h2>
+        <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
+          {isUpgrade
+            ? 'Add an email so you can come back to it from any device.'
+            : isInviteSignup
+              ? 'Create a parent account, then we will add you to the shared board.'
+              : 'Create your account so we can save their board.'}
+        </p>
 
-      <label htmlFor="signup-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-        Email
-      </label>
-      <input
-        id="signup-email"
-        type="email"
-        autoComplete="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full px-4 py-3 mb-4 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-      />
+        <label htmlFor="signup-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Email
+        </label>
+        <input
+          id="signup-email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-4 py-3 mb-4 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
+        />
 
-      <label htmlFor="signup-password" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-        Password
-      </label>
-      <input
-        id="signup-password"
-        type="password"
-        autoComplete="new-password"
-        required
-        minLength={8}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-      />
-      <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 8 characters.</p>
+        <label htmlFor="signup-password" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
+          Password
+        </label>
+        <input
+          id="signup-password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
+        />
+        <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 8 characters.</p>
 
-      {error && (
-        <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
-          {error}
+        {error && (
+          <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
+            {error}
+          </div>
+        )}
+
+        <PrimaryButton type="submit" disabled={loading} aria-disabled={loading}>
+          {loading ? 'Creating…' : 'Create →'}
+        </PrimaryButton>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-6" role="presentation">
+          <span className="flex-1 h-px bg-earthy-divider" />
+          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">or</span>
+          <span className="flex-1 h-px bg-earthy-divider" />
         </div>
-      )}
 
-      <PrimaryButton type="submit" disabled={loading} aria-disabled={loading}>
-        {loading ? 'Creating…' : 'Create →'}
-      </PrimaryButton>
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={onApple}
+            disabled={loading}
+            aria-disabled={loading}
+            aria-label="Continue with Apple"
+            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
+          >
+            <span aria-hidden="true"></span> Continue with Apple
+          </button>
+          <button
+            type="button"
+            onClick={onGoogle}
+            disabled={loading}
+            aria-disabled={loading}
+            aria-label="Continue with Google"
+            className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
+          >
+            <span aria-hidden="true">G</span> Continue with Google
+          </button>
+        </div>
 
-      {/* Divider */}
-      <div className="flex items-center gap-3 my-6" role="presentation">
-        <span className="flex-1 h-px bg-earthy-divider" />
-        <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">or</span>
-        <span className="flex-1 h-px bg-earthy-divider" />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={onApple}
-          disabled={loading}
-          aria-disabled={loading}
-          aria-label="Continue with Apple"
-          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
-        >
-          <span aria-hidden="true"></span> Continue with Apple
-        </button>
-        <button
-          type="button"
-          onClick={onGoogle}
-          disabled={loading}
-          aria-disabled={loading}
-          aria-label="Continue with Google"
-          className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
-        >
-          <span aria-hidden="true">G</span> Continue with Google
-        </button>
-      </div>
-
-      <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
-        <a
-          href={supportMailto('Help with Winking Star signup')}
-          className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
-        >
-          Need help?
-        </a>
-      </p>
+        <p className="text-center mt-6 text-xs text-earthy-cocoaSoft">
+          {onTryGuest ? (
+            <>
+              <button
+                type="button"
+                onClick={onTryGuest}
+                className="mb-4 font-extrabold text-earthy-cocoa underline underline-offset-4 transition-colors hover:text-earthy-cocoaDark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill"
+              >
+                Test the board without signing up
+              </button>
+              <br />
+            </>
+          ) : null}
+          <a
+            href={supportMailto('Help with Winking Star signup')}
+            className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
+          >
+            Need help?
+          </a>
+        </p>
+      </WizardStepCard>
     </form>
   )
 }

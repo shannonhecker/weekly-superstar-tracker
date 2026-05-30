@@ -1,19 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import WizardHero from './wizard/WizardHero'
+import WizardStepCard from './wizard/WizardStepCard'
 
 export default function ParentConsentGate({ onAccept, compact = false }) {
   const [confirmedAdult, setConfirmedAdult] = useState(false)
   const [confirmedConsent, setConfirmedConsent] = useState(false)
   const canContinue = confirmedAdult && confirmedConsent
 
-  return (
-    <div className={compact ? '' : 'pt-2'}>
-      {!compact ? (
-        <div className="mb-6 max-w-md mx-auto">
-          <WizardHero illustration="intro-house" height={170} />
-        </div>
-      ) : null}
+  const content = (
+    <>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
         Grown-up check.
       </h2>
@@ -70,6 +65,18 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
       >
         Continue
       </button>
+    </>
+  )
+
+  if (compact) {
+    return <div>{content}</div>
+  }
+
+  return (
+    <div className="pt-2">
+      <WizardStepCard illustration="intro-house" heroHeight={178}>
+        {content}
+      </WizardStepCard>
     </div>
   )
 }

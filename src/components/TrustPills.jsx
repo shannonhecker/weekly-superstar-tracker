@@ -1,29 +1,35 @@
-// Canonical 3-pill trust signal row for the onboarding journey.
+// Canonical 3-item trust signal row for the onboarding journey.
 // Same content + order on every onboarding surface (Landing / SignUp /
 // SignIn / Join). Single source of copy — change here, change everywhere.
 //
-// Per spec section 7 + Q4: Ages 3 to 12 · No ads, ever · Free to try.
+// Static facts should not look like calls to action. Keep these as passive
+// metadata labels, not bordered pills/buttons.
 
 const TRUST_PILLS = [
   'Ages 3 to 12',
   'No ads, ever',
-  'Free to try',
+  'Free starter board',
 ]
 
-export default function TrustPills({ className = '' }) {
+export default function TrustPills({ className = '', align = 'center' }) {
+  const alignmentClass = align === 'start'
+    ? 'justify-start text-left'
+    : 'justify-center text-center'
+
   return (
     <ul
       role="list"
-      className={`grid grid-cols-3 gap-3 text-center ${className}`.trim()}
+      className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${alignmentClass} ${className}`.trim()}
     >
       {TRUST_PILLS.map((label) => (
         <li
           key={label}
           role="listitem"
           data-testid="trust-pill"
-          className="rounded-2xl border border-earthy-divider bg-earthy-ivory px-3 py-3 text-sm font-extrabold text-earthy-cocoa"
+          className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-earthy-cocoaSoft sm:text-xs"
         >
-          {label}
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-earthy-sage" />
+          <span>{label}</span>
         </li>
       ))}
     </ul>
