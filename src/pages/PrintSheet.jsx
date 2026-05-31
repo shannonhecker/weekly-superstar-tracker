@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { doc, onSnapshot } from 'firebase/firestore'
 import QRCode from 'react-qr-code'
+import { colors } from '@weekly-superstar/shared/tokens'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import LogoLoader from '../components/LogoLoader'
@@ -37,6 +38,19 @@ const METADATA_QR_QUIET_MM = 2
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+const earthy = colors.earthy
+const SHEET = {
+  card: earthy.card || '#FFFDF7',
+  cream: earthy.cream || '#FFFAF0',
+  ivory: earthy.ivory || '#F8F1E4',
+  cocoa: earthy.cocoa || '#5A3A2E',
+  cocoaSoft: earthy.cocoaSoft || '#8B6651',
+  divider: earthy.divider || '#E8DCC4',
+  dividerCream: earthy.dividerCream || '#F1E5D4',
+  sage: earthy.sage || '#9DAC85',
+  terracottaSoft: earthy.terracottaSoft || '#F4C8A8',
+}
+
 function weekKeyToDays(weekKey) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(weekKey)) return []
   const monday = new Date(`${weekKey}T00:00:00Z`)
@@ -70,20 +84,36 @@ function buildSheetUrl(boardId, kidId, weekKey) {
 function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
   return (
     <div
-      className="absolute left-0 right-0 top-0 flex flex-col gap-[2mm] px-[4mm] pt-[3mm]"
+      className="absolute left-0 right-0 top-0 flex flex-col gap-[1.4mm] px-[4mm] pt-[2.5mm]"
       style={{ height: `${GRID_TOP_PCT - 6}%` }}
     >
+      <div
+        className="absolute inset-x-[1.5mm] top-[1.5mm] bottom-[0.5mm] rounded-[5mm]"
+        style={{
+          background: `linear-gradient(180deg, ${theme.accent}26 0%, ${SHEET.card}00 76%)`,
+          border: `1px solid ${SHEET.dividerCream}`,
+        }}
+      />
       {/* Banner strip — full-bleed theme art, panoramic crop. Animated={false}
           so the particle layer doesn't render at all in print, and the
           @media print rule in AnimatedRasterBanner.css kills the breath
           animation on the <img>. */}
-      <div className="flex items-stretch gap-[3mm] shrink-0" style={{ height: '12mm' }}>
-        <div className="flex-1 min-w-0 rounded-[1.5mm] overflow-hidden">
+      <div className="relative z-10 flex items-start gap-[3mm] shrink-0" style={{ height: '15.5mm' }}>
+        <div
+          className="flex-1 min-w-0 overflow-hidden rounded-[4mm]"
+          style={{
+            height: '100%',
+            background: SHEET.cream,
+            border: `1px solid ${SHEET.dividerCream}`,
+            boxShadow: '0 1.4mm 3.2mm rgba(90, 58, 46, 0.08)',
+          }}
+        >
           <ThemeBannerArt
             themeKey={themeKey}
             animated={false}
             height="100%"
-            objectPosition="center top"
+            objectPosition="center center"
+            imageScale={1.08}
           />
         </div>
         {/* Single metadata QR — encodes board / kid / week. The CV pipeline
@@ -97,40 +127,78 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
             width: `${METADATA_QR_SIZE_MM}mm`,
             height: `${METADATA_QR_SIZE_MM}mm`,
             padding: `${METADATA_QR_QUIET_MM}mm`,
-            border: '1px solid #E8DCC4', // earthy-divider
+            border: `1px solid ${SHEET.divider}`,
+            boxShadow: '0 1mm 2.6mm rgba(90, 58, 46, 0.10)',
           }}
         >
           <QRCode value={sheetUrl} size={256} style={{ height: '100%', width: '100%' }} />
         </div>
       </div>
 
-      {/* Title row beneath the banner — softer gradient (theme accent → deeper),
-          no amber/pink. Hatch progress sits inline with the week range. */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
+      <div
+        className="relative z-10 flex-1 min-w-0 flex items-center gap-[2.5mm]"
+        style={{ paddingRight: `${METADATA_QR_SIZE_MM + 5}mm` }}
+      >
         <div
-          className="font-display text-[22pt] leading-none truncate"
+          className="flex h-[8.2mm] w-[8.2mm] shrink-0 items-center justify-center rounded-[2.6mm] text-[13pt]"
           style={{
-            // backgroundImage (NOT background shorthand) — the shorthand
-            // resets background-clip, which silently kills the text mask
-            // and leaves the heading invisible.
-            backgroundImage: `linear-gradient(90deg, ${theme.accent} 0%, ${theme.deeper} 100%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            color: theme.deeper,
+            background: `linear-gradient(135deg, ${theme.accent}66, ${SHEET.card})`,
+            border: `1px solid ${theme.accent}88`,
+            boxShadow: '0 0.7mm 1.4mm rgba(90, 58, 46, 0.08)',
           }}
+          aria-hidden="true"
         >
-          {theme.emoji} {kid.name}
+          {theme.emoji}
         </div>
-        <div className="font-body text-[9pt] mt-[1mm] flex items-center gap-[3mm]" style={{ color: '#5A3A2E' /* earthy-cocoa */ }}>
-          <span>Week of {weekRange}</span>
-          <span style={{ color: '#E8DCC4' /* earthy-divider */ }}>·</span>
-          <span>
-            <span className="font-bold" style={{ color: theme.deeper }}>
-              {Math.round(hatchPercent)}%
-            </span>{' '}
-            of the way to a new pet ({totalStarsCopy(hatchPercent)})
-          </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-end gap-[2mm]">
+            <div
+              className="font-display text-[18pt] font-black leading-none tracking-normal truncate"
+              style={{ color: SHEET.cocoa }}
+            >
+              {kid.name}
+            </div>
+            <span
+              className="mb-[0.2mm] shrink-0 rounded-full px-[2mm] py-[0.6mm] font-body text-[6pt] font-black uppercase tracking-[0.08em]"
+              style={{
+                color: SHEET.cocoa,
+                background: SHEET.cream,
+                border: `1px solid ${SHEET.dividerCream}`,
+              }}
+            >
+              Winking Star
+            </span>
+            <span
+              className="h-[1.5mm] w-[1.5mm] rounded-full"
+              style={{ background: SHEET.sage }}
+              aria-hidden="true"
+            />
+          </div>
+          <div className="mt-[1mm] flex items-center gap-[2.2mm] font-body text-[8.5pt]" style={{ color: SHEET.cocoaSoft }}>
+            <span className="font-extrabold" style={{ color: SHEET.cocoa }}>Week of {weekRange}</span>
+            <span style={{ color: SHEET.divider }}>·</span>
+            <span className="font-bold">
+              <span style={{ color: theme.deeper }}>{Math.round(hatchPercent)}%</span>{' '}
+              of the way ({totalStarsCopy(hatchPercent)})
+            </span>
+          </div>
+          <div
+            className="mt-[1.3mm] h-[1.8mm] overflow-hidden rounded-full"
+            style={{
+              width: '55mm',
+              background: SHEET.cream,
+              border: `1px solid ${SHEET.dividerCream}`,
+              boxShadow: 'inset 0 0 0 0.2mm rgba(90, 58, 46, 0.03)',
+            }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${Math.max(3, Math.round(hatchPercent))}%`,
+                background: `linear-gradient(90deg, ${theme.accent}, ${theme.deeper})`,
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -147,22 +215,37 @@ function totalStarsCopy(hatchPercent) {
 function ColumnHeaders({ days, theme }) {
   return (
     <div
-      className="absolute flex"
+      className="absolute flex overflow-hidden rounded-t-[3mm]"
       style={{
         top: `${GRID_TOP_PCT - 6}%`,
         left: `${GRID_LEFT_PCT}%`,
         right: `${GRID_RIGHT_PCT}%`,
         height: '6%',
+        background: SHEET.card,
+        border: `1px solid ${SHEET.dividerCream}`,
+        borderBottom: 0,
       }}
     >
-      {days.map((d) => (
+      {days.map((d, index) => (
         <div
           key={d.key}
-          className="flex-1 flex flex-col items-center justify-end pb-[1.5mm] font-body"
-          style={{ color: d.isWeekend ? theme.deeper : '#5A3A2E' /* earthy-cocoa */ }}
+          className="flex-1 flex flex-col items-center justify-center font-body"
+          style={{
+            color: d.isWeekend ? theme.deeper : SHEET.cocoa,
+            background: d.isWeekend ? `${theme.accent}2B` : index % 2 === 0 ? SHEET.card : SHEET.cream,
+            borderRight: index < days.length - 1 ? `1px solid ${SHEET.dividerCream}` : 'none',
+          }}
         >
-          <span className="text-[9pt] font-bold leading-none">{d.label}</span>
-          <span className="text-[7pt] leading-none mt-[0.5mm] opacity-70">{d.dayNumber}</span>
+          <span className="text-[9pt] font-black leading-none">{d.label}</span>
+          <span className="mt-[0.7mm] rounded-full px-[1.8mm] py-[0.4mm] text-[6.5pt] font-extrabold leading-none"
+            style={{
+              background: d.isWeekend ? SHEET.card : `${theme.accent}1E`,
+              color: d.isWeekend ? theme.deeper : SHEET.cocoaSoft,
+              border: `1px solid ${SHEET.dividerCream}`,
+            }}
+          >
+            {d.dayNumber}
+          </span>
         </div>
       ))}
     </div>
@@ -172,24 +255,39 @@ function ColumnHeaders({ days, theme }) {
 function RowLabels({ activities, theme }) {
   return (
     <div
-      className="absolute flex flex-col"
+      className="absolute flex flex-col overflow-hidden rounded-l-[3mm]"
       style={{
         top: `${GRID_TOP_PCT}%`,
         left: 0,
         width: `${GRID_LEFT_PCT}%`,
         bottom: `${GRID_BOTTOM_PCT}%`,
+        background: SHEET.card,
+        border: `1px solid ${SHEET.dividerCream}`,
+        borderRight: 0,
       }}
     >
-      {activities.map((a) => (
+      {activities.map((a, index) => (
         <div
           key={a.id}
-          className="flex-1 flex items-center gap-[1.5mm] px-[3mm]"
-          style={{ minHeight: 0, borderBottom: '1px solid #E8DCC4' /* earthy-divider */ }}
+          className="flex-1 flex items-center gap-[2mm] px-[3mm]"
+          style={{
+            minHeight: 0,
+            background: index % 2 === 0 ? SHEET.card : SHEET.cream,
+            borderBottom: index < activities.length - 1 ? `1px solid ${SHEET.divider}` : 'none',
+          }}
         >
-          <span className="text-[14pt] flex-shrink-0">{a.emoji || '⭐'}</span>
           <span
-            className="font-body font-bold text-[10pt] leading-tight truncate"
-            style={{ color: theme.deeper }}
+            className="flex h-[7.2mm] w-[7.2mm] flex-shrink-0 items-center justify-center rounded-full text-[12pt]"
+            style={{
+              background: `${theme.accent}2B`,
+              border: `1px solid ${theme.accent}66`,
+            }}
+          >
+            {a.emoji || '⭐'}
+          </span>
+          <span
+            className="font-body font-black text-[9.5pt] leading-tight truncate"
+            style={{ color: SHEET.cocoa }}
           >
             {a.label || 'Activity'}
           </span>
@@ -202,38 +300,50 @@ function RowLabels({ activities, theme }) {
 function CellGrid({ activities, days, theme }) {
   return (
     <div
-      className="absolute"
+      className="absolute overflow-hidden rounded-br-[3mm]"
       style={{
         top: `${GRID_TOP_PCT}%`,
         left: `${GRID_LEFT_PCT}%`,
         right: `${GRID_RIGHT_PCT}%`,
         bottom: `${GRID_BOTTOM_PCT}%`,
+        background: SHEET.card,
       }}
     >
       <div className="grid h-full" style={{ gridTemplateRows: `repeat(${activities.length}, 1fr)` }}>
-        {activities.map((a) => (
+        {activities.map((a, rowIndex) => (
           <div
             key={a.id}
             className="grid"
             style={{ gridTemplateColumns: `repeat(${days.length}, 1fr)` }}
           >
-            {days.map((d) => (
+            {days.map((d, dayIndex) => (
               <div
                 key={d.key}
-                className="flex items-center justify-center"
+                className="relative flex items-center justify-center"
                 style={{
-                  background: d.isWeekend ? `${theme.accent}22` : `${theme.accent}0A`,
-                  borderBottom: '1px solid #E8DCC4' /* earthy-divider */,
-                  borderRight: '1px solid #E8DCC4',
+                  background: d.isWeekend ? `${theme.accent}22` : rowIndex % 2 === 0 ? '#FFFFFF' : `${SHEET.cream}B3`,
+                  borderBottom: rowIndex < activities.length - 1 ? `1px solid ${SHEET.divider}` : 'none',
+                  borderRight: dayIndex < days.length - 1 ? `1px solid ${SHEET.divider}` : 'none',
                 }}
-              />
+              >
+                <span
+                  className="absolute rounded-[2.4mm]"
+                  style={{
+                    inset: '1.5mm',
+                    background: '#FFFFFFCC',
+                    border: `1px solid ${d.isWeekend ? `${theme.accent}55` : SHEET.dividerCream}`,
+                    boxShadow: 'inset 0 0 0 0.25mm rgba(255, 255, 255, 0.55)',
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
             ))}
           </div>
         ))}
       </div>
       {/* Top border for the grid (below day headers) */}
-      <div className="absolute inset-0 pointer-events-none border-t-2 border-l-2"
-        style={{ borderColor: theme.deeper }}
+      <div className="absolute inset-0 pointer-events-none border-t-[0.6mm] border-l-[0.6mm]"
+        style={{ borderColor: theme.deeper, opacity: 0.86 }}
       />
     </div>
   )
@@ -242,8 +352,16 @@ function CellGrid({ activities, days, theme }) {
 function FootCaption() {
   return (
     <div
-      className="absolute left-0 right-0 flex items-center justify-center font-body text-[7pt]"
-      style={{ bottom: '0.5mm', height: '4mm', color: '#8B6651' /* earthy-cocoaSoft */ }}
+      className="absolute flex items-center justify-center rounded-full font-body text-[7pt] font-extrabold"
+      style={{
+        left: '4mm',
+        right: '4mm',
+        bottom: '0.8mm',
+        height: '5.4mm',
+        color: SHEET.cocoaSoft,
+        background: SHEET.cream,
+        border: `1px solid ${SHEET.dividerCream}`,
+      }}
     >
       Stick a sticker, draw a star, or colour the box — every {HATCH_GOAL} earns a new pet.
     </div>
@@ -355,12 +473,13 @@ export default function PrintSheet() {
   const sheetUrl = buildSheetUrl(boardId, kidId, weekKey)
 
   return (
-    <main id="main" className="print-shell bg-gray-100 min-h-screen flex flex-col items-center gap-6 py-8">
+    <main id="main" className="print-shell min-h-screen flex flex-col items-center gap-6 py-8" style={{ background: SHEET.ivory }}>
       {/* Toolbar — hidden on print */}
       <div className="print-hide flex items-center gap-3 text-sm font-body">
         <button
           onClick={() => navigate(-1)}
-          className="px-3 py-1.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50"
+          className="px-3 py-1.5 rounded-pill border font-extrabold transition-colors"
+          style={{ color: SHEET.cocoa, background: SHEET.card, borderColor: SHEET.dividerCream }}
         >
           ← Back
         </button>
@@ -375,14 +494,29 @@ export default function PrintSheet() {
 
       {/* The actual A4 sheet — sized in mm so print fidelity matches preview */}
       <div
-        className="print-page bg-white shadow-pop relative font-body"
+        className="print-page relative font-body shadow-earthy-lifted"
         style={{
           width: '210mm',
           height: '297mm',
           padding: '8mm',
+          background: SHEET.card,
+          border: `1px solid ${SHEET.dividerCream}`,
         }}
       >
-        <div className="relative w-full h-full">
+        <div
+          className="relative h-full w-full overflow-hidden rounded-[6mm]"
+          style={{
+            background: SHEET.card,
+            border: `1px solid ${SHEET.dividerCream}`,
+            boxShadow: 'inset 0 0 0 1.5mm rgba(255, 250, 240, 0.62)',
+          }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `linear-gradient(180deg, ${SHEET.cream} 0%, ${SHEET.card} 34%, #FFFFFF 100%)`,
+            }}
+          />
           <Header
             kid={kid}
             theme={theme}
