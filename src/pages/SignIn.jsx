@@ -100,6 +100,12 @@ export default function SignIn() {
       const cred = await signInWithPopup(auth, provider)
       await completeOAuthSignIn(cred.user)
     } catch (err) {
+      // Surface the real Firebase/Apple error code. The banner shown to users
+      // is a generic fallback; this logs the underlying code (e.g.
+      // auth/unauthorized-domain, auth/operation-not-allowed,
+      // auth/operation-not-supported-in-this-environment) needed to diagnose
+      // OAuth failures in production.
+      console.error(`[oauth] ${attemptedProviderId} sign-in failed:`, err?.code, err?.message)
       const info = extractRecoveryInfo(err, attemptedProviderId)
       if (info) {
         try {
