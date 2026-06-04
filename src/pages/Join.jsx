@@ -5,6 +5,8 @@ import { arrayUnion, collection, doc, getDocs, limit, query, updateDoc, where } 
 import { useAuth } from '../contexts/AuthContext'
 import { db, functions } from '../lib/firebase'
 import EmptyStateScene from '../components/EmptyStateScene'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
+import { useI18n } from '../lib/i18n'
 
 const INVITE_NOT_FOUND = 'invite/not-found'
 const INVITE_MISSING = 'invite/missing-code'
@@ -45,11 +47,11 @@ function categorizeRedeemFailure(err) {
   return INVITE_UNKNOWN
 }
 
-const INVITE_ERROR_COPY = {
-  [INVITE_NOT_FOUND]: 'This invite link could not be redeemed. It may have expired or already been used. Ask the family admin for a new link.',
-  [INVITE_MISSING]: 'This invite link doesn’t look right. Check the URL or ask for a new one.',
-  [INVITE_NETWORK]: 'We couldn’t reach the server. Check your connection and try again.',
-  [INVITE_UNKNOWN]: 'Something went wrong joining the board. Try again, or ask the family admin for a new link.',
+const INVITE_ERROR_COPY_KEYS = {
+  [INVITE_NOT_FOUND]: 'join.error.notFound',
+  [INVITE_MISSING]: 'join.error.missing',
+  [INVITE_NETWORK]: 'join.error.network',
+  [INVITE_UNKNOWN]: 'join.error.unknown',
 }
 
 async function redeemShareCodeFromFirestore(code, uid) {
@@ -85,6 +87,7 @@ async function redeemShareCode(code, uid) {
 }
 
 export default function Join() {
+  const { t } = useI18n()
   const { code } = useParams()
   const { user, loading } = useAuth()
   const navigate = useNavigate()
@@ -120,12 +123,15 @@ export default function Join() {
 
   const showError = signedOut || !!errorCategory
   const message = signedOut
-    ? 'Sign in or create a parent account to join this family board.'
-    : INVITE_ERROR_COPY[errorCategory] || INVITE_ERROR_COPY[INVITE_UNKNOWN]
+    ? t('join.signedOut')
+    : t(INVITE_ERROR_COPY_KEYS[errorCategory] || INVITE_ERROR_COPY_KEYS[INVITE_UNKNOWN])
   const canRetry = !signedOut && errorCategory === INVITE_NETWORK
 
   return (
     <main id="main" className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
+      <div className="fixed right-4 top-4 z-20">
+        <LocaleSelectorButton compact />
+      </div>
       <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full overflow-hidden">
         <div className="bg-earthy-ivory">
           <EmptyStateScene variant="joining" />
@@ -142,7 +148,7 @@ export default function Join() {
                       style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
                       className="mt-5 w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
                     >
-                      Try again
+                      {t('join.tryAgain')}
                     </button>
                   )}
                   {signedOut && (
@@ -152,21 +158,21 @@ export default function Join() {
                         style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
                         className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center"
                       >
-                        Sign in
+                        {t('join.signIn')}
                       </Link>
                       <Link
                         to={`/signup?next=${encodeURIComponent(`/join/${code}`)}`}
                         className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all text-center"
                       >
-                        Create account
+                        {t('join.create')}
                       </Link>
                     </div>
                   )}
                 </>
               )
             : <>
-                <p className="text-earthy-cocoa font-extrabold text-lg mb-1">Joining the board…</p>
-                <p className="text-earthy-cocoaSoft text-sm font-bold">Hang tight, we’re getting you in.</p>
+                <p className="text-earthy-cocoa font-extrabold text-lg mb-1">{t('join.joining')}</p>
+                <p className="text-earthy-cocoaSoft text-sm font-bold">{t('join.wait')}</p>
               </>}
         </div>
       </div>

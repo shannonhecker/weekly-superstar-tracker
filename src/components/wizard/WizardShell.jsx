@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ProductPreview from './ProductPreview'
+import LocaleSelectorButton from '../LocaleSelectorButton'
 
 const ROTATING_PREVIEWS = ['board', 'themes', 'kid', 'records']
 
@@ -18,6 +19,9 @@ export default function WizardShell({ children, step, direction }) {
   return (
     <div className="contents lg:block lg:min-h-screen lg:bg-earthy-card">
       <div className={`contents lg:mx-auto lg:grid lg:min-h-screen lg:w-full lg:items-center lg:bg-earthy-card lg:px-8 lg:py-8 ${gridClass}`}>
+        <div className="fixed right-4 top-4 z-20">
+          <LocaleSelectorButton compact />
+        </div>
         {isIntro ? (
           <aside
             className="hidden lg:min-w-0 lg:flex lg:flex-col"

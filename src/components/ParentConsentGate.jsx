@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import WizardStepCard from './wizard/WizardStepCard'
+import { useI18n } from '../lib/i18n'
 
 export default function ParentConsentGate({ onAccept, compact = false }) {
+  const { t } = useI18n()
   const [confirmedAdult, setConfirmedAdult] = useState(false)
   const [confirmedConsent, setConfirmedConsent] = useState(false)
   const canContinue = confirmedAdult && confirmedConsent
@@ -10,10 +12,10 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
   const content = (
     <>
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Grown-up check.
+        {t('consent.title')}
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-5">
-        A parent or legal guardian needs to continue before we collect a child’s name, birthday, or photo.
+        {t('consent.body')}
       </p>
 
       <div className="space-y-3 mb-6">
@@ -25,7 +27,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
             className="mt-1 h-4 w-4 accent-earthy-cocoa"
           />
           <span className="text-sm font-bold text-earthy-cocoa">
-            I am the child’s parent or legal guardian and I am at least 18.
+            {t('consent.adult')}
           </span>
         </label>
         <label className="flex gap-3 rounded-2xl bg-earthy-ivory border border-earthy-divider p-4 text-left">
@@ -36,7 +38,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
             className="mt-1 h-4 w-4 accent-earthy-cocoa"
           />
           <span className="text-sm font-bold text-earthy-cocoa">
-            I consent to Winking Star saving family board data for app functionality.
+            {t('consent.data')}
           </span>
         </label>
       </div>
@@ -48,7 +50,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:text-earthy-cocoa"
         >
-          Read our privacy policy
+          {t('consent.privacy')}
         </Link>
       </p>
 
@@ -63,7 +65,7 @@ export default function ParentConsentGate({ onAccept, compact = false }) {
             : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed',
         ].join(' ')}
       >
-        Continue
+        {t('consent.continue')}
       </button>
     </>
   )

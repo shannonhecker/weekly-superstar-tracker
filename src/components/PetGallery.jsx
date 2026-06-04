@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { doc, updateDoc, deleteField } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { PET_CHAINS, THEMES, petAtStage, animatedFluentUrl } from '../lib/themes'
+import { PET_CHAINS, THEMES, HATCH_GOAL, petAtStage, animatedFluentUrl } from '../lib/themes'
 import { getWeekKey, formatWeekKey } from '../lib/week'
 import { RARE_STICKERS } from '../lib/stickers'
 import { useToast } from '../contexts/ToastContext'
@@ -9,6 +9,7 @@ import Modal from './Modal'
 import Icon from './Icon'
 import Egg from './Egg'
 import EmptyStateScene from './EmptyStateScene'
+import { useI18n } from '../lib/i18n'
 
 function collectRareStickers(kid) {
   const map = kid?.stickers || {}
@@ -26,8 +27,16 @@ function totalBonusStars(kid) {
   return Object.values(b).reduce((s, v) => s + (v || 0), 0)
 }
 
+function rawSpeciesForEmoji(chainKey, emoji) {
+  const chain = PET_CHAINS[chainKey]
+  if (!chain || !emoji) return ''
+  const idx = chain.stages.indexOf(emoji)
+  return idx >= 0 ? chain.names[idx] : ''
+}
+
 export default function PetGallery({ open, onClose, kid, currentPet, currentChainKey, currentStage = 0, currentEggName = 'Mystery Egg', boardId, onRename, onOpenSummary }) {
   const toast = useToast()
+  const { t, petSpeciesName, petChainLabel } = useI18n()
   const history = kid?.weekHistory || {}
   const favorite = kid?.favoritePet || null
   // Two-step delete — the trash icon next to each week entry sits 8px
@@ -61,7 +70,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('[PetGallery] deleteEntry failed', err)
-      toast.error('Could not remove that week — try again')
+      toast.error(t('petGallery.removeError'))
     }
   }
 
@@ -78,20 +87,27 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('[PetGallery] toggleFavorite failed', err)
-      toast.error('Could not update favourite — try again')
+      toast.error(t('petGallery.favoriteError'))
     }
   }
 
   return (
     <>
-    <Modal open={open} onClose={onClose} emoji="🏆" title={`${kid?.name || ''}'s Collection`}>
-      <div className="max-h-[65vh] overflow-y-auto">
+    <Modal
+      open={open}
+      onClose={onClose}
+      emoji="🏆"
+      title={t('petGallery.title', { name: kid?.name || '' })}
+      panelClassName="!max-w-[860px] !overflow-hidden"
+    >
+      <div className="flex h-[calc(100vh-13rem)] max-h-[680px] flex-col sm:h-auto sm:max-h-[calc(100vh-9rem)]">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1 sm:pr-2">
         {/* Bonus Goodies section: rare stickers + bonus stars from mystery boxes */}
         <div className="mb-4">
-          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">✨ Bonus Goodies</div>
+          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">✨ {t('petGallery.bonusGoodies')}</div>
           {rareEntries.length === 0 && bonusStars === 0 ? (
             <p className="text-xs text-earthy-cocoaSoft font-bold py-2">
-              Keep tapping stickers — mystery boxes appear once in a while!
+              {t('petGallery.bonusHelp')}
             </p>
           ) : (
             <div className="bg-earthy-terracottaSoft/40 rounded-xl p-3">
@@ -107,7 +123,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               )}
               {bonusStars > 0 && (
                 <div className="text-xs font-bold text-earthy-terracotta">
-                  ⭐ Bonus stars earned: {bonusStars}
+                  ⭐ {t('petGallery.bonusStarsEarned', { count: bonusStars })}
                 </div>
               )}
             </div>
@@ -115,7 +131,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         </div>
 
         {/* Pet history section */}
-        <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🐾 Pet History</div>
+        <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🐾 {t('petGallery.petHistory')}</div>
 
         {/* Current week */}
         {currentPet && currentStage === 0 && (() => {
@@ -133,9 +149,9 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-earthy-cocoa">This week</div>
+                <div className="font-bold text-earthy-cocoa">{t('board.thisWeek')}</div>
                 <div className="text-xs text-earthy-cocoaSoft font-bold truncate">
-                  {currentEggName} — earn 50 stars to hatch!
+                  {t('petGallery.earnStarsToHatch', { egg: currentEggName, count: HATCH_GOAL })}
                 </div>
               </div>
             </div>
@@ -144,11 +160,14 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         {currentStage > 0 && (() => {
           // Fallback to petAtStage so we still render a thumbnail when
           // currentPet is briefly undefined during chain assignment.
-          const pet = currentPet || petAtStage(kid?.chainKey || 'cats', currentStage).emoji
+          const chainKey = currentChainKey || kid?.chainKey || 'cats'
+          const currentPetInfo = petAtStage(chainKey, currentStage)
+          const pet = currentPet || currentPetInfo.emoji
+          const species = petSpeciesName(currentPetInfo.name)
           const currentFav = isFavoriteEntry(currentWeekKey, pet)
           const currentSnapshot = {
             emoji: pet,
-            chainLabel: PET_CHAINS[currentChainKey]?.label || 'Pet',
+            chainLabel: petChainLabel(chainKey, PET_CHAINS[chainKey]?.label),
             petName: kid?.petName || null,
             weekKey: currentWeekKey,
           }
@@ -164,14 +183,14 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-earthy-cocoa">This week</div>
+                <div className="font-bold text-earthy-cocoa">{t('board.thisWeek')}</div>
                 <div className="text-xs text-earthy-cocoaSoft font-bold truncate">
-                  {kid?.petName || `Your ${pet} is still growing!`}
+                  {kid?.petName || t('petGallery.yourPetGrowing', { pet: species || pet })}
                 </div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); toggleFavorite(currentSnapshot) }}
-                aria-label={currentFav ? 'Unset favorite' : 'Set as favorite'}
+                aria-label={currentFav ? t('petGallery.unsetFavorite') : t('petGallery.setFavorite')}
                 aria-pressed={currentFav}
                 className="shrink-0 text-lg px-2"
                 style={{ color: currentFav ? '#F59E0B' : '#6B7280' }}
@@ -181,11 +200,11 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               {onRename && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onClose?.(); onRename(); }}
-                  aria-label="Rename pet"
+                  aria-label={t('petGallery.renamePet')}
                   className="shrink-0 px-2 py-1 rounded-lg text-xs font-bold text-earthy-cocoa bg-earthy-cream border border-earthy-divider flex items-center gap-1"
                 >
                   <Icon name="edit" size={14} />
-                  <span>Rename</span>
+                  <span>{t('petGallery.rename')}</span>
                 </button>
               )}
             </div>
@@ -193,10 +212,10 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
         })()}
 
         {entries.length === 0 && (
-          <div className="rounded-2xl overflow-hidden bg-earthy-ivory ring-1 ring-earthy-divider mb-2">
+          <div className="rounded-2xl overflow-hidden bg-earthy-card border border-earthy-divider mb-2">
             <EmptyStateScene variant="no-weeks" />
-            <p className="text-xs text-earthy-cocoaSoft font-bold text-center py-3">
-              No past weeks yet — finish this week to start your collection.
+            <p className="text-xs text-earthy-cocoaSoft font-bold text-center px-3 py-3 border-t border-earthy-dividerCream">
+              {t('petGallery.noPastWeeks')}
             </p>
           </div>
         )}
@@ -205,10 +224,11 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
           const pet = archive.petEmoji
           const stars = archive.totalStars || 0
           const name = archive.petName
+          const species = petSpeciesName(rawSpeciesForEmoji(archive.chainKey, pet))
           const isFav = isFavoriteEntry(weekKey, pet)
           const snapshot = {
             emoji: pet,
-            chainLabel: PET_CHAINS[archive.chainKey]?.label || 'Pet',
+            chainLabel: petChainLabel(archive.chainKey, PET_CHAINS[archive.chainKey]?.label),
             petName: name || null,
             weekKey,
           }
@@ -221,7 +241,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               tabIndex={canOpen ? 0 : undefined}
               onClick={canOpen ? openRecap : undefined}
               onKeyDown={canOpen ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRecap() } } : undefined}
-              aria-label={canOpen ? `Open ${formatWeekKey(weekKey)} recap` : undefined}
+              aria-label={canOpen ? t('petGallery.openRecap', { week: formatWeekKey(weekKey) }) : undefined}
               className={`flex items-center gap-3 p-2 rounded-xl ${canOpen ? 'hover:bg-earthy-cream active:scale-[0.99] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta' : 'hover:bg-earthy-cream'}`}
               style={isFav ? { background: '#FEF3C7' } : undefined}
             >
@@ -233,12 +253,12 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-sm text-earthy-cocoa truncate">{formatWeekKey(weekKey)}</div>
                 <div className="text-[11px] text-earthy-cocoaSoft font-bold truncate">
-                  {name ? `${name} · ` : ''}{stars} stars
+                  {name ? `${name} · ` : species ? `${species} · ` : ''}{t('board.starsCount', { count: stars })}
                 </div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); toggleFavorite(snapshot) }}
-                aria-label={isFav ? 'Unset favorite' : 'Set as favorite'}
+                aria-label={isFav ? t('petGallery.unsetFavorite') : t('petGallery.setFavorite')}
                 aria-pressed={isFav}
                 className="shrink-0 text-lg px-2"
                 style={{ color: isFav ? '#F59E0B' : '#6B7280' }}
@@ -247,7 +267,7 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setPendingDelete({ weekKey, archive: snapshot }) }}
-                aria-label="Remove this week from collection"
+                aria-label={t('petGallery.removeWeekA11y')}
                 className="shrink-0 text-earthy-cocoaSoft hover:text-red-400 px-2 flex items-center"
               >
                 <Icon name="delete" size={18} />
@@ -256,34 +276,41 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
           )
         })}
       </div>
-      <button
-        onClick={onClose}
-        className="w-full mt-4 py-2 rounded-xl text-earthy-cocoaSoft font-bold text-sm"
-      >
-        Close
-      </button>
+      <div className="mt-4 flex justify-end border-t border-earthy-divider pt-4">
+        <button
+          onClick={onClose}
+          className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
+        >
+          {t('common.close')}
+        </button>
+      </div>
+      </div>
     </Modal>
     <Modal
       open={!!pendingDelete}
       onClose={() => setPendingDelete(null)}
       emoji="🗑"
-      title="Remove this week?"
+      title={t('petGallery.removeWeekTitle')}
+      panelClassName="!max-w-lg !overflow-hidden"
     >
+        <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
         <div className="text-sm text-earthy-cocoa font-bold mb-2">
           {pendingDelete?.archive?.emoji ? `${pendingDelete.archive.emoji} ` : ''}
           {pendingDelete?.archive?.petName ? `"${pendingDelete.archive.petName}" — ` : ''}
           {pendingDelete?.weekKey ? formatWeekKey(pendingDelete.weekKey) : ''}
         </div>
         <p className="text-sm text-earthy-cocoaSoft mb-5">
-          Removing this week from {kid?.name || 'this collection'} can't be undone.
-          Tap Cancel if you didn't mean to.
+          {kid?.name
+            ? t('petGallery.removeWeekBody', { name: kid.name })
+            : t('petGallery.removeWeekBodyFallback')}
         </p>
-        <div className="flex gap-3">
+        </div>
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             onClick={() => setPendingDelete(null)}
-            className="flex-1 py-3 rounded-xl bg-earthy-divider text-earthy-cocoa font-bold text-sm"
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={async () => {
@@ -291,9 +318,9 @@ export default function PetGallery({ open, onClose, kid, currentPet, currentChai
               setPendingDelete(null)
               if (wk) await deleteEntry(wk)
             }}
-            className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+            className="flex min-h-12 w-full items-center justify-center rounded-pill bg-red-500 px-6 font-bold text-white transition-colors hover:bg-red-600 active:scale-[0.99] sm:w-auto sm:min-w-32"
           >
-            Remove
+            {t('activities.remove')}
           </button>
         </div>
     </Modal>

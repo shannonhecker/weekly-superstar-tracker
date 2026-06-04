@@ -4,16 +4,21 @@ import { useAuth } from '../contexts/AuthContext'
 import { findUserBoards } from '../lib/boards'
 import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
 import TrustPills from '../components/TrustPills'
 import ProductPreview from '../components/wizard/ProductPreview'
+import { useI18n, usePageMetadata } from '../lib/i18n'
 
 const ROTATING_PREVIEWS = ['board', 'themes', 'kid', 'records']
 
 export default function Landing() {
   const { user, loading } = useAuth()
+  const { t } = useI18n()
   const [boardId, setBoardId] = useState(null)
   const [checking, setChecking] = useState(true)
   const [previewIndex, setPreviewIndex] = useState(0)
+
+  usePageMetadata(t('meta.landing.title'), t('meta.landing.description'))
 
   useEffect(() => {
     if (!user) { setChecking(false); return }
@@ -55,12 +60,15 @@ export default function Landing() {
             <Logo size={40} />
             <span className="text-lg font-black text-earthy-cocoa sm:text-xl">Winking Star</span>
           </Link>
-          <Link
-            to="/signin"
-            className="rounded-pill text-sm font-extrabold text-earthy-cocoaSoft underline underline-offset-4 transition-colors hover:text-earthy-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 sm:text-base"
-          >
-            Sign in
-          </Link>
+          <div className="flex items-center gap-2">
+            <LocaleSelectorButton />
+            <Link
+              to="/signin"
+              className="rounded-pill text-sm font-extrabold text-earthy-cocoaSoft underline underline-offset-4 transition-colors hover:text-earthy-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 sm:text-base"
+            >
+              {t('nav.signIn')}
+            </Link>
+          </div>
         </header>
 
         <section className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.88fr)] lg:gap-14 lg:py-10">
@@ -73,19 +81,19 @@ export default function Landing() {
               <ProductPreview key={`mobile-${previewVariant}`} compact variant={previewVariant} />
             </div>
             <h1 className="font-display text-4xl font-black leading-[1.05] tracking-normal text-earthy-cocoa sm:text-5xl">
-              Meet your weekly superstar.
+              {t('landing.title')}
             </h1>
             <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-earthy-cocoaSoft sm:text-lg lg:mx-0">
               <span className="block text-xl font-black leading-snug text-earthy-cocoa sm:text-2xl">
-                A family achievement board.
+                {t('landing.subtitleLead')}
               </span>
               <span className="mt-3 block">
-                Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+                {t('landing.subtitleBody')}
               </span>
             </p>
             <TrustPills align="start" className="mt-6 justify-center lg:justify-start" />
             <p className="mt-4 text-[11px] font-extrabold uppercase tracking-[0.12em] text-earthy-cocoaSoft sm:text-xs">
-              Web app · Also available on iPhone
+              {t('landing.platform')}
             </p>
 
             <div className="mx-auto mt-8 flex w-full max-w-md flex-col gap-3 lg:mx-0">
@@ -93,23 +101,23 @@ export default function Landing() {
                 to="/signup"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-earthy-cocoa px-6 py-4 text-base font-bold text-earthy-ivory shadow-earthy-soft transition-all hover:-translate-y-0.5 hover:bg-earthy-cocoaDark active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
               >
-                Create a family board <span aria-hidden="true">▶</span>
+                {t('landing.createBoard')} <span aria-hidden="true">▶</span>
               </Link>
               <Link
                 to="/signup?guest=1"
                 className="rounded-pill text-center text-sm font-extrabold text-earthy-cocoaSoft underline underline-offset-4 transition-colors hover:text-earthy-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
               >
-                Try it first. No sign-up needed.
+                {t('landing.tryFirst')}
               </Link>
             </div>
 
             <p className="mt-8 text-xs text-earthy-cocoaSoft/75">
-              Got an invite link? Tap it and sign in to join.
+              {t('landing.invite')}
             </p>
             <p className="mt-3 text-[11px] font-bold text-earthy-cocoaSoft/70">
-              <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
+              <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">{t('nav.privacy')}</Link>
               {' · '}
-              <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
+              <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">{t('nav.terms')}</Link>
             </p>
           </div>
         </section>

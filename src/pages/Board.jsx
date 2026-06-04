@@ -6,11 +6,12 @@ import { auth, db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
-import { getCurrentWeek, formatWeekRange, getWeekKey } from '../lib/week'
+import { getCurrentWeek, getWeekKey } from '../lib/week'
 import KidSwitcher from '../components/KidSwitcher'
 import ActivityGrid from '../components/ActivityGrid'
 import ActivitiesModal from '../components/ActivitiesModal'
 import ShareModal from '../components/ShareModal'
+import LocaleSettingsModal from '../components/LocaleSettingsModal'
 import MysteryPet from '../components/MysteryPet'
 import StreakCounter from '../components/StreakCounter'
 import BadgeShelf, { BADGE_TIERS } from '../components/BadgeShelf'
@@ -34,6 +35,7 @@ import LogoLoader from '../components/LogoLoader'
 import ThemeScene from '../components/ThemeScene'
 import EmptyStateScene from '../components/EmptyStateScene'
 import { ACHIEVEMENTS, evaluateAchievements } from '../lib/achievements'
+import { useI18n } from '../lib/i18n'
 
 const HATCH_GOAL = 60
 
@@ -55,6 +57,20 @@ function boardSectionHref(boardId, sectionId, kidId) {
   const params = kidId ? `?kid=${encodeURIComponent(kidId)}` : ''
   const hash = sectionId && sectionId !== 'top' ? `#${sectionId}` : ''
   return `/board/${boardId}${params}${hash}`
+}
+
+function boardDisplayName(boardName, kids, t) {
+  const trimmed = String(boardName || '').trim()
+  const matchedKid = kids.find((kid) => {
+    const name = String(kid?.name || '').trim()
+    return name && (trimmed === `${name}'s board` || trimmed === `${name}’s board`)
+  })
+
+  if (matchedKid) return t('board.defaultKidTitle', { name: matchedKid.name })
+  const defaultNameMatch = trimmed.match(/^(.+?)[’']s board$/)
+  if (defaultNameMatch) return t('board.defaultKidTitle', { name: defaultNameMatch[1] })
+  if (!trimmed || trimmed === 'Our Family') return t('board.defaultFamilyTitle')
+  return trimmed
 }
 
 function progressToStage(stars, goal) {
@@ -153,7 +169,7 @@ function getRecentCelebrations(kid, limit = 6) {
         key,
         dayIndex,
         dayLabel: day.label,
-        label: activity.label || 'Activity',
+        activity,
         sticker: stickers[key] || activity.emoji || '⭐',
       })
     })
@@ -175,6 +191,7 @@ export default function Board() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t, localeSummary } = useI18n()
   const [board, setBoard] = useState(null)
   const [kids, setKids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -182,6 +199,7 @@ export default function Board() {
   const [editKidOpen, setEditKidOpen] = useState(false)
   const [tasksOpen, setTasksOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [localeOpen, setLocaleOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
@@ -197,9 +215,9 @@ export default function Board() {
   // here. Empty deps — runs at mount only.
   useEffect(() => {
     if (consumeUpgradeFlag()) {
-      toast.success('Your board is saved.')
+      toast.success(t('board.savedToast'))
     }
-  }, [toast])
+  }, [toast, t])
   const [muted, setMutedState] = useState(isMuted())
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { kid, archive, weekKey } or null
@@ -452,13 +470,13 @@ export default function Board() {
   }, [loading, kids.length, legacySection, location.pathname, boardId, activeKid?.id, navigate])
 
   useEffect(() => {
-    if (loading || !activeKid) return
+    if (loading || !activeKid?.id) return
     const sectionId = location.hash ? location.hash.slice(1) : 'top'
     if (!BOARD_SECTIONS.some((section) => section.id === sectionId)) return
     requestAnimationFrame(() => scrollToSection(sectionId, false))
-  }, [loading, activeKid, location.hash])
+  }, [loading, activeKid?.id, location.hash])
 
-  if (loading) return <LogoLoader label="Loading board..." />
+  if (loading) return <LogoLoader label={t('board.loadingBoard')} />
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>
   if (!board) return null
 
@@ -466,6 +484,7 @@ export default function Board() {
   const activeStars = activeKid ? totalStarsFor(activeKid) : 0
   const activeMax = activeKid ? totalActivityCapFor(activeKid) : 0
   const { monday, sunday } = getCurrentWeek()
+  const displayBoardName = boardDisplayName(board.name, kids, t)
 
   return (
     <div className="relative min-h-screen bg-earthy-ivory px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-10 font-jakarta">
@@ -483,7 +502,7 @@ export default function Board() {
           <h1 className="text-base sm:text-xl font-extrabold flex items-center gap-2 min-w-0">
             <Logo size={36} className="shrink-0" />
             <span className="text-earthy-cocoa truncate">
-              {board.name}
+              {displayBoardName}
             </span>
           </h1>
           {kids.length > 0 && (
@@ -491,7 +510,7 @@ export default function Board() {
               <button
                 type="button"
                 onClick={() => setMenuOpen((open) => !open)}
-                aria-label="Board menu"
+                aria-label={t('board.menu.label')}
                 aria-expanded={menuOpen}
                 style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
                 className="w-11 h-11 rounded-full text-sm font-bold hover:bg-earthy-cocoaDark active:scale-[0.98] transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
@@ -510,9 +529,9 @@ export default function Board() {
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="tasks" size={18} />
-                          <span className="flex-1">Edit tasks</span>
+                          <span className="flex-1">{t('board.menu.editTasks')}</span>
                           <span className="text-xs text-earthy-cocoaSoft">
-                            {(activeKid.activities?.length ?? 0)} of 10
+                            {t('board.menu.taskCount', { count: activeKid.activities?.length ?? 0 })}
                           </span>
                         </button>
                         <button
@@ -521,7 +540,7 @@ export default function Board() {
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="edit" size={18} />
-                          <span className="flex-1">Edit kid</span>
+                          <span className="flex-1">{t('board.menu.editKid')}</span>
                           <span className="text-xs text-earthy-cocoaSoft truncate max-w-[120px]">
                             {activeKid.name}
                           </span>
@@ -532,7 +551,7 @@ export default function Board() {
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="print" size={18} />
-                          <span>Print sheet</span>
+                          <span>{t('board.menu.printSheet')}</span>
                         </Link>
                         <button
                           type="button"
@@ -540,7 +559,7 @@ export default function Board() {
                           className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                         >
                           <Icon name="reward" size={18} />
-                          <span>Pet collection</span>
+                          <span>{t('board.menu.petCollection')}</span>
                         </button>
                       </>
                     )}
@@ -550,7 +569,7 @@ export default function Board() {
                       className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <Icon name="share" size={18} />
-                      <span>Share board</span>
+                      <span>{t('board.menu.shareBoard')}</span>
                     </button>
                     <button
                       type="button"
@@ -558,7 +577,18 @@ export default function Board() {
                       className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                     >
                       <Icon name={muted ? 'volume-off' : 'volume-on'} size={18} />
-                      <span>{muted ? 'Unmute sounds' : 'Mute sounds'}</span>
+                      <span>{muted ? t('board.menu.unmuteSounds') : t('board.menu.muteSounds')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMenuOpen(false); setLocaleOpen(true) }}
+                      className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
+                    >
+                      <Icon name="language" size={18} />
+                      <span className="flex-1">{t('locale.menuLabel')}</span>
+                      <span className="max-w-[120px] truncate text-xs text-earthy-cocoaSoft">
+                        {localeSummary}
+                      </span>
                     </button>
                     {user && (
                       <button
@@ -567,7 +597,7 @@ export default function Board() {
                         className="w-full text-left px-3 py-3 text-sm font-bold text-earthy-cocoa hover:bg-earthy-cream flex items-center gap-2"
                       >
                         <Icon name="sign-out" size={18} />
-                        <span>{isAnonymous ? 'Discard demo' : 'Sign out'}</span>
+                        <span>{isAnonymous ? t('board.menu.discardDemo') : t('board.menu.signOut')}</span>
                       </button>
                     )}
                     {user && !isAnonymous && (
@@ -577,7 +607,7 @@ export default function Board() {
                         className="w-full text-left px-3 py-3 text-sm font-bold text-semantic-danger hover:bg-semantic-errorBg flex items-center gap-2"
                       >
                         <Icon name="delete" size={18} />
-                        <span>Delete account</span>
+                        <span>{t('board.menu.deleteAccount')}</span>
                       </button>
                     )}
                   </div>
@@ -650,6 +680,11 @@ export default function Board() {
         boardId={boardId}
       />
 
+      <LocaleSettingsModal
+        open={localeOpen}
+        onClose={() => setLocaleOpen(false)}
+      />
+
       <WeeklySummary
         open={!!summary}
         onClose={dismissSummary}
@@ -660,41 +695,49 @@ export default function Board() {
         onOpenCollection={summary?.replay ? undefined : openTreasureCollection}
       />
 
-      <Modal open={signOutOpen} onClose={() => setSignOutOpen(false)} emoji="↩︎" title="Sign out of Winking Star?">
-        <div className="flex flex-col gap-2 mt-2">
-          {isAnonymous && (
-            <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
-              Your demo board will be discarded.
-            </p>
-          )}
-          {isAnonymous && (
+      <Modal
+        open={signOutOpen}
+        onClose={() => setSignOutOpen(false)}
+        emoji="↩︎"
+        title={t('board.signOutTitle')}
+        panelClassName="!max-w-lg !overflow-hidden"
+      >
+        <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
+          <p className="text-sm text-earthy-cocoaSoft text-center font-bold">
+            {isAnonymous ? t('board.discardDemoBody') : t('board.signOutBody')}
+          </p>
+        </div>
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={() => setSignOutOpen(false)}
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
+          >
+            {t('common.cancel')}
+          </button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {isAnonymous && (
             <Link
               to="/signup?upgrade=1"
               onClick={() => setSignOutOpen(false)}
               style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"
+              className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-earthy-cocoaDark active:scale-[0.99] sm:w-auto sm:min-w-40"
             >
-              Save with email
+              {t('board.saveWithEmail')}
             </Link>
-          )}
-          <button
-            type="button"
-            onClick={async () => { setSignOutOpen(false); await onSignOut() }}
-            className={`w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all ${
-              isAnonymous
-                ? 'bg-semantic-errorBg text-semantic-errorText'
-                : 'bg-earthy-cocoa text-earthy-ivory'
-            }`}
-          >
-            {isAnonymous ? 'Sign out and discard' : 'Sign out'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSignOutOpen(false)}
-            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
-          >
-            Cancel
-          </button>
+            )}
+            <button
+              type="button"
+              onClick={async () => { setSignOutOpen(false); await onSignOut() }}
+              className={`flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all active:scale-[0.99] sm:w-auto sm:min-w-36 ${
+                isAnonymous
+                  ? 'bg-semantic-errorBg text-semantic-errorText'
+                  : 'bg-earthy-cocoa text-earthy-ivory'
+              }`}
+            >
+              {isAnonymous ? t('board.signOutDiscard') : t('board.signOutConfirm')}
+            </button>
+          </div>
         </div>
       </Modal>
 
@@ -702,16 +745,19 @@ export default function Board() {
         open={deleteAccountOpen}
         onClose={deleteBusy ? undefined : () => setDeleteAccountOpen(false)}
         emoji="🗑️"
-        title="Delete account?"
+        title={t('board.deleteAccountTitle')}
+        panelClassName="!max-w-xl !overflow-hidden"
       >
-        <div className="flex flex-col gap-3 mt-2">
+        <div className="flex max-h-[calc(100vh-10rem)] flex-col">
+        <div className="min-h-0 overflow-y-auto rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
+        <div className="flex flex-col gap-3">
           <p className="text-sm text-earthy-cocoaSoft text-center font-bold">
-            This permanently removes your sign-in and family spaces you manage. Shared spaces stay with their admin.
+            {t('board.deleteAccountBody')}
           </p>
           {needsDeletePassword ? (
             <label className="text-left">
               <span className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-                Confirm with your password
+                {t('board.confirmPassword')}
               </span>
               <input
                 type="password"
@@ -726,7 +772,7 @@ export default function Board() {
             </label>
           ) : (
             <p className="text-xs text-earthy-cocoaSoft text-center font-bold">
-              You will confirm once more with your sign-in provider.
+              {t('board.providerConfirm')}
             </p>
           )}
           {deleteError && (
@@ -734,45 +780,57 @@ export default function Board() {
               {deleteError}
             </div>
           )}
-          <button
-            type="button"
-            onClick={onDeleteAccount}
-            disabled={deleteBusy}
-            className="w-full py-3 rounded-pill font-bold active:scale-[0.99] transition-all disabled:opacity-50 bg-semantic-danger text-earthy-ivory"
-          >
-            {deleteBusy ? 'Deleting…' : 'Delete my account'}
-          </button>
+        </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={() => setDeleteAccountOpen(false)}
             disabled={deleteBusy}
-            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] disabled:opacity-50 sm:w-auto"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
+          <button
+            type="button"
+            onClick={onDeleteAccount}
+            disabled={deleteBusy}
+            className="flex min-h-12 w-full items-center justify-center rounded-pill bg-semantic-danger px-6 font-bold text-earthy-ivory transition-all active:scale-[0.99] disabled:opacity-50 sm:w-auto sm:min-w-44"
+          >
+            {deleteBusy ? t('board.deletingAccount') : t('board.deleteAccountConfirm')}
+          </button>
+        </div>
         </div>
       </Modal>
 
-      <Modal open={shareGateOpen} onClose={() => setShareGateOpen(false)} emoji="🔗" title="Share with your family">
-        <div className="flex flex-col gap-2 mt-2">
+      <Modal
+        open={shareGateOpen}
+        onClose={() => setShareGateOpen(false)}
+        emoji="🔗"
+        title={t('board.shareGateTitle')}
+        panelClassName="!max-w-lg !overflow-hidden"
+      >
+        <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
           <p className="text-sm text-earthy-cocoaSoft text-center font-bold mb-1">
-            Save your board first so the link still works when your family opens it.
+            {t('board.shareGateBody')}
           </p>
+        </div>
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={() => setShareGateOpen(false)}
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
+          >
+            {t('common.cancel')}
+          </button>
           <Link
             to="/signup?upgrade=1"
             onClick={() => setShareGateOpen(false)}
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-            className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center block"
+            className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-earthy-cocoaDark active:scale-[0.99] sm:w-auto sm:min-w-40"
           >
-            Save with email
+            {t('board.saveWithEmail')}
           </Link>
-          <button
-            type="button"
-            onClick={() => setShareGateOpen(false)}
-            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
-          >
-            Cancel
-          </button>
         </div>
       </Modal>
 
@@ -806,6 +864,8 @@ function BoardPanel({ activeTheme, children, className = '' }) {
 }
 
 function KidContextHeader({ activeKid, activeTheme, monday, sunday, onEditKid }) {
+  const { formatDateRange } = useI18n()
+
   return (
     <div className="mb-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -839,7 +899,7 @@ function KidContextHeader({ activeKid, activeTheme, monday, sunday, onEditKid })
           )}
         </div>
         <div className="px-3 py-1.5 rounded-pill bg-earthy-ivory text-xs font-bold text-earthy-cocoaSoft shrink-0 border border-earthy-divider">
-          📅 {formatWeekRange(monday, sunday)}
+          📅 {formatDateRange(monday, sunday)}
         </div>
       </div>
     </div>
@@ -862,6 +922,7 @@ function BoardSinglePage({
   onEditTasks,
   onOpenCollection,
 }) {
+  const { t } = useI18n()
   const discoveries = getDiscoveryEntries(activeKid)
   const weekly = getWeeklyBreakdown(activeKid)
   const earnedAchievements = evaluateAchievements(activeKid || {}, { totalStars: activeStars, days: getCurrentWeek().days })
@@ -871,34 +932,43 @@ function BoardSinglePage({
     <BoardPanel activeTheme={activeTheme} className="overflow-hidden">
       <section id="top" tabIndex={-1} className="scroll-mt-6 outline-none">
         <div className="mb-5 overflow-hidden rounded-[24px]">
-          <ThemeScene themeKey={activeKid.theme || 'animals'} height="clamp(156px, 24vw, 220px)" favoritePet={activeKid?.favoritePet} />
+          <ThemeScene
+            themeKey={activeKid.theme || 'animals'}
+            height="clamp(128px, 15vw, 168px)"
+            sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 1200px) calc(100vw - 128px), 1024px"
+            borderRadius={0}
+            favoritePet={activeKid?.favoritePet}
+          />
         </div>
         <KidContextHeader activeKid={activeKid} activeTheme={activeTheme} monday={monday} sunday={sunday} onEditKid={onEditKid} />
         <BirthdayBanner kid={activeKid} />
         <ScoreBar total={activeStars} max={activeMax} theme={activeTheme} />
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 mt-5">
           <TodayCard kid={activeKid} activeTheme={activeTheme} />
-          <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
+          <div className="grid grid-cols-1 gap-4">
+            <MysteryPet ref={mysteryPetRef} kid={activeKid} totalStars={activeStars} boardId={boardId} assignedChain={chainAssignment[activeKid.id]} onOpenSummary={replaySummary} />
+            <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
+          </div>
         </div>
       </section>
 
       <section id="activity" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <SectionHeading label="Activities" className="mb-0" />
+          <SectionHeading label={t('board.activities')} className="mb-0" />
           <button
             type="button"
             onClick={onEditTasks}
             className="min-h-11 px-4 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
           >
             <Icon name="tasks" size={18} />
-            <span>Edit tasks</span>
+            <span>{t('board.menu.editTasks')}</span>
           </button>
         </div>
         <ActivityGrid kid={activeKid} boardId={boardId} />
       </section>
 
       <section id="treasure-progress" tabIndex={-1} className="mt-6 pt-6 border-t border-earthy-divider scroll-mt-6 outline-none">
-        <SectionHeading label="Stars & Pet" />
+        <SectionHeading label={t('board.starsAndPet')} />
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <StreakCounter kid={activeKid} />
@@ -906,13 +976,10 @@ function BoardSinglePage({
           </div>
           <TreasureProgressCard kid={activeKid} activeStars={activeStars} activeTheme={activeTheme} />
         </div>
-        <div className="mt-5">
-          <RewardGoal kid={activeKid} boardId={boardId} totalStars={activeStars} />
-        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
-          <MiniStat label="Star badges" value={`${starBadgeCount}/${BADGE_TIERS.length}`} />
-          <MiniStat label="Achievements" value={`${earnedAchievements.length}/${ACHIEVEMENTS.length}`} />
-          <MiniStat label="Week total" value={`${activeStars}/${activeMax}`} />
+          <MiniStat label={t('board.starBadges')} value={`${starBadgeCount}/${BADGE_TIERS.length}`} />
+          <MiniStat label={t('board.achievements')} value={`${earnedAchievements.length}/${ACHIEVEMENTS.length}`} />
+          <MiniStat label={t('board.weekTotal')} value={`${activeStars}/${activeMax}`} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-4 mt-5">
           <DiscoveryList discoveries={discoveries} onReplay={replaySummary} />
@@ -924,7 +991,7 @@ function BoardSinglePage({
           className="mt-4 min-h-11 w-full sm:w-auto px-5 rounded-pill bg-earthy-cocoa text-earthy-cream text-sm font-extrabold flex items-center justify-center gap-2 hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
         >
           <Icon name="reward" size={18} />
-          <span>Open pet collection</span>
+          <span>{t('board.menu.petCollection')}</span>
         </button>
       </section>
 
@@ -933,6 +1000,7 @@ function BoardSinglePage({
 }
 
 function TodayCard({ kid, activeTheme, actionHref }) {
+  const { t, formatDate, activityLabel } = useI18n()
   const today = getTodayStats(kid)
   const pct = today.total > 0 ? Math.round((today.done / today.total) * 100) : 0
   const body = (
@@ -940,14 +1008,14 @@ function TodayCard({ kid, activeTheme, actionHref }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-xs font-bold uppercase tracking-wide" style={{ color: activeTheme.deeper }}>
-            Today
+            {t('board.today')}
           </div>
           <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
-            {today.done}/{today.total} done
+            {t('board.doneCount', { done: today.done, total: today.total })}
           </div>
         </div>
         <div className="px-3 py-1 rounded-pill bg-earthy-ivory text-xs font-extrabold text-earthy-cocoaSoft shrink-0">
-          {today.day?.label}
+          {today.day ? formatDate(today.day.date, { weekday: 'short' }) : ''}
         </div>
       </div>
       <div className="h-3 rounded-full overflow-hidden mt-3 bg-earthy-cream border border-earthy-dividerCream">
@@ -955,7 +1023,7 @@ function TodayCard({ kid, activeTheme, actionHref }) {
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {today.scheduledActivities.length === 0 ? (
-          <span className="text-sm font-bold text-earthy-cocoaSoft">No star spots today</span>
+          <span className="text-sm font-bold text-earthy-cocoaSoft">{t('board.noStarSpotsToday')}</span>
         ) : (
           today.scheduledActivities.slice(0, 5).map((activity) => {
             const done = today.doneActivities.some((item) => item.id === activity.id)
@@ -969,7 +1037,7 @@ function TodayCard({ kid, activeTheme, actionHref }) {
                 }}
               >
                 <span aria-hidden>{done ? '✓' : activity.emoji || '○'}</span>
-                <span className="truncate max-w-[120px]">{activity.label || 'Activity'}</span>
+                <span className="truncate max-w-[120px]">{activityLabel(activity)}</span>
               </span>
             )
           })
@@ -987,9 +1055,10 @@ function TodayCard({ kid, activeTheme, actionHref }) {
 }
 
 function FamilyTodayList({ boardId, kids, activeKidId }) {
+  const { t } = useI18n()
   return (
     <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
-      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Family today</div>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('board.today')}</div>
       <div className="mt-3 flex flex-col gap-2">
         {kids.map((kid) => {
           const stats = getTodayStats(kid)
@@ -1021,19 +1090,20 @@ function FamilyTodayList({ boardId, kids, activeKidId }) {
 }
 
 function RecentCelebrations({ celebrations }) {
+  const { t, formatDate, activityLabel } = useI18n()
   return (
     <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
-      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Recent celebrations</div>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('preview.recentCelebrations')}</div>
       {celebrations.length === 0 ? (
-        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">No stickers yet this week</div>
+        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">{t('board.noStarSpotsToday')}</div>
       ) : (
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {celebrations.map((item) => (
             <div key={item.key} className="min-h-12 rounded-2xl bg-earthy-card px-3 py-2 flex items-center gap-2 border border-earthy-divider">
               <span className="text-xl shrink-0" aria-hidden>{item.sticker}</span>
               <div className="min-w-0">
-                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{item.label}</div>
-                <div className="text-xs font-bold text-earthy-cocoaSoft">{item.dayLabel}</div>
+                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{activityLabel(item.activity)}</div>
+                <div className="text-xs font-bold text-earthy-cocoaSoft">{formatDate(getCurrentWeek().days[item.dayIndex]?.date, { weekday: 'short' })}</div>
               </div>
             </div>
           ))}
@@ -1044,33 +1114,35 @@ function RecentCelebrations({ celebrations }) {
 }
 
 function TreasureProgressCard({ kid, activeStars, activeTheme }) {
+  const { t } = useI18n()
   const remaining = Math.max(0, HATCH_GOAL - activeStars)
   const pct = Math.min(100, Math.round((activeStars / HATCH_GOAL) * 100))
   const historyCount = Object.keys(kid.weekHistory || {}).length
 
   return (
     <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
-      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Mystery box</div>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('board.mysteryBox')}</div>
       <div className="text-2xl font-extrabold text-earthy-cocoa mt-1">
-        {remaining === 0 ? 'Ready' : `${remaining} to hatch`}
+        {remaining === 0 ? t('board.ready') : t('board.toHatch', { count: remaining })}
       </div>
       <div className="h-3 rounded-full overflow-hidden mt-3 bg-earthy-cream border border-earthy-dividerCream">
         <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
       </div>
       <div className="grid grid-cols-2 gap-2 mt-4">
-        <MiniStat label="This week" value={`${activeStars}/${HATCH_GOAL}`} compact />
-        <MiniStat label="Past pets" value={historyCount} compact />
+        <MiniStat label={t('board.thisWeekStat')} value={`${activeStars}/${HATCH_GOAL}`} compact />
+        <MiniStat label={t('board.pastPets')} value={historyCount} compact />
       </div>
     </div>
   )
 }
 
 function DiscoveryList({ discoveries, onReplay }) {
+  const { t } = useI18n()
   return (
     <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
-      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Recent discoveries</div>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('board.recentDiscoveries')}</div>
       {discoveries.length === 0 ? (
-        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">No archived pets yet</div>
+        <div className="text-sm font-bold text-earthy-cocoaSoft mt-3">{t('board.noArchivedPets')}</div>
       ) : (
         <div className="mt-3 flex flex-col gap-2">
           {discoveries.map(({ weekKey, archive }) => (
@@ -1082,10 +1154,10 @@ function DiscoveryList({ discoveries, onReplay }) {
             >
               <span className="text-2xl shrink-0" aria-hidden>{archive.petEmoji || '⭐'}</span>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{archive.petName || 'Mystery friend'}</div>
+                <div className="text-sm font-extrabold text-earthy-cocoa truncate">{archive.petName || t('board.mysteryFriend')}</div>
                 <div className="text-xs font-bold text-earthy-cocoaSoft">{weekKey}</div>
               </div>
-              <span className="text-xs font-extrabold text-earthy-cocoaSoft shrink-0">{archive.totalStars || 0} stars</span>
+              <span className="text-xs font-extrabold text-earthy-cocoaSoft shrink-0">{t('board.starsCount', { count: archive.totalStars || 0 })}</span>
             </button>
           ))}
         </div>
@@ -1095,16 +1167,17 @@ function DiscoveryList({ discoveries, onReplay }) {
 }
 
 function WeeklyProgressList({ weekly, activeTheme }) {
+  const { t, formatDate } = useI18n()
   return (
     <div className="rounded-2xl p-4 bg-earthy-ivory border border-earthy-divider">
-      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Weekly progress</div>
+      <div className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('board.weeklyProgress')}</div>
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
         {weekly.map(({ day, done, total }) => {
           const pct = total > 0 ? Math.round((done / total) * 100) : 0
           return (
             <div key={day.key} className="rounded-2xl bg-earthy-card border border-earthy-divider p-3 min-h-[112px]">
-              <div className="font-extrabold text-earthy-cocoa">{day.label}</div>
-              <div className="text-xs font-bold text-earthy-cocoaSoft mt-0.5">{done}/{total} done</div>
+              <div className="font-extrabold text-earthy-cocoa">{formatDate(day.date, { weekday: 'short' })}</div>
+              <div className="text-xs font-bold text-earthy-cocoaSoft mt-0.5">{t('board.doneCount', { done, total })}</div>
               <div className="h-2 rounded-full overflow-hidden mt-3 bg-earthy-cream">
                 <div className="h-full transition-all" style={{ width: `${pct}%`, background: activeTheme.deeper }} />
               </div>

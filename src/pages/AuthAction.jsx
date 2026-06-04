@@ -10,6 +10,7 @@ import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 import { supportMailto } from '../lib/support'
 import Logo from '../components/Logo'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
 import PrimaryButton from '../components/PrimaryButton'
 
 // Branded handler for Firebase email-action links (?mode=...&oobCode=...).
@@ -355,6 +356,9 @@ function RecoverEmail({ oobCode }) {
 function PageShell({ children }) {
   return (
     <main id="main" className="min-h-screen bg-earthy-cream flex flex-col items-center px-5 py-10">
+      <div className="fixed right-4 top-4 z-20">
+        <LocaleSelectorButton compact />
+      </div>
       <div className="flex items-center gap-2 mb-7">
         <Logo size={28} />
         <span className="font-display font-black text-earthy-cocoa text-base tracking-tight">

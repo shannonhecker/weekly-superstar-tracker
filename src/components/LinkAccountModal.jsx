@@ -1,4 +1,5 @@
 import Modal from './Modal'
+import { useI18n } from '../lib/i18n'
 
 const PROVIDER_LABEL = {
   'google.com': 'Google',
@@ -28,6 +29,7 @@ export default function LinkAccountModal({
   busy = false,
   error = '',
 }) {
+  const { t } = useI18n()
   const originalOAuth = pickOriginalOAuthProvider(existingMethods)
   const hasPassword = Array.isArray(existingMethods) && existingMethods.includes('password')
   const canLinkInModal = !!originalOAuth
@@ -36,25 +38,32 @@ export default function LinkAccountModal({
     <Modal
       open={open}
       onClose={busy ? undefined : onClose}
-      title="Link your accounts?"
+      title={t('linkAccount.title')}
       emoji="🔗"
+      panelClassName="!max-w-xl !overflow-hidden"
     >
-      <div className="text-sm font-bold text-earthy-cocoa space-y-3">
+      <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4 text-sm font-bold text-earthy-cocoa space-y-3">
         <p>
-          We already have an account for <span className="text-earthy-cocoa">{email}</span>
+          {t('linkAccount.existsPrefix')} <span className="text-earthy-cocoa">{email}</span>
           {hasPassword
-            ? ' using email and password.'
+            ? t('linkAccount.usingPassword')
             : originalOAuth
-              ? ` using ${labelFor(originalOAuth)}.`
-              : '.'}
+              ? t('linkAccount.usingProvider', { provider: labelFor(originalOAuth) })
+              : t('linkAccount.existsSuffix')}
         </p>
         {canLinkInModal ? (
           <p className="text-earthy-cocoaSoft">
-            Sign in with {labelFor(originalOAuth)} once, and we&apos;ll link {labelFor(attemptedProviderId)} for next time.
+            {t('linkAccount.linkBody', {
+              original: labelFor(originalOAuth),
+              attempted: labelFor(attemptedProviderId),
+            })}
           </p>
         ) : (
           <p className="text-earthy-cocoaSoft">
-            Sign in with {labelFor(existingMethods?.[0] || 'your original method')} to continue. You can link {labelFor(attemptedProviderId)} from settings later.
+            {t('linkAccount.signInBody', {
+              original: labelFor(existingMethods?.[0] || t('linkAccount.originalMethod')),
+              attempted: labelFor(attemptedProviderId),
+            })}
           </p>
         )}
       </div>
@@ -68,26 +77,27 @@ export default function LinkAccountModal({
         </div>
       )}
 
+      <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <button
+        type="button"
+        onClick={onClose}
+        disabled={busy}
+        className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] disabled:opacity-60 sm:w-auto"
+      >
+        {t('common.cancel')}
+      </button>
       {canLinkInModal && (
         <button
           type="button"
           onClick={() => onConfirm(originalOAuth)}
           disabled={busy}
           style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-          className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all disabled:opacity-60"
+          className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-[#4A2E25] active:scale-[0.99] disabled:opacity-60 sm:w-auto sm:min-w-44"
         >
-          {busy ? 'Linking…' : `Sign in with ${labelFor(originalOAuth)}`}
+          {busy ? t('linkAccount.linking') : t('linkAccount.signInWith', { provider: labelFor(originalOAuth) })}
         </button>
       )}
-
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={busy}
-        className="w-full mt-2 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa disabled:opacity-60"
-      >
-        Cancel
-      </button>
+      </div>
     </Modal>
   )
 }
