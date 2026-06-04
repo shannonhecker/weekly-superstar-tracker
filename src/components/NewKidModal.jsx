@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { THEMES, KID_AVATARS } from '../lib/themes'
 import Modal from './Modal'
 import EarthyDatePicker from './EarthyDatePicker'
 import ParentConsentGate from './ParentConsentGate'
+import { useI18n } from '../lib/i18n'
+import ThemeBannerArt from './ThemeBannerArt'
+import Icon from './Icon'
+import FluentEmoji from './FluentEmoji'
+
+const THEME_KEYS = Object.keys(THEMES)
+
+function themeForEmoji(emoji) {
+  for (const [key, value] of Object.entries(THEMES)) {
+    if (value.emoji === emoji) return key
+  }
+  return null
+}
 
 // Single-screen "Add a superstar" modal: name + avatar emoji + theme +
 // optional birthday. Only the name is required. Replaces the legacy
@@ -13,12 +26,13 @@ import ParentConsentGate from './ParentConsentGate'
 // distinct); avatar defaults to "theme" mode (no explicit emoji picked,
 // KidAvatar falls back to the theme emoji).
 export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
-  const themeKeys = Object.keys(THEMES)
-  const defaultTheme = themeKeys[kidCount % themeKeys.length]
+  const { t, themeLabel } = useI18n()
+  const defaultTheme = THEME_KEYS[kidCount % THEME_KEYS.length]
 
   const [name, setName] = useState('')
   const [avatarEmoji, setAvatarEmoji] = useState(null)
   const [theme, setTheme] = useState(defaultTheme)
+  const [themeManuallySet, setThemeManuallySet] = useState(false)
   const [birthday, setBirthday] = useState('')
   const [parentConsent, setParentConsent] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -29,7 +43,8 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
     if (!open) return
     setName('')
     setAvatarEmoji(null)
-    setTheme(themeKeys[kidCount % themeKeys.length])
+    setTheme(THEME_KEYS[kidCount % THEME_KEYS.length])
+    setThemeManuallySet(false)
     setBirthday('')
     setParentConsent(false)
     setBusy(false)
@@ -55,132 +70,265 @@ export default function NewKidModal({ open, onClose, onSubmit, kidCount = 0 }) {
   }
 
   return (
-    <Modal open={open} onClose={busy ? undefined : onClose} emoji="⭐" title="Add a superstar">
+    <Modal
+      open={open}
+      onClose={busy ? undefined : onClose}
+      emoji="⭐"
+      title={t('kid.addTitle')}
+      panelClassName="!max-w-[920px] !overflow-hidden"
+    >
       {!parentConsent ? (
-        <ParentConsentGate compact onAccept={() => setParentConsent(true)} />
+        <div className="mx-auto max-w-xl">
+          <ParentConsentGate compact onAccept={() => setParentConsent(true)} />
+        </div>
       ) : (
-      <form onSubmit={handleSubmit}>
-        <div className="max-h-[65vh] overflow-y-auto pr-1">
-          {/* Name */}
-          <label htmlFor="new-kid-name" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Name
-          </label>
-          <input
-            id="new-kid-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Leo"
-            autoFocus
-            required
-            maxLength={30}
-            className="w-full px-4 py-3 mb-5 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
-          />
+      <form onSubmit={handleSubmit} className="flex h-[calc(100vh-14.5rem)] max-h-[720px] flex-col sm:h-auto sm:max-h-[calc(100vh-9.5rem)]">
+        <div className="grid min-h-0 flex-1 gap-5 overflow-y-auto pr-1 sm:pr-2 lg:grid-cols-[320px_minmax(0,1fr)] lg:overflow-hidden lg:pr-0">
+          <section className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4 lg:self-start">
+            <label htmlFor="new-kid-name" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
+              {t('kid.name')}
+            </label>
+            <input
+              id="new-kid-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('kid.namePlaceholder')}
+              autoFocus
+              required
+              maxLength={30}
+              className="mb-5 w-full rounded-xl border-2 border-earthy-divider bg-earthy-card px-4 py-3 font-bold text-earthy-cocoa outline-none transition-colors focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20"
+            />
 
-          {/* Avatar */}
-          <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Avatar <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
-          </label>
-          <div className="bg-earthy-ivory border border-earthy-divider rounded-xl p-2 mb-5 grid grid-cols-8 gap-1">
-            {KID_AVATARS.map((emoji) => {
-              const active = avatarEmoji === emoji
-              return (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => setAvatarEmoji(active ? null : emoji)}
-                  aria-pressed={active}
-                  className="aspect-square rounded-lg text-xl flex items-center justify-center transition-all"
-                  style={{
-                    background: active ? `${THEMES[theme]?.accent}55` : 'transparent',
-                    border: active ? `2px solid ${THEMES[theme]?.deeper}` : '2px solid transparent',
-                  }}
-                >
-                  {emoji}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Theme */}
-          <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Theme
-          </label>
-          <div
-            role="radiogroup"
-            aria-label="Pick a theme"
-            className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-5"
-          >
-            {themeKeys.map((key) => {
-              const t = THEMES[key]
-              const isSelected = theme === key
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  onClick={() => setTheme(key)}
-                  className="flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-3 bg-earthy-ivory border-2 transition-all active:scale-[0.98]"
-                  style={{
-                    borderColor: isSelected ? t.deeper : '#E8DDD0',
-                    boxShadow: isSelected ? `0 2px 8px ${t.deeper}33` : 'none',
-                  }}
-                >
-                  <span
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
-                    style={{ backgroundColor: t.accent }}
-                    aria-hidden="true"
+            <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
+              {t('kid.avatar')} <span className="font-normal normal-case text-earthy-cocoaSoft/70">({t('signup.kid.optional')})</span>
+            </label>
+            <div className="mb-5 rounded-2xl border border-earthy-divider bg-earthy-card p-3">
+              <div className="flex flex-wrap gap-2">
+              {KID_AVATARS.map((emoji) => {
+                const active = avatarEmoji === emoji
+                return (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      const next = active ? null : emoji
+                      setAvatarEmoji(next)
+                      if (next && !themeManuallySet) {
+                        const matchedTheme = themeForEmoji(next)
+                        if (matchedTheme) setTheme(matchedTheme)
+                      }
+                    }}
+                    aria-pressed={active}
+                    aria-label={t('kid.avatarA11y', { emoji })}
+                    className="h-10 w-10 rounded-full text-xl flex items-center justify-center transition-all active:scale-[0.96]"
+                    style={{
+                      background: active ? `${THEMES[theme]?.accent}55` : '#FFFAF0',
+                      border: active ? `2px solid ${THEMES[theme]?.deeper}` : '2px solid #E8DDD0',
+                    }}
                   >
-                    {t.emoji}
-                  </span>
-                  <span className="font-bold text-earthy-cocoa text-[11px] tracking-tight truncate max-w-full">
-                    {t.label}
-                  </span>
+                  <FluentEmoji emoji={emoji} size={24} />
                 </button>
               )
             })}
-          </div>
+              </div>
+            </div>
 
-          {/* Birthday (optional) */}
-          <label htmlFor="new-kid-birthday" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
-            Birthday <span className="font-normal normal-case text-earthy-cocoaSoft/70">(optional)</span>
-          </label>
-          <EarthyDatePicker
-            value={birthday}
-            onChange={setBirthday}
-            placeholder="Add a birthday"
-            ariaLabel="Pick a birthday"
-          />
+            <label htmlFor="new-kid-birthday" className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
+              {t('signup.kid.birthday')} <span className="font-normal normal-case text-earthy-cocoaSoft/70">({t('signup.kid.optional')})</span>
+            </label>
+            <EarthyDatePicker
+              value={birthday}
+              onChange={setBirthday}
+              placeholder={t('signup.kid.birthdayPlaceholder')}
+              ariaLabel={t('signup.kid.birthdayA11y')}
+            />
+          </section>
+
+          <section className="min-h-0 rounded-2xl border border-earthy-divider bg-earthy-ivory p-4 lg:max-h-[calc(100vh-14.5rem)] lg:overflow-y-auto lg:pr-3">
+            <ThemeCardPicker
+              selected={theme}
+              onSelect={(key) => {
+                setTheme(key)
+                setThemeManuallySet(true)
+              }}
+              name={trimmedName || t('kid.superstar')}
+              themeLabel={themeLabel}
+              t={t}
+            />
+          </section>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col gap-2 mt-4">
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] disabled:opacity-50 sm:w-auto"
+          >
+            {t('common.cancel')}
+          </button>
           <button
             type="submit"
             disabled={!canSubmit}
             style={canSubmit
               ? { color: '#FFFAF0', backgroundColor: '#5A3A2E' }
               : undefined}
-            className={`w-full py-3 rounded-pill font-bold transition-all ${
+            className={`flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all sm:w-auto sm:min-w-44 ${
               canSubmit
                 ? 'hover:bg-earthy-cocoaDark active:scale-[0.99]'
                 : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed'
             }`}
           >
-            {busy ? 'Adding…' : 'Add superstar'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-            className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all"
-          >
-            Cancel
+            {busy ? t('kid.adding') : t('kid.addSuperstar')}
           </button>
         </div>
       </form>
       )}
     </Modal>
+  )
+}
+
+function ThemeCardPicker({ selected, onSelect, name, themeLabel, t }) {
+  const scrollRef = useRef(null)
+  const selectedIndex = Math.max(0, THEME_KEYS.indexOf(selected))
+  const [visibleIndex, setVisibleIndex] = useState(selectedIndex)
+
+  useEffect(() => {
+    setVisibleIndex(selectedIndex)
+    const target = scrollRef.current?.querySelector(`[data-theme-key="${selected}"]`)
+    target?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+  }, [selected, selectedIndex])
+
+  const goToTheme = (index) => {
+    const nextIndex = Math.max(0, Math.min(THEME_KEYS.length - 1, index))
+    setVisibleIndex(nextIndex)
+    onSelect(THEME_KEYS[nextIndex])
+  }
+
+  const updateVisibleFromScroll = () => {
+    const node = scrollRef.current
+    if (!node) return
+    const cards = Array.from(node.querySelectorAll('[data-theme-card]'))
+    const center = node.getBoundingClientRect().left + node.getBoundingClientRect().width / 2
+    let bestIndex = 0
+    let bestDistance = Number.POSITIVE_INFINITY
+    cards.forEach((card, index) => {
+      const rect = card.getBoundingClientRect()
+      const distance = Math.abs(rect.left + rect.width / 2 - center)
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestIndex = index
+      }
+    })
+    setVisibleIndex(bestIndex)
+  }
+
+  return (
+    <div className="mb-5">
+      <label className="text-xs font-bold text-earthy-cocoaSoft mb-2 block uppercase tracking-wide">
+        {t('kid.bannerTheme')}
+      </label>
+      <div
+        ref={scrollRef}
+        role="radiogroup"
+        aria-label={t('kid.pickTheme')}
+        onScroll={updateVisibleFromScroll}
+        className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {THEME_KEYS.map((key) => {
+          const item = THEMES[key]
+          const isSelected = selected === key
+          const label = themeLabel(key, item.label)
+          return (
+            <button
+              key={key}
+              type="button"
+              data-theme-card
+              data-theme-key={key}
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={`${label} ${t('kid.theme')}`}
+              onClick={() => onSelect(key)}
+              className="w-[min(72vw,292px)] shrink-0 snap-center overflow-hidden rounded-2xl border bg-earthy-ivory text-left transition-all active:scale-[0.99]"
+              style={{
+                borderColor: isSelected ? item.deeper : '#E8DDD0',
+                boxShadow: isSelected ? `0 8px 20px ${item.deeper}22` : '0 2px 8px rgba(90, 58, 46, 0.06)',
+              }}
+            >
+              <ThemeBannerArt
+                themeKey={key}
+                height={142}
+                animated={false}
+                loading="lazy"
+                objectPosition="center"
+                borderRadius={0}
+              />
+              <div className="flex items-center gap-3 px-4 py-3">
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl"
+                  style={{ backgroundColor: item.accent }}
+                  aria-hidden="true"
+                >
+                  <FluentEmoji emoji={item.emoji} size={30} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-lg font-black text-earthy-cocoa">
+                    {label}
+                  </span>
+                  <span className="block truncate text-xs font-bold text-earthy-cocoaSoft">
+                    {t('kid.worldForName', { name })}
+                  </span>
+                </span>
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2"
+                  style={{
+                    backgroundColor: isSelected ? '#12351F' : '#FFFFFF',
+                    borderColor: isSelected ? '#12351F' : '#E8DDD0',
+                    color: '#FFFAF0',
+                  }}
+                  aria-hidden="true"
+                >
+                  {isSelected ? <Icon name="check" size={18} /> : null}
+                </span>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => goToTheme(visibleIndex - 1)}
+          disabled={visibleIndex <= 0}
+          aria-label={t('kid.previousTheme')}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-earthy-cocoa text-earthy-cream transition-all disabled:bg-earthy-divider disabled:text-earthy-cocoaSoft disabled:opacity-70"
+        >
+          <Icon name="chevron-left" size={22} />
+        </button>
+        <div className="flex flex-1 items-center justify-center gap-1.5" aria-hidden="true">
+          {THEME_KEYS.map((key, index) => (
+            <span
+              key={key}
+              className="h-1.5 rounded-full transition-all"
+              style={{
+                width: index === visibleIndex ? 18 : 6,
+                backgroundColor: index === visibleIndex ? '#12351F' : '#D9C9B8',
+              }}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => goToTheme(visibleIndex + 1)}
+          disabled={visibleIndex >= THEME_KEYS.length - 1}
+          aria-label={t('kid.nextTheme')}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-earthy-cocoa text-earthy-cream transition-all disabled:bg-earthy-divider disabled:text-earthy-cocoaSoft disabled:opacity-70"
+        >
+          <Icon name="chevron-right" size={22} />
+        </button>
+      </div>
+    </div>
   )
 }
