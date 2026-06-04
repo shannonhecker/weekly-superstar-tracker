@@ -5,13 +5,16 @@
 // Static facts should not look like calls to action. Keep these as passive
 // metadata labels, not bordered pills/buttons.
 
+import { useI18n } from '../lib/i18n'
+
 const TRUST_PILLS = [
-  'Ages 3 to 12',
-  'No ads, ever',
-  'Free starter board',
+  'trust.ages',
+  'trust.noAds',
+  'trust.freeStarter',
 ]
 
 export default function TrustPills({ className = '', align = 'center' }) {
+  const { t } = useI18n()
   const alignmentClass = align === 'start'
     ? 'justify-start text-left'
     : 'justify-center text-center'
@@ -21,15 +24,15 @@ export default function TrustPills({ className = '', align = 'center' }) {
       role="list"
       className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${alignmentClass} ${className}`.trim()}
     >
-      {TRUST_PILLS.map((label) => (
+      {TRUST_PILLS.map((key) => (
         <li
-          key={label}
+          key={key}
           role="listitem"
           data-testid="trust-pill"
           className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-earthy-cocoaSoft sm:text-xs"
         >
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-earthy-sage" />
-          <span>{label}</span>
+          <span>{t(key)}</span>
         </li>
       ))}
     </ul>

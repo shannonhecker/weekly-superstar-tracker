@@ -17,6 +17,8 @@ import {
   MdArrowBack,
   MdChevronLeft,
   MdChevronRight,
+  MdCheck,
+  MdLanguage,
 } from 'react-icons/md'
 
 // Curated Material-icon registry. Keep this list short — every icon
@@ -46,6 +48,8 @@ const ICONS = {
   back: MdArrowBack,
   'chevron-left': MdChevronLeft,
   'chevron-right': MdChevronRight,
+  check: MdCheck,
+  language: MdLanguage,
 }
 
 export default function Icon({ name, size = 20, className = '', style, ...rest }) {

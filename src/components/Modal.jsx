@@ -24,7 +24,15 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
-export default function Modal({ open, onClose, title, emoji, emojiClassName, children }) {
+export default function Modal({
+  open,
+  onClose,
+  title,
+  emoji,
+  emojiClassName,
+  children,
+  panelClassName = '',
+}) {
   const dialogRef = useRef(null)
   const titleId = useId()
   // Where focus was BEFORE the modal opened — restored when we close
@@ -43,7 +51,10 @@ export default function Modal({ open, onClose, title, emoji, emojiClassName, chi
     // so screen readers still announce it.
     const node = dialogRef.current
     if (node) {
-      const first = node.querySelector(FOCUSABLE)
+      const preferred = node.querySelector('[data-autofocus="true"], [autofocus]')
+      const first = preferred instanceof HTMLElement && !preferred.hasAttribute('disabled')
+        ? preferred
+        : node.querySelector(FOCUSABLE)
       if (first instanceof HTMLElement) first.focus()
       else node.focus()
     }
@@ -102,7 +113,7 @@ export default function Modal({ open, onClose, title, emoji, emojiClassName, chi
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-earthy-pop modal-in font-jakarta outline-none"
+        className={`relative max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-4 shadow-earthy-pop outline-none modal-in font-jakarta sm:p-6 ${panelClassName}`}
       >
         {(title || emoji) && (
           <div className="text-center mb-4">

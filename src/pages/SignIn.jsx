@@ -18,9 +18,11 @@ import { safeRedirect } from '../lib/safeRedirect'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
 import Logo from '../components/Logo'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
 import LinkAccountModal from '../components/LinkAccountModal'
 import TrustPills from '../components/TrustPills'
 import ProductPreview from '../components/wizard/ProductPreview'
+import { useI18n } from '../lib/i18n'
 
 // First-time OAuth users on the SignIn page have no board yet. Do not create
 // one here: board creation collects child data and must go through onboarding's
@@ -35,6 +37,7 @@ async function ensureBoardForOAuthUser(user) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [searchParams] = useSearchParams()
   const next = safeRedirect(searchParams.get('next'), '')
   const [email, setEmail] = useState('')
@@ -152,6 +155,9 @@ export default function SignIn() {
 
   return (
     <main id="main" className="min-h-screen bg-earthy-card font-jakarta text-earthy-cocoa">
+      <div className="fixed right-4 top-4 z-20">
+        <LocaleSelectorButton compact />
+      </div>
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-5 sm:px-8 lg:px-10">
         <section className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.88fr)] lg:gap-14 lg:py-10">
           <div className="order-2 hidden min-w-0 lg:order-1 lg:block">
@@ -172,38 +178,38 @@ export default function SignIn() {
             </div>
 
             <h1 className="font-display text-4xl font-black leading-[1.05] tracking-normal text-earthy-cocoa sm:text-5xl">
-              Sign in
+              {t('signin.title')}
             </h1>
             <p className="mx-auto mt-4 max-w-md text-base font-bold leading-relaxed text-earthy-cocoaSoft sm:text-lg">
-              Keep today&apos;s stars moving from any device.
+              {t('signin.subtitle')}
             </p>
             <TrustPills className="mt-5" />
 
-            {/* Social auth: primary path per spec Q2 */}
+            {/* Social auth — primary path per spec Q2 */}
             <div className="mt-8 grid gap-3">
               <button
                 type="button"
                 onClick={onApple}
                 disabled={loading}
-                aria-label="Continue with Apple"
+                aria-label={t('signin.apple')}
                 className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
               >
                 <span aria-hidden="true" className="text-base">A</span>
-                Continue with Apple
+                {t('signin.apple')}
               </button>
               <button
                 type="button"
                 onClick={onGoogle}
                 disabled={loading}
-                aria-label="Continue with Google"
+                aria-label={t('signin.google')}
                 className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill border border-earthy-dividerCream bg-earthy-card px-4 py-3 text-sm font-extrabold text-earthy-cocoa transition-colors hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-dividerCream"
               >
                 <span aria-hidden="true" className="text-base">G</span>
-                Continue with Google
+                {t('signin.google')}
               </button>
             </div>
 
-            {/* Email-collapse toggle: defaults closed; expands on click */}
+            {/* Email-collapse toggle — defaults closed; expands on click */}
             <div className="mt-5 flex items-center gap-3" role="presentation">
               <span className="h-px flex-1 bg-earthy-dividerCream" />
               <button
@@ -213,7 +219,7 @@ export default function SignIn() {
                 aria-controls="signin-email-form"
                 className="text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft hover:text-earthy-cocoa transition-colors"
               >
-                {showEmailForm ? 'Hide email form' : 'Use email instead'}
+                {showEmailForm ? t('signin.hideEmail') : t('signin.useEmail')}
               </button>
               <span className="h-px flex-1 bg-earthy-dividerCream" />
             </div>
@@ -228,7 +234,7 @@ export default function SignIn() {
               <div id="signin-email-form" className="text-left">
                 <div className="mt-5">
                   <label htmlFor="signin-email" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft mb-2">
-                    Email
+                    {t('signin.email')}
                   </label>
                   <input
                     id="signin-email"
@@ -244,13 +250,13 @@ export default function SignIn() {
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <label htmlFor="signin-password" className="block text-xs font-extrabold uppercase tracking-wide text-earthy-cocoaSoft">
-                      Password
+                      {t('signin.password')}
                     </label>
                     <Link
                       to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
                       className="text-xs text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold underline underline-offset-2 transition-colors"
                     >
-                      Forgot password?
+                      {t('signin.forgot')}
                     </Link>
                   </div>
                   <div className="relative">
@@ -267,33 +273,33 @@ export default function SignIn() {
                       type="button"
                       onClick={() => setShowPassword((visible) => !visible)}
                       className="absolute right-2 top-1/2 min-h-10 -translate-y-1/2 rounded-pill px-3 text-xs font-extrabold text-earthy-cocoaSoft transition-colors hover:bg-earthy-cream hover:text-earthy-cocoa focus-visible:ring-2 focus-visible:ring-earthy-terracotta"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? t('signin.hidePassword') : t('signin.showPassword')}
                     >
-                      {showPassword ? 'Hide' : 'Show'}
+                      {showPassword ? t('signin.hide') : t('signin.show')}
                     </button>
                   </div>
                 </div>
 
                 <PrimaryButton type="submit" disabled={loading} className="mt-6 min-h-[54px]">
-                  {loading ? 'Signing in...' : 'Sign in'}
+                  {loading ? t('signin.signingIn') : t('signin.title')}
                 </PrimaryButton>
               </div>
             )}
 
             <div className="mt-8 rounded-3xl border border-earthy-dividerCream bg-white/55 p-4">
               <p className="text-sm font-extrabold text-earthy-cocoaSoft">
-                New to Winking Star?
+                {t('signin.new')}
               </p>
               <Link
-                to="/?guest=1"
+                to="/signup?guest=1"
                 className="mt-3 inline-flex min-h-[48px] w-full items-center justify-center rounded-pill bg-earthy-cocoa px-5 py-3 text-sm font-extrabold text-earthy-ivory shadow-earthy-soft transition-all hover:-translate-y-0.5 hover:bg-earthy-cocoaDark active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
               >
-                Try a sample board
+                {t('signin.trySample')}
               </Link>
               <p className="mt-3 text-xs font-bold text-earthy-cocoaSoft">
-                Ready to save one?{' '}
-                <Link to="/" className="text-earthy-cocoa underline underline-offset-2">
-                  Create account
+                {t('signin.ready')}{' '}
+                <Link to="/signup" className="text-earthy-cocoa underline underline-offset-2">
+                  {t('signin.create')}
                 </Link>
               </p>
             </div>
@@ -303,7 +309,7 @@ export default function SignIn() {
                 href={supportMailto('Help signing in to Winking Star')}
                 className="underline underline-offset-2 transition-colors hover:text-earthy-cocoa"
               >
-                Need help?
+                {t('signin.needHelp')}
               </a>
             </p>
           </form>

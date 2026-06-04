@@ -1,11 +1,12 @@
 import { useState } from 'react'
 
 import { colors } from '@weekly-superstar/shared/tokens'
-import { THEMES, animatedFluentUrl } from '../lib/themes'
+import { THEMES } from '../lib/themes'
+import FluentEmoji from './FluentEmoji'
 
 /**
  * Web mirror of iOS components/KidAvatar.tsx. Priority:
- *   photo (avatarUrl) → preset (Fluent Emoji PNG of avatarEmoji) → theme emoji.
+ *   photo (avatarUrl) → preset Fluent emoji → theme Fluent emoji.
  *
  * Background is always the kid's theme accent at 33 alpha so shape stays
  * consistent across the 3 states. borderColor optional — callers set it to
@@ -15,7 +16,6 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
   const theme = THEMES[kid?.theme || 'football'] || THEMES.football
   const bg = `${theme.accent}38`
   const [photoFailed, setPhotoFailed] = useState(false)
-  const [presetFailed, setPresetFailed] = useState(false)
 
   const containerStyle = {
     width: size,
@@ -61,25 +61,10 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
   }
 
   if (kid?.avatarKind === 'preset' && kid.avatarEmoji) {
-    const url = animatedFluentUrl(kid.avatarEmoji)
-    if (url && !presetFailed) {
-      return (
-        <div style={containerStyle}>
-          <div style={stickerStyle}>
-            <img
-              src={url}
-              alt=""
-              style={{ width: size * 0.66, height: size * 0.66 }}
-              onError={() => setPresetFailed(true)}
-            />
-          </div>
-        </div>
-      )
-    }
     return (
       <div style={containerStyle}>
         <div style={stickerStyle}>
-          <span style={{ fontSize: size * 0.5 }}>{kid.avatarEmoji}</span>
+          <FluentEmoji emoji={kid.avatarEmoji} size={size * 0.66} />
         </div>
       </div>
     )
@@ -88,7 +73,7 @@ export function KidAvatar({ kid, size = 48, borderColor }) {
   return (
     <div style={containerStyle}>
       <div style={stickerStyle}>
-        <span style={{ fontSize: size * 0.5 }}>{theme.emoji}</span>
+        <FluentEmoji emoji={theme.emoji} size={size * 0.66} />
       </div>
     </div>
   )

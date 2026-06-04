@@ -62,10 +62,7 @@ export default function AnimatedRasterBanner({
       alt=""
       loading={loading}
       decoding="async"
-      style={{
-        objectPosition,
-        '--ws-image-scale': imageScale,
-      }}
+      style={{ objectPosition }}
     />
   )
 

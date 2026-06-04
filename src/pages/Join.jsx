@@ -5,6 +5,8 @@ import { arrayUnion, collection, doc, getDocs, limit, query, updateDoc, where } 
 import { useAuth } from '../contexts/AuthContext'
 import { db, functions } from '../lib/firebase'
 import EmptyStateScene from '../components/EmptyStateScene'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
+import { useI18n } from '../lib/i18n'
 
 const INVITE_NOT_FOUND = 'invite/not-found'
 const INVITE_MISSING = 'invite/missing-code'
@@ -45,11 +47,11 @@ function categorizeRedeemFailure(err) {
   return INVITE_UNKNOWN
 }
 
-const INVITE_ERROR_COPY = {
-  [INVITE_NOT_FOUND]: 'This invite link could not be redeemed. It may have expired or already been used. Ask the family admin for a new link.',
-  [INVITE_MISSING]: 'This invite link does not look right. Check the URL or ask for a new one.',
-  [INVITE_NETWORK]: 'We could not reach the server. Check your connection and try again.',
-  [INVITE_UNKNOWN]: 'Something went wrong joining the board. Try again, or ask the family admin for a new link.',
+const INVITE_ERROR_COPY_KEYS = {
+  [INVITE_NOT_FOUND]: 'join.error.notFound',
+  [INVITE_MISSING]: 'join.error.missing',
+  [INVITE_NETWORK]: 'join.error.network',
+  [INVITE_UNKNOWN]: 'join.error.unknown',
 }
 
 async function redeemShareCodeFromFirestore(code, uid) {
@@ -85,6 +87,7 @@ async function redeemShareCode(code, uid) {
 }
 
 export default function Join() {
+  const { t } = useI18n()
   const { code } = useParams()
   const { user, loading } = useAuth()
   const navigate = useNavigate()
@@ -120,54 +123,56 @@ export default function Join() {
 
   const showError = signedOut || !!errorCategory
   const message = signedOut
-    ? 'You have been invited to cheer on a family superstar. Sign in or create a parent account to join the board.'
-    : INVITE_ERROR_COPY[errorCategory] || INVITE_ERROR_COPY[INVITE_UNKNOWN]
+    ? t('join.signedOut')
+    : t(INVITE_ERROR_COPY_KEYS[errorCategory] || INVITE_ERROR_COPY_KEYS[INVITE_UNKNOWN])
   const canRetry = !signedOut && errorCategory === INVITE_NETWORK
 
   return (
     <main id="main" className="min-h-screen flex items-center justify-center text-center px-5 bg-earthy-ivory font-jakarta">
-      <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full overflow-hidden">
-        <div className="bg-earthy-cream">
+      <div className="fixed right-4 top-4 z-20">
+        <LocaleSelectorButton compact />
+      </div>
+      <div className="bg-earthy-cream rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full overflow-hidden">
+        <div className="bg-earthy-ivory">
           <EmptyStateScene variant="joining" />
         </div>
         <div className="p-8 pt-6">
           {showError
             ? (
                 <>
-                  <h1 className="text-earthy-cocoa font-extrabold text-2xl leading-tight">
-                    Join the family board
-                  </h1>
-                  <p className="mt-3 text-earthy-cocoaSoft font-bold text-sm leading-relaxed">{message}</p>
+                  <p className="text-earthy-cocoa font-extrabold text-lg">{message}</p>
                   {canRetry && (
                     <button
                       type="button"
                       onClick={retry}
-                      className="mt-5 w-full py-3 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
+                      style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+                      className="mt-5 w-full py-3 rounded-pill font-bold hover:bg-[#4A2E25] active:scale-[0.99] transition-all"
                     >
-                      Try again
+                      {t('join.tryAgain')}
                     </button>
                   )}
                   {signedOut && (
                     <div className="mt-5 flex flex-col gap-2">
                       <Link
                         to={`/signin?next=${encodeURIComponent(`/join/${code}`)}`}
-                        className="w-full py-3 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center"
+                        style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+                        className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all text-center"
                       >
-                        Sign in to join
+                        {t('join.signIn')}
                       </Link>
                       <Link
-                        to={`/?next=${encodeURIComponent(`/join/${code}`)}`}
-                        className="w-full py-3 rounded-pill border-2 border-earthy-divider bg-earthy-ivory text-earthy-cocoa font-bold hover:border-earthy-cocoaSoft active:scale-[0.99] transition-all text-center"
+                        to={`/signup?next=${encodeURIComponent(`/join/${code}`)}`}
+                        className="w-full py-3 rounded-pill text-earthy-cocoaSoft font-bold hover:text-earthy-cocoa active:scale-[0.99] transition-all text-center"
                       >
-                        Create account
+                        {t('join.create')}
                       </Link>
                     </div>
                   )}
                 </>
               )
             : <>
-                <p className="text-earthy-cocoa font-extrabold text-lg mb-1">Joining the board...</p>
-                <p className="text-earthy-cocoaSoft text-sm font-bold">Hang tight, we are getting you in.</p>
+                <p className="text-earthy-cocoa font-extrabold text-lg mb-1">{t('join.joining')}</p>
+                <p className="text-earthy-cocoaSoft text-sm font-bold">{t('join.wait')}</p>
               </>}
         </div>
       </div>

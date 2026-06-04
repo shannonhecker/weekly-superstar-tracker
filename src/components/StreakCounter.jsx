@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getCurrentWeek } from '../lib/week'
 import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '../lib/themes'
+import { useI18n } from '../lib/i18n'
 
 function calculateStreak(kid, days) {
   const checks = kid.checks || {}
@@ -23,6 +24,7 @@ function calculateStreak(kid, days) {
 }
 
 export default function StreakCounter({ kid }) {
+  const { t } = useI18n()
   // Don't memoize `days` — `getCurrentWeek()` is cheap date math (no Firestore
   // read), and an empty-deps `useMemo` froze the reference at first render.
   // After midnight rollover the cached `day.key` could drift from what
@@ -58,10 +60,10 @@ export default function StreakCounter({ kid }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-base font-extrabold text-earthy-cocoa" key={`label-${pulseKey}`}>
-          {streak > 0 ? `${streak}-day streak!` : 'No streak yet'}
+          {streak > 0 ? t('streak.count', { count: streak }) : t('streak.none')}
         </div>
         <div className="text-[11px] font-bold mt-0.5" style={{ color: theme.deeper }}>
-          Complete all tasks in a day
+          {t('streak.help')}
         </div>
       </div>
     </div>

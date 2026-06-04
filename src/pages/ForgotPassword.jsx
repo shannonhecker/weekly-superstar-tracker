@@ -5,6 +5,8 @@ import { auth } from '../lib/firebase'
 import { formatAuthError } from '../lib/authErrors'
 import { supportMailto } from '../lib/support'
 import PrimaryButton from '../components/PrimaryButton'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
+import { useI18n } from '../lib/i18n'
 
 // Migrated to the earthy palette to match SignIn / SignUp / AuthAction.
 // The legacy purple/grey treatment was the only auth screen still on
@@ -12,6 +14,7 @@ import PrimaryButton from '../components/PrimaryButton'
 // in the new tokens. Audit A3.
 
 export default function ForgotPassword() {
+  const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
   const prefill = new URLSearchParams(location.search).get('email') || ''
@@ -25,7 +28,7 @@ export default function ForgotPassword() {
     setError('')
     const trimmed = email.trim()
     if (!trimmed) {
-      setError('Enter your email to reset your password.')
+      setError(t('forgot.emptyEmail'))
       return
     }
     setLoading(true)
@@ -58,28 +61,30 @@ export default function ForgotPassword() {
 
   return (
     <main id="main" className="min-h-screen bg-earthy-cream flex items-center justify-center px-5 py-8">
+      <div className="fixed right-4 top-4 z-20">
+        <LocaleSelectorButton compact />
+      </div>
       <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider p-8 max-w-md w-full">
         {sent ? (
           <>
             <div className="text-5xl text-center mb-3" aria-hidden="true">✉️</div>
             <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-2 text-center">
-              Check your inbox
+              {t('forgot.sentTitle')}
             </h1>
             <p className="text-earthy-cocoaSoft text-sm font-bold mb-6 text-center">
-              If we have an account for <span className="text-earthy-cocoa">{email.trim()}</span>,
-              the reset link is on its way. Follow it to set a new password.
+              {t('forgot.sentBody', { email: email.trim() })}
             </p>
             <PrimaryButton onClick={() => navigate('/signin', { replace: true })}>
-              Back to sign in
+              {t('forgot.back')}
             </PrimaryButton>
             <p className="text-center mt-4 text-xs text-earthy-cocoaSoft font-bold">
-              Didn't get it? Check spam, or{' '}
+              {t('forgot.retryLead')}{' '}
               <button
                 type="button"
                 onClick={() => { setSent(false) }}
                 className="text-earthy-cocoa font-bold underline underline-offset-2 hover:text-earthy-cocoa/80 transition-colors"
               >
-                try a different email
+                {t('forgot.tryDifferent')}
               </button>
               .
             </p>
@@ -87,17 +92,17 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={onSubmit} noValidate>
             <h1 className="font-display font-black text-earthy-cocoa text-3xl tracking-tight mb-1">
-              Reset your password
+              {t('forgot.title')}
             </h1>
             <p className="text-earthy-cocoaSoft text-sm mb-6">
-              Enter your email and we'll send you a link to reset it.
+              {t('forgot.body')}
             </p>
 
             <label
               htmlFor="forgot-email"
               className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2"
             >
-              Email
+              {t('signin.email')}
             </label>
             <input
               id="forgot-email"
@@ -117,16 +122,16 @@ export default function ForgotPassword() {
             )}
 
             <PrimaryButton type="submit" disabled={loading} className="mt-4">
-              {loading ? 'Sending…' : 'Send reset link'}
+              {loading ? t('forgot.sending') : t('forgot.send')}
             </PrimaryButton>
 
             <p className="text-center mt-4 text-sm text-earthy-cocoaSoft">
-              Remembered it?{' '}
+              {t('forgot.remembered')}{' '}
               <Link
                 to="/signin"
                 className="text-earthy-cocoa font-bold underline underline-offset-2"
               >
-                Sign in
+                {t('signin.title')}
               </Link>
             </p>
 
@@ -138,7 +143,7 @@ export default function ForgotPassword() {
                 href={supportMailto('Help resetting my Winking Star password')}
                 className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
               >
-                Need help?
+                {t('signin.needHelp')}
               </a>
             </p>
           </form>

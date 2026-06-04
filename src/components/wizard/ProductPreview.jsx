@@ -1,5 +1,7 @@
 import { colors } from '@weekly-superstar/shared/tokens'
 import { THEMES } from '@weekly-superstar/shared/themes'
+import { useI18n } from '../../lib/i18n'
+import FluentEmoji from '../FluentEmoji'
 
 const earthy = colors.earthy
 
@@ -40,66 +42,62 @@ const SCREEN_BY_VARIANT = {
 
 const SCREENS = {
   home: {
-    aria: 'Preview of the Winking Star home board with family progress and kid cards',
+    ariaKey: 'preview.home.aria',
     banner: onboardingBanner('home-star-hero'),
-    title: "Lili's Family",
-    date: 'Sunday 17 May',
-    heroTitle: 'Today',
-    heroMeta: '0/40 done',
-    badge: '4 KIDS',
+    titleKey: 'preview.familyTitle',
+    dateKind: 'sampleDate',
+    badgeValue: '4',
+    badgeLabelKey: 'preview.kids',
   },
   themes: {
-    aria: 'Preview of the Winking Star theme picker with real board banner styles',
+    ariaKey: 'preview.themes.aria',
     banner: themeBanner('deer'),
-    title: 'Pick their world',
-    date: 'Themes update every board screen',
-    heroTitle: 'Forest',
-    heroMeta: 'Mimi selected',
-    badge: 'LIVE',
+    titleKey: 'preview.pickWorld',
+    dateKey: 'preview.themesDate',
+    badgeKey: 'preview.live',
   },
   activity: {
-    aria: 'Preview of the Winking Star activity board with star spots',
+    ariaKey: 'preview.activity.aria',
     banner: themeBanner('deer'),
-    title: 'Activity',
-    date: "Choose a superstar, then tap today's big star spots.",
-    heroTitle: "Mimi's star week",
-    heroMeta: '20/70 stars',
-    badge: 'TODAY',
+    titleKey: 'preview.activity',
+    dateKey: 'preview.activityHint',
+    badgeKey: 'preview.today',
   },
   progress: {
-    aria: 'Preview of the Winking Star progress screen with records and celebrations',
+    ariaKey: 'preview.progress.aria',
     banner: themeBanner('rocket'),
-    title: 'Progress',
-    date: 'Stars, streaks, badges, and treasure progress.',
-    heroTitle: 'Progress saved',
-    heroMeta: '42 stars this week',
-    badge: 'SYNCED',
+    titleKey: 'preview.progress',
+    dateKey: 'preview.progressHint',
+    badgeKey: 'preview.synced',
   },
 }
 
 const KIDS = [
-  { name: 'Lili', emoji: '🦊', done: 6, total: 10, banner: 'fox', theme: THEMES.fox, buddy: 'fish', buddyEmoji: '🐠' },
-  { name: 'Ben', emoji: '🐘', done: 3, total: 10, banner: 'elephant', theme: THEMES.elephant, buddy: 'mystery egg', buddyEmoji: '🥚' },
-  { name: 'Hah', emoji: '🦋', done: 7, total: 10, banner: 'rocket', theme: THEMES.rocket, buddy: 'moon rover', buddyEmoji: '🛸' },
-  { name: 'Mimi', emoji: '🦌', done: 20, total: 70, banner: 'deer', theme: THEMES.deer, buddy: 'galaxy', buddyEmoji: '🌌' },
+  { id: 'lili', nameKey: 'preview.kid.lili', emoji: '🦊', done: 6, total: 10, banner: 'fox', theme: THEMES.fox, buddyKey: 'preview.pet.fish', buddyEmoji: '🐠' },
+  { id: 'ben', nameKey: 'preview.kid.ben', emoji: '🐘', done: 3, total: 10, banner: 'elephant', theme: THEMES.elephant, buddyKey: 'preview.pet.mysteryEgg', buddyEmoji: '🥚' },
+  { id: 'hah', nameKey: 'preview.kid.hah', emoji: '🦋', done: 7, total: 10, banner: 'rocket', theme: THEMES.rocket, buddyKey: 'preview.pet.moonRover', buddyEmoji: '🛸' },
+  { id: 'mimi', nameKey: 'preview.kid.mimi', emoji: '🦌', done: 20, total: 70, banner: 'deer', theme: THEMES.deer, buddyKey: 'preview.pet.galaxy', buddyEmoji: '🌌' },
 ]
 
+const FEATURED_KID_ID = 'mimi'
+
 const TASKS = [
-  { label: 'Sleep', emoji: '😴', done: true },
-  { label: 'Bath', emoji: '🛁', done: false },
-  { label: 'Teeth', emoji: '🪥', done: true },
-  { label: 'Reading', emoji: '📚', done: false },
+  { labelKey: 'preview.task.sleep', emoji: '😴', done: true },
+  { labelKey: 'preview.task.bath', emoji: '🛁', done: false },
+  { labelKey: 'preview.task.teeth', emoji: '🪥', done: true },
+  { labelKey: 'preview.task.reading', emoji: '📚', done: false },
 ]
 
 const RECORDS = [
-  { label: 'Streak', value: '8 days' },
-  { label: 'Badges', value: '12' },
-  { label: 'Best week', value: '42 stars' },
+  { labelKey: 'preview.record.streak', valueKey: 'preview.record.streakValue' },
+  { labelKey: 'preview.record.badges', valueKey: 'preview.record.badgesValue' },
+  { labelKey: 'preview.record.bestWeek', valueKey: 'preview.record.bestWeekValue' },
 ]
 
 export default function ProductPreview({ className = '', compact = false, variant = 'board' }) {
+  const { t, formatDate } = useI18n()
   const screenKey = SCREEN_BY_VARIANT[variant] || 'home'
-  const screen = SCREENS[screenKey]
+  const screen = translateScreen(SCREENS[screenKey], t, formatDate)
   const previewHeight = compact ? 460 : 640
 
   return (
@@ -316,19 +314,23 @@ export default function ProductPreview({ className = '', compact = false, varian
 }
 
 function HomeScreen({ compact }) {
+  const { t } = useI18n()
+
   return (
     <div>
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
-          <p className="ws-ui-title font-display text-[26px] font-black leading-none">Today</p>
-          <p className="ws-ui-subtitle mt-1 text-[14px] font-black">0/40 done</p>
+          <p className="ws-ui-title font-display text-[26px] font-black leading-none">{t('preview.today')}</p>
+          <p className="ws-ui-subtitle mt-1 text-[14px] font-black">
+            {t('preview.doneCount', { done: 0, total: 40 })}
+          </p>
         </div>
-        <ProgressBadge value="4" label="KIDS" />
+        <ProgressBadge value="4" label={t('preview.kids')} />
       </div>
       <ProgressTrack width="28%" />
       <div className={compact ? 'mt-4 grid gap-2' : 'mt-4 grid grid-cols-2 gap-3'}>
         {KIDS.slice(0, compact ? 2 : 4).map((kid, index) => (
-          <KidSummaryCard key={kid.name} kid={kid} delay={index * 70} />
+          <KidSummaryCard key={kid.id} kid={kid} delay={index * 70} />
         ))}
       </div>
     </div>
@@ -340,7 +342,7 @@ function ThemeScreen({ compact }) {
     <div>
       <div className={compact ? 'grid gap-3' : 'grid grid-cols-2 gap-3'}>
         {KIDS.slice(0, compact ? 2 : 4).map((kid, index) => (
-          <ThemeTile key={kid.name} kid={kid} selected={kid.name === 'Mimi'} delay={index * 70} />
+          <ThemeTile key={kid.id} kid={kid} selected={kid.id === FEATURED_KID_ID} delay={index * 70} />
         ))}
       </div>
     </div>
@@ -348,35 +350,37 @@ function ThemeScreen({ compact }) {
 }
 
 function ActivityScreen({ compact }) {
+  const { t } = useI18n()
+
   return (
     <div>
       <div className="mb-3 flex items-center gap-2">
         {KIDS.map((kid, index) => (
           <span
-            key={kid.name}
+            key={kid.id}
             className={[
               'ws-app-pop flex h-9 items-center justify-center rounded-full border text-lg',
-              kid.name === 'Mimi' ? 'w-[92px] gap-2 border-[color:var(--ws-ui-accent)] bg-white px-2' : 'w-9 border-[color:var(--ws-ui-border)] bg-[color:var(--ws-ui-surface-muted)]',
+              kid.id === FEATURED_KID_ID ? 'w-[92px] gap-2 border-[color:var(--ws-ui-accent)] bg-white px-2' : 'w-9 border-[color:var(--ws-ui-border)] bg-[color:var(--ws-ui-surface-muted)]',
             ].join(' ')}
             style={{ animationDelay: `${index * 60}ms` }}
           >
-            <span aria-hidden>{kid.emoji}</span>
-            {kid.name === 'Mimi' ? <span className="ws-ui-subtitle text-[13px] font-black">Mimi</span> : null}
+            <FluentEmoji emoji={kid.emoji} size={22} />
+            {kid.id === FEATURED_KID_ID ? <span className="ws-ui-subtitle text-[13px] font-black">{t(kid.nameKey)}</span> : null}
           </span>
         ))}
       </div>
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <p className="ws-ui-title font-display text-[24px] font-black leading-none">Mimi&apos;s star week</p>
-          <p className="ws-ui-subtitle mt-1 text-[13px] font-black">Tap big rows for stars.</p>
+          <p className="ws-ui-title font-display text-[24px] font-black leading-none">{t('preview.mimiStarWeek')}</p>
+          <p className="ws-ui-subtitle mt-1 text-[13px] font-black">{t('preview.tapRows')}</p>
         </div>
-        <ProgressBadge value="20/70" label="STARS" />
+        <ProgressBadge value="20/70" label={t('preview.stars')} />
       </div>
       <ProgressTrack width="42%" />
       <WeekStrip />
       <div className={compact ? 'mt-3 grid gap-2' : 'mt-3 grid grid-cols-2 gap-2'}>
         {TASKS.slice(0, compact ? 2 : 4).map((task, index) => (
-          <TaskRow key={task.label} task={task} delay={index * 80} />
+          <TaskRow key={task.labelKey} task={task} delay={index * 80} />
         ))}
       </div>
     </div>
@@ -384,32 +388,34 @@ function ActivityScreen({ compact }) {
 }
 
 function ProgressScreen({ compact }) {
+  const { t } = useI18n()
+
   return (
     <div>
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <p className="ws-ui-title font-display text-[24px] font-black leading-none">Mimi&apos;s progress</p>
-          <p className="ws-ui-subtitle mt-1 text-[13px] font-black">Stars, badges, and saved records.</p>
+          <p className="ws-ui-title font-display text-[24px] font-black leading-none">{t('preview.mimiProgress')}</p>
+          <p className="ws-ui-subtitle mt-1 text-[13px] font-black">{t('preview.progressSub')}</p>
         </div>
-        <ProgressBadge value="42" label="STARS" />
+        <ProgressBadge value="42" label={t('preview.stars')} />
       </div>
       <ProgressTrack width="78%" />
       <div className={compact ? 'mt-4 grid gap-3' : 'mt-4 grid grid-cols-[1.1fr_0.9fr] gap-3'}>
         <div className="ws-ui-soft-card rounded-[18px] border p-3">
-          <p className="ws-ui-muted text-[11px] font-black uppercase tracking-[0.08em]">Recent celebrations</p>
-          <CelebrationLine icon="🎉" title="Mimi hatched galaxy" meta='Named "Nova"' delay={60} />
-          <CelebrationLine icon="🥈" title="Silver badge" meta="36 stars this week" delay={120} />
-          <CelebrationLine icon="⭐" title="Best week" meta="42 stars" delay={180} />
+          <p className="ws-ui-muted text-[11px] font-black uppercase tracking-[0.08em]">{t('preview.recentCelebrations')}</p>
+          <CelebrationLine icon="🎉" title={t('preview.hatchedGalaxy')} meta={t('preview.namedNova')} delay={60} />
+          <CelebrationLine icon="🥈" title={t('preview.silverBadge')} meta={t('preview.starsThisWeek', { count: 36 })} delay={120} />
+          <CelebrationLine icon="⭐" title={t('preview.bestWeek')} meta={t('preview.record.bestWeekValue')} delay={180} />
         </div>
         <div className="grid gap-2">
           {RECORDS.map((record, index) => (
             <div
-              key={record.label}
+              key={record.labelKey}
               className="ws-ui-soft-card ws-app-pop flex items-center justify-between rounded-[16px] px-3 py-2"
               style={{ animationDelay: `${80 + index * 70}ms` }}
             >
-              <span className="ws-ui-muted text-[12px] font-black">{record.label}</span>
-              <span className="ws-ui-title text-[12px] font-black">{record.value}</span>
+              <span className="ws-ui-muted text-[12px] font-black">{t(record.labelKey)}</span>
+              <span className="ws-ui-title text-[12px] font-black">{t(record.valueKey)}</span>
             </div>
           ))}
         </div>
@@ -438,6 +444,8 @@ function PreviewBanner({ banner }) {
 }
 
 function KidSummaryCard({ kid, delay }) {
+  const { t } = useI18n()
+
   return (
     <div
       className="ws-ui-card ws-app-pop rounded-[18px] border p-3"
@@ -445,11 +453,13 @@ function KidSummaryCard({ kid, delay }) {
     >
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--ws-ui-surface-muted)] text-xl ring-2 ring-white shadow-earthy-card">
-          {kid.emoji}
+          <FluentEmoji emoji={kid.emoji} size={27} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="ws-ui-title truncate text-[17px] font-black">{kid.name}</p>
-          <p className="ws-ui-muted text-[12px] font-black">{kid.done}/{kid.total} today</p>
+          <p className="ws-ui-title truncate text-[17px] font-black">{t(kid.nameKey)}</p>
+          <p className="ws-ui-muted text-[12px] font-black">
+            {t('preview.todayCount', { done: kid.done, total: kid.total })}
+          </p>
         </div>
       </div>
       <ProgressTrack width={kid.done ? '45%' : '6%'} small />
@@ -458,6 +468,8 @@ function KidSummaryCard({ kid, delay }) {
 }
 
 function ThemeTile({ kid, selected, delay }) {
+  const { t } = useI18n()
+
   return (
     <div
       className={[
@@ -477,20 +489,22 @@ function ThemeTile({ kid, selected, delay }) {
         </picture>
       </div>
       <div className="flex items-center gap-2 p-3">
-        <span className="text-xl" aria-hidden>{kid.emoji}</span>
+        <FluentEmoji emoji={kid.emoji} size={26} />
         <div>
-          <p className="ws-ui-title text-[15px] font-black">{kid.name}</p>
-          <p className="ws-ui-muted text-[11px] font-black">{kid.done}/{kid.total} today</p>
+          <p className="ws-ui-title text-[15px] font-black">{t(kid.nameKey)}</p>
+          <p className="ws-ui-muted text-[11px] font-black">
+            {t('preview.todayCount', { done: kid.done, total: kid.total })}
+          </p>
         </div>
       </div>
       <div className="mx-3 mb-3 flex items-center gap-2 rounded-[14px] bg-[color:var(--ws-ui-surface-muted)] px-2.5 py-2">
-        <span className="text-base" aria-hidden>{kid.buddyEmoji}</span>
+        <FluentEmoji emoji={kid.buddyEmoji} size={20} />
         <span className="min-w-0 flex-1 truncate text-[11px] font-black text-[color:var(--ws-ui-text-secondary)]">
-          {kid.buddy}
+          {t(kid.buddyKey)}
         </span>
         {selected ? (
           <span className="rounded-full bg-[color:var(--ws-ui-accent)] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.06em] text-white">
-            Active
+            {t('preview.active')}
           </span>
         ) : null}
       </div>
@@ -499,6 +513,8 @@ function ThemeTile({ kid, selected, delay }) {
 }
 
 function TaskRow({ task, delay }) {
+  const { t } = useI18n()
+
   return (
     <div
       className="ws-ui-soft-card ws-app-pop flex min-h-[62px] items-center gap-3 rounded-[18px] px-3 py-2"
@@ -508,8 +524,8 @@ function TaskRow({ task, delay }) {
         {task.emoji}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="ws-ui-title truncate text-[16px] font-black">{task.label}</p>
-        <p className="ws-ui-muted truncate text-[11px] font-extrabold">Tap this row for a star</p>
+        <p className="ws-ui-title truncate text-[16px] font-black">{t(task.labelKey)}</p>
+        <p className="ws-ui-muted truncate text-[11px] font-extrabold">{t('preview.taskHint')}</p>
       </div>
       <span
         className={[
@@ -524,14 +540,15 @@ function TaskRow({ task, delay }) {
 }
 
 function WeekStrip() {
+  const { t } = useI18n()
   const days = [
-    ['M', '11', '0'],
-    ['T', '12', '0'],
-    ['W', '13', '7'],
-    ['T', '14', '✓'],
-    ['F', '15', '0'],
-    ['S', '16', '0'],
-    ['S', '17', '0'],
+    [t('preview.week.mon'), '11', '0'],
+    [t('preview.week.tue'), '12', '0'],
+    [t('preview.week.wed'), '13', '7'],
+    [t('preview.week.thu'), '14', '✓'],
+    [t('preview.week.fri'), '15', '0'],
+    [t('preview.week.sat'), '16', '0'],
+    [t('preview.week.sun'), '17', '0'],
   ]
   return (
     <div className="ws-week-strip">
@@ -549,11 +566,33 @@ function WeekStrip() {
           <p className="ws-week-count">
             {count}
           </p>
-          {index === 6 ? <p className="mt-0.5 text-[8px] font-black">Today</p> : null}
+          {index === 6 ? <p className="mt-0.5 text-[8px] font-black">{t('preview.today')}</p> : null}
         </div>
       ))}
     </div>
   )
+}
+
+function translateScreen(screen, t, formatDate) {
+  const date = screen.dateKind === 'sampleDate'
+    ? formatDate(new Date(2026, 4, 17), {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+      })
+    : t(screen.dateKey)
+
+  const badge = screen.badgeKey
+    ? t(screen.badgeKey)
+    : `${screen.badgeValue} ${t(screen.badgeLabelKey)}`
+
+  return {
+    aria: t(screen.ariaKey),
+    banner: screen.banner,
+    title: t(screen.titleKey),
+    date,
+    badge,
+  }
 }
 
 function CelebrationLine({ icon, title, meta, delay }) {

@@ -11,37 +11,39 @@ import { play } from '../lib/sounds'
 import Egg from './Egg'
 import PromptModal from './PromptModal'
 import PetGallery from './PetGallery'
+import { useI18n } from '../lib/i18n'
 
-function stageMessage(stage, petName, remaining) {
+function stageMessage(stage, remaining, t) {
   // Subtitles stand alone — the title already shows the pet's name + form, so
   // we keep this to a short mood phrase ("snoozing 💤") instead of repeating.
   switch (stage) {
-    case 0: return `${remaining} stars to hatch`
-    case 1: return 'Snoozing 💤'
-    case 2: return 'Growing 🌱'
-    case 3: return 'Happy 😊'
-    case 4: return 'Buzzing ✨'
-    case 5: return 'Getting cool 😎'
-    case 6: return '🎉 All grown!'
-    default: return `${remaining} stars to hatch`
+    case 0: return t('pet.starsToHatch', { count: remaining })
+    case 1: return t('pet.stage.snoozing')
+    case 2: return t('pet.stage.growing')
+    case 3: return t('pet.stage.happy')
+    case 4: return t('pet.stage.buzzing')
+    case 5: return t('pet.stage.cool')
+    case 6: return t('pet.fullyGrown')
+    default: return t('pet.starsToHatch', { count: remaining })
   }
 }
 
-function stageTitle(stage, petName, eggName, kidName, savedPetName) {
+function stageTitle(stage, petName, eggName, kidName, savedPetName, t) {
   if (stage === 0) return eggName
-  if (stage === 6) return savedPetName || `${kidName}'s ${petName}`
-  const pn = petName || 'pet'
-  if (stage === 1) return `Baby ${pn}`
-  if (stage === 2) return `Growing ${pn}`
-  if (stage === 3) return `Young ${pn}`
-  if (stage === 4) return `Strong ${pn}`
-  if (stage === 5) return `Cool ${pn}`
+  if (stage === 6) return savedPetName || t('pet.kidPetTitle', { name: kidName, pet: petName })
+  const pn = petName || t('pet.generic')
+  if (stage === 1) return t('pet.stageTitle.baby', { pet: pn })
+  if (stage === 2) return t('pet.stageTitle.growing', { pet: pn })
+  if (stage === 3) return t('pet.stageTitle.young', { pet: pn })
+  if (stage === 4) return t('pet.stageTitle.strong', { pet: pn })
+  if (stage === 5) return t('pet.stageTitle.cool', { pet: pn })
   return pn
 }
 
 function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, ref) {
+  const { t, eggName: translatedEggName, petSpeciesName } = useI18n()
   const theme = THEMES[kid.theme] || THEMES.football
-  const eggName = EGG_NAMES[kid.theme] || 'Mystery Egg'
+  const eggName = translatedEggName(kid.theme, EGG_NAMES[kid.theme] || 'Mystery Egg')
   const thisWeekKey = getWeekKey()
   const weekKey = kid.weekKey || thisWeekKey
   // Prefer the persisted chainKey on the kid doc when it's for THIS week
@@ -51,7 +53,8 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
   const persistedChainKey = kid.weekKey === thisWeekKey ? kid.chainKey : null
   const chainKey = persistedChainKey || assignedChain || chainFor(kid.id, thisWeekKey)
   const stage = progressToStage(totalStars, HATCH_GOAL)
-  const { emoji: petEmoji, name: petDisplayName } = petAtStage(chainKey, stage)
+  const { emoji: petEmoji, name: rawPetDisplayName } = petAtStage(chainKey, stage)
+  const petDisplayName = petSpeciesName(rawPetDisplayName)
   const isHatched = totalStars >= HATCH_GOAL
   const petName = kid.petName
   const petNameDeclined = kid.petNameDeclined
@@ -103,8 +106,8 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
   useEffect(() => {
     const prevIdx = prevChainIdxRef.current
     if (chainIdx > prevIdx) {
-      const fromName = chain.names[prevIdx] || 'baby'
-      const toName = chain.names[chainIdx] || petDisplayName
+      const fromName = petSpeciesName(chain.names[prevIdx] || 'baby')
+      const toName = petSpeciesName(chain.names[chainIdx] || rawPetDisplayName)
       setEvolution({
         kind: chainIdx === chain.stages.length - 1 ? 'adult' : 'evolve',
         from: fromName,
@@ -118,12 +121,12 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
       setEvolution({
         kind: 'hatch',
         from: null,
-        to: chain.names[0] || petDisplayName,
+        to: petSpeciesName(chain.names[0] || rawPetDisplayName),
         emoji: chain.stages[0],
       })
     }
     prevChainIdxRef.current = chainIdx
-  }, [chainIdx])
+  }, [chain, chainIdx, petSpeciesName, rawPetDisplayName])
 
   // Open the naming prompt when the egg FIRST cracks open (stage 1), not at full grown.
   // Gated on !evolution so the growth-celebration popup shows first.
@@ -148,14 +151,14 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
     const trimmed = (name || '').trim()
     if (!trimmed) {
       // Cancel or empty — remember the decline so we don't nag
-      try {
-        await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), { petNameDeclined: true })
-      } catch (e) { toast.error('Could not save — try again') }
+    try {
+      await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), { petNameDeclined: true })
+    } catch (e) { toast.error(t('board.saveError')) }
       return
     }
     try {
       await updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), { petName: trimmed })
-    } catch (e) { toast.error('Could not save pet name — try again') }
+    } catch (e) { toast.error(t('board.saveError')) }
   }
 
   const dismissModal = async () => {
@@ -173,6 +176,7 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
   }
 
   const openGallery = () => setGalleryOpen(true)
+  const petNameTarget = [petEmoji, petDisplayName].filter(Boolean).join(' ')
 
   return (
     <>
@@ -217,17 +221,17 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[11px] font-bold uppercase" style={{ color: theme.deeper }}>
-            {kid.name}'s Mystery Pet
+            {t('pet.mysteryPetForKid', { name: kid.name })}
           </div>
           <div className="text-base font-extrabold truncate text-earthy-cocoa">
-            {stageTitle(stage, petDisplayName, eggName, kid.name, petName)}
+            {stageTitle(stage, petDisplayName, eggName, kid.name, petName, t)}
           </div>
           <div className="text-[11px] italic mt-0.5 truncate" style={{ color: theme.deeper, opacity: 0.85 }}>
             {stage === 0
-              ? `${remaining} stars to hatch`
+              ? t('pet.starsToHatch', { count: remaining })
               : stage === 6
-                ? '🎉 Fully grown!'
-                : stageMessage(stage, petDisplayName, remaining)}
+                ? t('pet.fullyGrown')
+                : stageMessage(stage, remaining, t)}
           </div>
         </div>
       </div>
@@ -240,14 +244,14 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         onSubmit={submitName}
         emoji={petEmoji}
         emojiClassName="text-7xl mb-3 leading-none"
-        title={`${kid.name}'s pet hatched!`}
-        submitLabel="Name it"
-        cancelLabel="Skip"
+        title={t('pet.hatchedTitle', { name: kid.name })}
+        submitLabel={t('pet.nameSubmit')}
+        cancelLabel={t('common.skip')}
         fields={[{
           name: 'name',
-          label: `Give ${petEmoji} a name`,
-          placeholder: 'e.g. Sunny',
-          defaultValue: petName || eggName.replace(' Egg', ''),
+          label: t('pet.nameLabel', { pet: petNameTarget }),
+          placeholder: t('pet.namePlaceholder'),
+          defaultValue: petName || petDisplayName || eggName.replace(' Egg', ''),
         }]}
       />
       <PetGallery
@@ -273,13 +277,15 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
         emoji={evolution?.kind === 'hatch' ? '🎉' : evolution?.kind === 'adult' ? '🏆' : '✨'}
         title={
           evolution?.kind === 'hatch'
-            ? `${kid.name}'s egg cracked!`
+            ? t('pet.evolution.eggCrackedTitle', { name: kid.name })
             : evolution?.kind === 'adult'
-              ? `${kid.name}'s pet is all grown!`
-              : `${kid.name}'s pet grew up!`
+              ? t('pet.evolution.adultTitle', { name: kid.name })
+              : t('pet.evolution.grewTitle', { name: kid.name })
         }
+        panelClassName="!max-w-lg !overflow-hidden"
       >
-        <div className="flex flex-col items-center py-4">
+        <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
+        <div className="flex flex-col items-center py-2">
           {evolution?.emoji && (
             <img
               src={`https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${
@@ -297,19 +303,22 @@ function MysteryPet({ kid, totalStars, boardId, assignedChain, onOpenSummary }, 
           )}
           <div className="text-center mt-3 text-earthy-cocoa font-bold">
             {evolution?.kind === 'hatch'
-              ? `Meet your baby ${evolution?.to} ${evolution?.emoji || ''}`
+              ? t('pet.evolution.meetBaby', { pet: evolution?.to, emoji: evolution?.emoji || '' }).trim()
               : evolution?.kind === 'adult'
-                ? `Your ${evolution?.from} is now a full-grown ${evolution?.to}! ${evolution?.emoji || ''}`
-                : `Your ${evolution?.from} grew into a ${evolution?.to}! ${evolution?.emoji || ''}`}
+                ? t('pet.evolution.adultBody', { from: evolution?.from, to: evolution?.to, emoji: evolution?.emoji || '' }).trim()
+                : t('pet.evolution.grewBody', { from: evolution?.from, to: evolution?.to, emoji: evolution?.emoji || '' }).trim()}
           </div>
         </div>
-        <button
-          onClick={() => setEvolution(null)}
-          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-          className="w-full py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
-        >
-          Yay!
-        </button>
+        </div>
+        <div className="mt-4 flex justify-end border-t border-earthy-divider pt-4">
+          <button
+            onClick={() => setEvolution(null)}
+            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-earthy-cocoaDark active:scale-[0.99] sm:w-auto sm:min-w-36"
+          >
+            {t('pet.evolution.confirm')}
+          </button>
+        </div>
       </Modal>
     </>
   )

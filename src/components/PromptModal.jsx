@@ -31,10 +31,18 @@ export default function PromptModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={title} emoji={emoji} emojiClassName={emojiClassName}>
-      <form onSubmit={submit}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      emoji={emoji}
+      emojiClassName={emojiClassName}
+      panelClassName="!max-w-xl !overflow-hidden"
+    >
+      <form onSubmit={submit} className="flex flex-col">
+        <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
         {fields.map((f, idx) => (
-          <div key={f.name} className={idx > 0 ? 'mt-3' : ''}>
+          <div key={f.name} className={idx > 0 ? 'mt-4' : ''}>
             {f.label && (
               <label className="text-xs font-bold text-earthy-cocoaSoft mb-1 block uppercase tracking-wide">{f.label}</label>
             )}
@@ -45,24 +53,27 @@ export default function PromptModal({
               onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
               placeholder={f.placeholder}
               inputMode={f.type === 'number' ? 'numeric' : undefined}
-              className="w-full px-3 py-3 rounded-xl border-2 border-earthy-divider bg-earthy-ivory focus:border-earthy-terracotta focus:outline-none text-base font-bold text-earthy-cocoa"
+              className="w-full px-3 py-3 rounded-xl border-2 border-earthy-divider bg-earthy-card focus:border-earthy-terracotta focus:outline-none text-base font-bold text-earthy-cocoa"
             />
           </div>
         ))}
-        <button
-          type="submit"
-          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-          className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
-        >
-          {submitLabel}
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full mt-2 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
-        >
-          {cancelLabel}
-        </button>
+        </div>
+        <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="submit"
+            style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+            className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-earthy-cocoaDark active:scale-[0.99] sm:w-auto sm:min-w-36"
+          >
+            {submitLabel}
+          </button>
+        </div>
       </form>
     </Modal>
   )

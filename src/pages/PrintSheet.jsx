@@ -114,6 +114,7 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
             height="100%"
             objectPosition="center center"
             imageScale={1.08}
+            borderRadius={0}
           />
         </div>
         {/* Single metadata QR — encodes board / kid / week. The CV pipeline

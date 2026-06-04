@@ -9,6 +9,7 @@ import { useToast } from '../contexts/ToastContext'
 import { celebrate } from '../lib/confetti'
 import { play } from '../lib/sounds'
 import MysteryBox from './MysteryBox'
+import { useI18n } from '../lib/i18n'
 
 // Small curated celebration pool — used for ~half of regular rewards to feel varied.
 // Everything else draws from the ACTIVITY's own emoji (a.emoji), so checking "Sleep"
@@ -29,6 +30,7 @@ function fallbackStickerFor(activity) {
 }
 
 export default function ActivityGrid({ kid, boardId }) {
+  const { t, formatDate, activityLabel } = useI18n()
   // Call fresh on every render — `getCurrentWeek()` is cheap date math, and the
   // previous `useMemo(..., [])` froze `days` at first render so post-midnight
   // writes could land under a different `dayKey` than StreakCounter reads.
@@ -62,12 +64,12 @@ export default function ActivityGrid({ kid, boardId }) {
       updates[`stickers.${key}`] = useRare ? randomRare() : stickerFor(activity)
       if (mystery) {
         if (useRare) {
-          prize = { emoji: updates[`stickers.${key}`], label: 'Rare sticker!' }
+          prize = { emoji: updates[`stickers.${key}`], label: t('board.rareSticker') }
         } else {
           const today = new Date()
           const bkey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
           updates[`bonusStars.${bkey}`] = ((kid.bonusStars || {})[bkey] || 0) + 3
-          prize = { emoji: '⭐⭐⭐', label: '+3 bonus stars!' }
+          prize = { emoji: '⭐⭐⭐', label: t('board.bonusStars') }
         }
       }
     }
@@ -94,7 +96,7 @@ export default function ActivityGrid({ kid, boardId }) {
         }
       }
     } catch (e) {
-      toast.error('Could not save — try again')
+      toast.error(t('board.saveError'))
     }
   }
 
@@ -108,39 +110,45 @@ export default function ActivityGrid({ kid, boardId }) {
       <div className="mb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
         <div>
           <h3 className="text-xl sm:text-2xl font-extrabold text-earthy-cocoa leading-tight">
-            This week
+            {t('board.thisWeek')}
           </h3>
           <p className="text-sm font-bold text-earthy-cocoaSoft">
-            Tap a circle to add a sticker star.
+            {t('board.tapCircle')}
           </p>
         </div>
         <div className="text-xs font-extrabold text-earthy-cocoaSoft">
-          Today is {days[safeTodayIndex]?.label}, {days[safeTodayIndex] ? `${monthShort(days[safeTodayIndex].date)} ${days[safeTodayIndex].date.getDate()}` : ''}
+          {days[safeTodayIndex]
+            ? t('board.todayIs', {
+                day: formatDate(days[safeTodayIndex].date, { weekday: 'short' }),
+                date: formatDate(days[safeTodayIndex].date, { month: 'short', day: 'numeric' }),
+              })
+            : ''}
         </div>
       </div>
 
       <table className="w-full min-w-[760px] text-center text-xs">
             <thead>
               <tr className="text-earthy-cocoaSoft">
-                <th className="text-left pl-4 py-3 font-bold sticky left-0 z-10 uppercase tracking-wide rounded-l-2xl bg-[#FFF4DF]">Activity</th>
+                <th className="text-left pl-4 py-3 font-bold sticky left-0 z-10 uppercase tracking-wide rounded-l-2xl bg-[#FFF4DF]">{t('activity.generic')}</th>
                 {days.map((d, dayIndex) => {
                   const isToday = dayIndex === safeTodayIndex
-                  const isWeekend = d.label === 'Sat' || d.label === 'Sun'
+                  const isWeekend = dayIndex >= 5
+                  const dayLabel = formatDate(d.date, { weekday: 'short' })
                   return (
                     <th
                       key={d.key}
                       className="px-1 py-3 font-bold relative bg-[#FFF4DF]"
                       style={isWeekend ? { background: weekendTint } : undefined}
                     >
-                      <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{d.label}</div>
+                      <div className={isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoa'}>{dayLabel}</div>
                       <div className={`text-[11px] font-bold ${isToday ? 'text-earthy-terracotta' : 'text-earthy-cocoaSoft'}`}>
-                        {monthShort(d.date)} {d.date.getDate()}
+                        {formatDate(d.date, { month: 'short', day: 'numeric' })}
                       </div>
                       {isToday && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-earthy-terracotta rounded-full" />}
                     </th>
                   )
                 })}
-                <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-2xl bg-[#FFF4DF]">Total</th>
+                <th className="pr-3 py-3 text-earthy-cocoa font-bold uppercase tracking-wide rounded-r-2xl bg-[#FFF4DF]">{t('board.total')}</th>
               </tr>
             </thead>
             <tbody className="[&_tr:first-child_td]:pt-3">
@@ -149,7 +157,7 @@ export default function ActivityGrid({ kid, boardId }) {
                 const scheduledDays = days.filter((_, dayIndex) => isDayScheduled(a.daysOfWeek, dayIndex + 1))
                 const rowTotal = scheduledDays.filter((d) => checks[`${a.id}-${d.key}`]).length
                 const rowBg = idx % 2 === 0 ? 'bg-earthy-card' : 'bg-earthy-ivory'
-                const label = a.label || 'Activity'
+                const label = activityLabel(a)
                 return (
                   <tr key={a.id} className={rowBg}>
                     <td
@@ -168,7 +176,8 @@ export default function ActivityGrid({ kid, boardId }) {
                     {days.map((d, dayIndex) => {
                       const checked = !!checks[`${a.id}-${d.key}`]
                       const scheduled = isDayScheduled(a.daysOfWeek, dayIndex + 1)
-                      const isWeekend = d.label === 'Sat' || d.label === 'Sun'
+                      const isWeekend = dayIndex >= 5
+                      const dayLabel = formatDate(d.date, { weekday: 'short' })
                       return (
                         <td
                           key={d.key}
@@ -179,7 +188,10 @@ export default function ActivityGrid({ kid, boardId }) {
                             type="button"
                             onClick={() => scheduled && toggle(a.id, d.key)}
                             disabled={!scheduled}
-                            aria-label={`${checked ? 'Uncheck' : 'Check'} ${label} for ${d.label}${!scheduled ? ' (not scheduled)' : checked ? ' (currently completed)' : ''}`}
+                            aria-label={[
+                              t(checked ? 'board.uncheckActivity' : 'board.checkActivity', { activity: label, day: dayLabel }),
+                              !scheduled ? `(${t('board.notScheduled')})` : checked ? `(${t('board.currentlyCompleted')})` : '',
+                            ].filter(Boolean).join(' ')}
                             aria-pressed={checked}
                             className="activity-check-cell w-12 h-12 rounded-full flex items-center justify-center text-lg transition-transform active:scale-90 mx-auto disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-earthy-terracotta"
                             style={{
@@ -208,6 +220,3 @@ export default function ActivityGrid({ kid, boardId }) {
 function isDayScheduled(daysOfWeek, isoIndex) {
   return !daysOfWeek || daysOfWeek.length === 0 || daysOfWeek.includes(isoIndex)
 }
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-function monthShort(d) { return MONTHS[d.getMonth()] }

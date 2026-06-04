@@ -5,6 +5,7 @@ import { ACTIVITY_COLORS, ACTIVITY_EMOJIS, ACTIVITY_PRESETS } from '../lib/theme
 import { useToast } from '../contexts/ToastContext'
 import Modal from './Modal'
 import ActivityRow from './ActivityRow'
+import { useI18n } from '../lib/i18n'
 
 const MAX_ACTIVITIES = 10
 
@@ -32,6 +33,7 @@ function pickRandomColor(existingColors) {
 // new ids append, 10-cap respected.
 export default function ActivitiesModal({ open, onClose, kid, boardId }) {
   const toast = useToast()
+  const { t, activityLabel } = useI18n()
   const [view, setView] = useState('list')
   const [editingId, setEditingId] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -64,7 +66,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
     try {
       await updateDoc(ref, { activities: next })
     } catch {
-      toast.error('Could not save tasks — try again')
+      toast.error(t('board.saveError'))
     } finally {
       setBusy(false)
     }
@@ -96,7 +98,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
     setPendingDelete({
       id,
       emoji: target?.emoji || '',
-      label: target?.label?.trim() || 'this activity',
+      label: target ? activityLabel(target) : t('activities.thisActivity'),
     })
   }
 
@@ -139,9 +141,9 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
           type="button"
           onClick={() => setView('list')}
           className="flex items-center text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa active:scale-[0.98]"
-          aria-label="Back"
+          aria-label={t('signup.back')}
         >
-          <span className="mr-1">←</span> Back
+          <span className="mr-1">←</span> {t('signup.back')}
         </button>
       )}
       <h2
@@ -155,78 +157,104 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
 
   return (
     <>
-    <Modal open={open} onClose={busy ? undefined : onClose}>
-      <div className="max-h-[65vh] overflow-y-auto">
+    <Modal
+      open={open}
+      onClose={busy ? undefined : onClose}
+      panelClassName="!max-w-[900px] !overflow-hidden"
+    >
+      <div className="flex h-[calc(100vh-8.5rem)] max-h-[720px] flex-col sm:h-auto sm:max-h-[calc(100vh-8.5rem)]">
         {view === 'list' && (
-          <div>
-            {renderHeader(kid.name ? `${kid.name}'s tasks` : 'Tasks', false)}
+          <div className="flex min-h-0 flex-1 flex-col">
+            {renderHeader(kid.name ? t('activities.titleForKid', { name: kid.name }) : t('activities.title'), false)}
 
-            <div className="flex flex-col gap-2">
-              {activities.map((a, i) => (
-                <ActivityRow
-                  key={a.id}
-                  activity={a}
-                  isFirst={i === 0}
-                  isLast={i === activities.length - 1}
-                  onLabelChange={(id, label) => updateActivity(id, { label })}
-                  onPickEmoji={(id) => {
-                    setEditingId(id)
-                    setView('emoji')
-                  }}
-                  onPickColor={(id) => {
-                    setEditingId(id)
-                    setView('color')
-                  }}
-                  onMoveUp={moveUp}
-                  onMoveDown={moveDown}
-                  onDelete={deleteActivity}
-                />
-              ))}
-              {activities.length === 0 && (
-                <div className="text-center text-sm text-earthy-cocoaSoft py-6">
-                  No tasks yet. Add one or apply a preset to get started.
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1 sm:pr-2">
+              {activities.length > 0 && (
+                <div className="mb-2 hidden grid-cols-[56px_minmax(260px,1fr)_72px_92px_52px] gap-3 px-3 text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft md:grid">
+                  <span>{t('kid.emoji')}</span>
+                  <span>{t('activityRow.taskName')}</span>
+                  <span>{t('activities.pickColor')}</span>
+                  <span>{t('kid.position')}</span>
+                  <span />
                 </div>
               )}
+              <div className="flex flex-col gap-2">
+                {activities.map((a, i) => (
+                  <ActivityRow
+                    key={a.id}
+                    activity={a}
+                    displayLabel={activityLabel(a)}
+                    isFirst={i === 0}
+                    isLast={i === activities.length - 1}
+                    labels={{
+                      taskName: t('activityRow.taskName'),
+                      changeEmoji: t('activityRow.changeEmoji'),
+                      changeColor: t('activityRow.changeColor'),
+                      moveUp: t('activityRow.moveUp'),
+                      moveDown: t('activityRow.moveDown'),
+                      delete: t('activityRow.delete'),
+                    }}
+                    onLabelChange={(id, label) => updateActivity(id, { label })}
+                    onPickEmoji={(id) => {
+                      setEditingId(id)
+                      setView('emoji')
+                    }}
+                    onPickColor={(id) => {
+                      setEditingId(id)
+                      setView('color')
+                    }}
+                    onMoveUp={moveUp}
+                    onMoveDown={moveDown}
+                    onDelete={deleteActivity}
+                  />
+                ))}
+                {activities.length === 0 && (
+                  <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory py-8 text-center text-sm font-bold text-earthy-cocoaSoft">
+                    {t('activities.empty')}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="flex gap-2 mt-4">
+            <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 md:flex-row md:items-center md:justify-between">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto">
+                <button
+                  type="button"
+                  onClick={addActivity}
+                  disabled={activities.length >= MAX_ACTIVITIES || busy}
+                  className="flex min-h-11 items-center justify-center gap-1 rounded-pill border border-earthy-divider bg-earthy-ivory px-4 font-bold text-earthy-cocoa active:scale-[0.98] disabled:opacity-40"
+                >
+                  <span>＋</span>
+                  <span>
+                    {t('activities.addTask', { count: activities.length, max: MAX_ACTIVITIES })}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView('preset')}
+                  className="flex min-h-11 items-center justify-center gap-1 rounded-pill border border-earthy-divider bg-earthy-ivory px-4 font-bold text-earthy-cocoa active:scale-[0.98]"
+                >
+                  <span>✨</span>
+                  <span>{t('activities.applyPreset')}</span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={addActivity}
-                disabled={activities.length >= MAX_ACTIVITIES || busy}
-                className="flex-1 py-3 rounded-pill bg-earthy-ivory border border-earthy-divider text-earthy-cocoa font-bold flex items-center justify-center gap-1 disabled:opacity-40 active:scale-[0.98]"
+                onClick={onClose}
+                disabled={busy}
+                style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+                className="flex min-h-12 w-full items-center justify-center rounded-pill px-6 font-bold transition-all hover:bg-earthy-cocoaDark active:scale-[0.99] disabled:opacity-50 md:w-auto md:min-w-40"
               >
-                <span>＋</span>
-                <span>
-                  Add task {activities.length}/{MAX_ACTIVITIES}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('preset')}
-                className="flex-1 py-3 rounded-pill bg-earthy-ivory border border-earthy-divider text-earthy-cocoa font-bold flex items-center justify-center gap-1 active:scale-[0.98]"
-              >
-                <span>✨</span>
-                <span>Apply preset</span>
+                {t('common.done')}
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={busy}
-              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="w-full mt-4 py-3 rounded-pill font-bold hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all disabled:opacity-50"
-            >
-              Done
-            </button>
           </div>
         )}
 
         {view === 'emoji' && (
-          <div>
-            {renderHeader('Pick an emoji', true)}
-            <div className="flex flex-wrap justify-center gap-1.5">
+          <div className="min-h-0 overflow-y-auto pr-1">
+            {renderHeader(t('activities.pickEmoji'), true)}
+            <div className="grid grid-cols-5 gap-2 sm:grid-cols-8 md:grid-cols-10">
               {ACTIVITY_EMOJIS.map((e) => (
                 <button
                   key={e}
@@ -245,9 +273,9 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
         )}
 
         {view === 'color' && (
-          <div>
-            {renderHeader('Pick a colour', true)}
-            <div className="flex flex-wrap justify-center gap-3">
+          <div className="min-h-0 overflow-y-auto pr-1">
+            {renderHeader(t('activities.pickColor'), true)}
+            <div className="grid grid-cols-5 gap-3 sm:grid-cols-8 md:grid-cols-10">
               {ACTIVITY_COLORS.map((hex) => (
                 <button
                   key={hex}
@@ -256,7 +284,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                     if (editingId) updateActivity(editingId, { color: hex })
                     setView('list')
                   }}
-                  aria-label={`Colour ${hex}`}
+                  aria-label={`${t('activities.pickColor')} ${hex}`}
                   className="w-12 h-12 rounded-full border-[3px] border-earthy-cream shadow-earthy-soft active:scale-[0.94]"
                   style={{ background: hex }}
                 />
@@ -266,13 +294,12 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
         )}
 
         {view === 'preset' && (
-          <div>
-            {renderHeader('Apply a preset', true)}
+          <div className="min-h-0 overflow-y-auto pr-1">
+            {renderHeader(t('activities.applyPresetTitle'), true)}
             <p className="text-xs text-earthy-cocoaSoft mb-3">
-              Adds the preset's tasks to the list. Existing tasks with the same id are
-              kept as-is. Cap of {MAX_ACTIVITIES} tasks is respected.
+              {t('activities.presetHelp', { max: MAX_ACTIVITIES })}
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {Object.entries(ACTIVITY_PRESETS).map(([key, preset]) => (
                 <button
                   key={key}
@@ -280,7 +307,9 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                   onClick={() => applyPreset(key)}
                   className="rounded-2xl p-3 bg-earthy-ivory border border-earthy-divider hover:border-earthy-terracotta text-left active:scale-[0.99] transition-all"
                 >
-                  <div className="font-bold mb-1.5 text-earthy-cocoa">{preset.label}</div>
+                  <div className="font-bold mb-1.5 text-earthy-cocoa">
+                    {t(`activityPreset.${key}`) === `activityPreset.${key}` ? preset.label : t(`activityPreset.${key}`)}
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {preset.activities.map((a) => (
                       <span
@@ -289,7 +318,7 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
                         style={{ background: a.color }}
                       >
                         <span className="mr-1 text-base leading-none">{a.emoji}</span>
-                        <span>{a.label}</span>
+                        <span>{activityLabel(a)}</span>
                       </span>
                     ))}
                   </div>
@@ -304,28 +333,32 @@ export default function ActivitiesModal({ open, onClose, kid, boardId }) {
       open={!!pendingDelete}
       onClose={() => setPendingDelete(null)}
       emoji="🗑"
-      title="Remove this activity?"
+      title={t('activities.removeTitle')}
+      panelClassName="!max-w-lg !overflow-hidden"
     >
-      <div className="text-sm text-earthy-cocoa font-bold mb-2">
-        {pendingDelete?.emoji ? `${pendingDelete.emoji} ` : ''}
-        {pendingDelete?.label || 'this activity'}
+      <div className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-4">
+        <div className="text-sm text-earthy-cocoa font-bold mb-2">
+          {pendingDelete?.emoji ? `${pendingDelete.emoji} ` : ''}
+          {pendingDelete?.label || t('activities.thisActivity')}
+        </div>
+        <p className="text-sm text-earthy-cocoaSoft">
+          {kid?.name
+            ? t('activities.removeBody', { name: kid.name })
+            : t('activities.removeBodyFallback')}
+        </p>
       </div>
-      <p className="text-sm text-earthy-cocoaSoft mb-5">
-        Removing this activity from {kid?.name || 'this superstar'}'s board can't be undone.
-        Any stars they've earned for it this week will disappear.
-      </p>
-      <div className="flex gap-3">
+      <div className="mt-4 flex flex-col gap-2 border-t border-earthy-divider pt-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           onClick={() => setPendingDelete(null)}
-          className="flex-1 py-3 rounded-xl bg-earthy-divider text-earthy-cocoa font-bold text-sm"
+          className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
         >
-          Cancel
+          {t('activities.cancel')}
         </button>
         <button
           onClick={confirmDeleteActivity}
-          className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+          className="flex min-h-12 w-full items-center justify-center rounded-pill bg-red-500 px-6 font-bold text-white transition-colors hover:bg-red-600 active:scale-[0.99] sm:w-auto sm:min-w-32"
         >
-          Remove
+          {t('activities.remove')}
         </button>
       </div>
     </Modal>

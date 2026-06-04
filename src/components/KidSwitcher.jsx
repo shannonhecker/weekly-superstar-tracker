@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext'
 import NewKidModal from './NewKidModal'
 import { KidAvatar } from './KidAvatar'
 import PrimaryButton from './PrimaryButton'
+import { useI18n } from '../lib/i18n'
 
 const FREE_KID_LIMIT = 2
 const PREMIUM_KID_LIMIT = 6
@@ -19,6 +20,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId, emptyAddLabel 
   const location = useLocation()
   const [promptOpen, setPromptOpen] = useState(false)
   const toast = useToast()
+  const { t } = useI18n()
 
   const setActive = (id) => {
     const params = new URLSearchParams(location.search)
@@ -69,7 +71,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId, emptyAddLabel 
       })
       setPromptOpen(false)
     } catch (e) {
-      toast.error('Could not add superstar — try again')
+      toast.error(t('board.saveError'))
     }
   }
 
@@ -133,7 +135,7 @@ export default function KidSwitcher({ kids, activeKidId, boardId, emptyAddLabel 
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-2 border-dashed border-earthy-divider text-earthy-cocoaSoft hover:border-earthy-terracotta hover:text-earthy-terracotta transition-colors bg-earthy-card shadow-earthy-card">
           +
         </div>
-        <span className="text-xs font-bold text-earthy-cocoaSoft">Add</span>
+        <span className="text-xs font-bold text-earthy-cocoaSoft">{t('board.add')}</span>
       </button>
 
       {modal}

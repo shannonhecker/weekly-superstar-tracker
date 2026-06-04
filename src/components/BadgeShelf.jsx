@@ -6,6 +6,7 @@ import { play } from '../lib/sounds'
 import { ACHIEVEMENTS, evaluateAchievements } from '../lib/achievements'
 import { getCurrentWeek } from '../lib/week'
 import Modal from './Modal'
+import { useI18n } from '../lib/i18n'
 
 export const BADGE_TIERS = [
   { stars: 15, emoji: '🥉', label: 'Bronze', description: 'Earn 15 stars this week' },
@@ -15,6 +16,7 @@ export const BADGE_TIERS = [
 ]
 
 export default function BadgeShelf({ totalStars, themeKey, kid }) {
+  const { t } = useI18n()
   const theme = THEMES[themeKey] || THEMES.football
   const { days } = getCurrentWeek()
   const earnedIds = evaluateAchievements(kid || {}, { totalStars, days })
@@ -53,6 +55,10 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
   const earnedStarCount = BADGE_TIERS.filter((t) => totalStars >= t.stars).length
 
   const openDetails = () => setDetailsOpen(true)
+  const badgeLabel = (tier) => t(`badge.${String(tier.label).toLowerCase()}`)
+  const badgeDescription = (tier) => t(`badge.desc${tier.stars}`)
+  const achievementLabel = (achievement) => t(`achievement.${achievement.id}.label`)
+  const achievementDescription = (achievement) => t(`achievement.${achievement.id}.desc`)
 
   return (
     <>
@@ -66,16 +72,16 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
       >
         <div className="flex items-center justify-between mb-1 gap-2">
           <div className="text-xs font-bold truncate" style={{ color: theme.deeper }}>
-            🏅 Badge Shelf
+            🏅 {t('badge.title')}
           </div>
           <div className="text-[10px] font-bold shrink-0" style={{ color: theme.deeper, opacity: 0.6 }}>
-            {earnedStarCount + earnedIds.length}/{BADGE_TIERS.length + ACHIEVEMENTS.length}<span className="hidden sm:inline"> · tap ›</span>
+            <span>{t('badge.progressTap', { done: earnedStarCount + earnedIds.length, total: BADGE_TIERS.length + ACHIEVEMENTS.length })} ›</span>
           </div>
         </div>
 
         {!anyStarBadge && !anyAchievement ? (
           <div className="text-[12px] font-bold" style={{ color: theme.deeper, opacity: 0.7 }}>
-            Earn 15+ stars for a badge!
+            {t('badge.empty')}
           </div>
         ) : (
           <>
@@ -85,7 +91,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                 return (
                   <div
                     key={tier.stars}
-                    title={`${tier.stars} stars`}
+                    title={t('badge.starsTitle', { count: tier.stars })}
                     className={`text-2xl transition-all ${flashIdx === idx ? 'badge-flash' : ''}`}
                     style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                   >
@@ -100,7 +106,7 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
                 return (
                   <div
                     key={a.id}
-                    title={a.label}
+                    title={achievementLabel(a)}
                     className={`text-lg transition-all ${flashAchievement === a.id ? 'badge-flash' : ''}`}
                     style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
                   >
@@ -113,72 +119,86 @@ export default function BadgeShelf({ totalStars, themeKey, kid }) {
         )}
       </div>
 
-      <Modal open={detailsOpen} onClose={() => setDetailsOpen(false)} emoji="🏅" title={`${kid?.name || ''}'s Badges`}>
-        <div className="max-h-[65vh] overflow-y-auto">
-          {/* Star tier badges */}
-          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">⭐ Star Badges</div>
-          {BADGE_TIERS.map((tier) => {
-            const earned = totalStars >= tier.stars
-            const remaining = Math.max(0, tier.stars - totalStars)
-            const pct = Math.min(100, Math.round((totalStars / tier.stars) * 100))
-            return (
-              <div key={tier.stars} className="flex items-center gap-3 p-2 rounded-xl mb-1">
-                <div
-                  className="text-3xl shrink-0"
-                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
-                >
-                  {tier.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-earthy-cocoa">{tier.label}</div>
-                  <div className="text-[11px] text-earthy-cocoaSoft font-bold truncate">
-                    {tier.description}
-                  </div>
-                  {!earned && (
-                    <div className="mt-1">
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E0D5' }}>
-                        <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
+      <Modal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        emoji="🏅"
+        title={t('badge.modalTitle', { name: kid?.name || '' })}
+        panelClassName="!max-w-[780px] !overflow-hidden"
+      >
+        <div className="flex h-[calc(100vh-13rem)] max-h-[650px] flex-col sm:h-auto sm:max-h-[calc(100vh-9rem)]">
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1 sm:pr-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <section className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-3">
+                <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">⭐ {t('badge.starBadges')}</div>
+                {BADGE_TIERS.map((tier) => {
+                  const earned = totalStars >= tier.stars
+                  const remaining = Math.max(0, tier.stars - totalStars)
+                  const pct = Math.min(100, Math.round((totalStars / tier.stars) * 100))
+                  return (
+                    <div key={tier.stars} className="mb-2 flex items-center gap-3 rounded-xl bg-earthy-card p-2">
+                      <div
+                        className="text-3xl shrink-0"
+                        style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
+                      >
+                        {tier.emoji}
                       </div>
-                      <div className="text-[11px] text-earthy-cocoaSoft font-bold mt-0.5">{remaining} more to go</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-earthy-cocoa">{badgeLabel(tier)}</div>
+                        <div className="text-[11px] text-earthy-cocoaSoft font-bold">
+                          {badgeDescription(tier)}
+                        </div>
+                        {!earned && (
+                          <div className="mt-1">
+                            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E0D5' }}>
+                              <div className="h-full transition-all duration-500" style={{ width: pct + '%', background: theme.deeper }} />
+                            </div>
+                            <div className="text-[11px] text-earthy-cocoaSoft font-bold mt-0.5">{t('badge.moreToGo', { count: remaining })}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-[10px] font-bold" style={{ color: earned ? theme.deeper : '#BBB' }}>
+                        {earned ? t('badge.earned') : `${totalStars}/${tier.stars}`}
+                      </div>
                     </div>
-                  )}
-                </div>
-                <div className="shrink-0 text-[10px] font-bold" style={{ color: earned ? theme.deeper : '#BBB' }}>
-                  {earned ? '✓ Earned' : `${totalStars}/${tier.stars}`}
-                </div>
-              </div>
-            )
-          })}
+                  )
+                })}
+              </section>
 
-          {/* Achievement badges */}
-          <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mt-4 mb-2">🎯 Achievements</div>
-          {ACHIEVEMENTS.map((a) => {
-            const earned = earnedIds.includes(a.id)
-            return (
-              <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl mb-1">
-                <div
-                  className="text-3xl shrink-0"
-                  style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
-                >
-                  {a.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-earthy-cocoa">{a.label}</div>
-                  <div className="text-[11px] text-earthy-cocoaSoft font-bold">{a.description}</div>
-                </div>
-                <div className="shrink-0 text-[10px] font-bold" style={{ color: earned ? theme.deeper : '#BBB' }}>
-                  {earned ? '✓ Earned' : 'Locked'}
-                </div>
-              </div>
-            )
-          })}
+              <section className="rounded-2xl border border-earthy-divider bg-earthy-ivory p-3">
+                <div className="font-bold text-xs text-earthy-cocoaSoft uppercase tracking-wide mb-2">🎯 {t('badge.achievements')}</div>
+                {ACHIEVEMENTS.map((a) => {
+                  const earned = earnedIds.includes(a.id)
+                  return (
+                    <div key={a.id} className="mb-2 flex items-center gap-3 rounded-xl bg-earthy-card p-2">
+                      <div
+                        className="text-3xl shrink-0"
+                        style={{ filter: earned ? 'none' : 'grayscale(1)', opacity: earned ? 1 : 0.55 }}
+                      >
+                        {a.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-earthy-cocoa">{achievementLabel(a)}</div>
+                        <div className="text-[11px] text-earthy-cocoaSoft font-bold">{achievementDescription(a)}</div>
+                      </div>
+                      <div className="shrink-0 text-[10px] font-bold" style={{ color: earned ? theme.deeper : '#BBB' }}>
+                        {earned ? t('badge.earned') : t('badge.locked')}
+                      </div>
+                    </div>
+                  )
+                })}
+              </section>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end border-t border-earthy-divider pt-4">
+            <button
+              onClick={() => setDetailsOpen(false)}
+              className="flex min-h-11 w-full items-center justify-center rounded-pill px-5 font-bold text-earthy-cocoaSoft transition-all hover:text-earthy-cocoa active:scale-[0.99] sm:w-auto"
+            >
+              {t('common.close')}
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setDetailsOpen(false)}
-          className="w-full mt-4 py-2 rounded-pill text-earthy-cocoaSoft font-bold text-sm hover:text-earthy-cocoa"
-        >
-          Close
-        </button>
       </Modal>
     </>
   )

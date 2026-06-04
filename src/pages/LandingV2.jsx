@@ -4,7 +4,9 @@ import { useAuth } from '../contexts/AuthContext'
 import { findUserBoards } from '../lib/boards'
 import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
+import LocaleSelectorButton from '../components/LocaleSelectorButton'
 import AnimatedRasterBanner from '../components/AnimatedRasterBanner'
+import { useI18n } from '../lib/i18n'
 
 // Sibling Landing prototype — full-bleed marketing shell on cream (#FCEEE1)
 // matching the wizard background. Lives at /landing-v2 so the live `/` route
@@ -16,6 +18,7 @@ import AnimatedRasterBanner from '../components/AnimatedRasterBanner'
 // follow-up PR (PR-3b) requiring explicit user go.
 export default function LandingV2() {
   const { user, loading } = useAuth()
+  const { t } = useI18n()
   const [boardId, setBoardId] = useState(null)
   const [checking, setChecking] = useState(true)
 
@@ -47,12 +50,15 @@ export default function LandingV2() {
             Winking Star
           </span>
         </div>
-        <Link
-          to="/signin"
-          className="text-sm sm:text-base font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-2 transition-colors"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-2">
+          <LocaleSelectorButton compact />
+          <Link
+            to="/signin"
+            className="text-sm sm:text-base font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-2 transition-colors"
+          >
+            {t('nav.signIn')}
+          </Link>
+        </div>
       </nav>
 
       <section className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto px-5 sm:px-8 pt-4 pb-8 text-center">
@@ -73,40 +79,40 @@ export default function LandingV2() {
           Winking Star
         </h1>
         <p className="mt-4 text-base sm:text-lg font-bold text-earthy-cocoaSoft leading-relaxed max-w-xl">
-          A weekly achievement tracker the whole family can share. Track habits, earn badges, grow pets together.
+          {t('landing.subtitleBody')}
         </p>
         <div className="mt-8 w-full max-w-md space-y-3">
           <Link
-            to="/"
+            to="/signup"
             style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
             className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
           >
-            Create a family board
+            {t('landing.createBoard')}
           </Link>
           <Link
             to="/signin"
             style={{ color: '#5A3A2E', backgroundColor: '#F4C8A8' }}
             className="block w-full px-6 py-4 rounded-pill font-bold text-base hover:bg-earthy-terracottaSoftHover active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2"
           >
-            Sign in
+            {t('nav.signIn')}
           </Link>
           <Link
-            to="/?guest=1"
+            to="/signup?guest=1"
             className="block mt-4 text-sm font-bold text-earthy-cocoaSoft hover:text-earthy-cocoa underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill text-center"
           >
-            Try it first. No sign-up needed.
+            {t('landing.tryFirst')}
           </Link>
         </div>
       </section>
 
       <div className="mt-auto px-5 sm:px-8 pb-6 text-center">
         <p className="text-xs text-earthy-cocoaSoft/70">
-          Got an invite link? Tap it and sign in to join.
+          {t('landing.invite')}
         </p>
         <p className="mt-3 text-[11px] text-earthy-cocoaSoft/70 font-bold">
-          <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">Privacy</Link>
+          <Link to="/privacy" className="underline underline-offset-2 hover:text-earthy-cocoa">{t('nav.privacy')}</Link>
           {' · '}
-          <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">Terms</Link>
+          <Link to="/terms" className="underline underline-offset-2 hover:text-earthy-cocoa">{t('nav.terms')}</Link>
         </p>
       </div>
     </main>

@@ -34,6 +34,7 @@ import WizardStepCard from '../components/wizard/WizardStepCard'
 import Icon from '../components/Icon'
 import Logo from '../components/Logo'
 import TrustPills from '../components/TrustPills'
+import { useI18n } from '../lib/i18n'
 
 // Direction B onboarding — 4 self-paced steps that replace the legacy single-form
 // signup. The page intentionally renders without a heavy white card: just cream,
@@ -53,6 +54,7 @@ const TOTAL_STEPS = 4
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const { user, loading: authLoading } = useAuth()
   const [searchParams] = useSearchParams()
   const isUpgrade = searchParams.get('upgrade') === '1'
@@ -77,7 +79,7 @@ export default function SignUp() {
       return () => { cancelled = true }
     }
     if (!user) {
-      navigate('/', { replace: true })
+      navigate('/signup', { replace: true })
     }
   }, [isUpgrade, authLoading, user, navigate])
 
@@ -114,7 +116,7 @@ export default function SignUp() {
   const goBack = () => setStep((s) => Math.max(1, s - 1))
   const goGuest = () => {
     setError('')
-    if (!isGuest) navigate('/?guest=1')
+    if (!isGuest) navigate('/signup?guest=1')
     setStep((s) => (s === 1 ? 2 : s))
   }
 
@@ -123,11 +125,11 @@ export default function SignUp() {
     if (loading) return
     setError('')
     if (!isGuest && password.length < 8) {
-      setError('Use at least 8 characters for your password.')
+      setError(t('signup.error.passwordLength'))
       return
     }
     if (!isUpgrade && !isInviteSignup && !parentConsent) {
-      setError('A grown-up needs to accept the family data notice before creating a board.')
+      setError(t('signup.error.parentNotice'))
       return
     }
     setLoading(true)
@@ -297,7 +299,7 @@ export default function SignUp() {
         return
       }
       if (!parentConsent) {
-        setError('A grown-up needs to accept the family data notice before starting a board.')
+        setError(t('signup.error.parentNoticeGuest'))
         return
       }
       const boardId = await createBoardForNewUser(currentUser, {
@@ -358,15 +360,15 @@ export default function SignUp() {
                 type="button"
                 onClick={goBack}
                 className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm flex items-center gap-1 transition-colors"
-                aria-label="Go to previous step"
+                aria-label={t('signup.previousA11y')}
               >
-                <span aria-hidden="true">←</span> Back
+                <span aria-hidden="true">←</span> {t('signup.back')}
               </button>
             ) : <span />}
             <div
               className="flex items-center gap-1.5"
               role="progressbar"
-              aria-label={`Step ${step} of ${TOTAL_STEPS}`}
+              aria-label={t('signup.stepA11y', { step, total: TOTAL_STEPS })}
               aria-valuenow={step}
               aria-valuemin={1}
               aria-valuemax={TOTAL_STEPS}
@@ -449,18 +451,18 @@ export default function SignUp() {
       <p className="w-full max-w-lg mx-auto text-center text-sm text-earthy-cocoaSoft mt-6">
         {isUpgrade ? (
           <>
-            Already a member?{' '}
+            {t('signup.upgradePrompt')}{' '}
             <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
-              Use your existing account →
+              {t('signup.upgradeLink')}
             </Link>
             <br />
-            <span className="text-xs">(your demo won't transfer)</span>
+            <span className="text-xs">{t('signup.upgradeNote')}</span>
           </>
         ) : (
           <>
-            Already have an account?{' '}
+            {t('signup.memberPrompt')}{' '}
             <Link to="/signin" className="text-earthy-cocoa font-bold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill">
-              Sign in
+              {t('signup.memberLink')}
             </Link>
           </>
         )}
@@ -486,17 +488,18 @@ export default function SignUp() {
 
 /* ---------- Step 4 (guest) — start without an account ---------- */
 function StepGuestStart({ kidName, error, loading, onStart }) {
+  const { t } = useI18n()
   const trimmed = (kidName || '').trim()
   return (
     <div className="pt-2">
       <WizardStepCard illustration="intro-cake" heroHeight={178}>
         <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-          Ready when you are.
+          {t('signup.guest.title')}
         </h2>
         <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
           {trimmed
-            ? `${trimmed}’s board is set up. You can save it with an email any time.`
-            : 'Your board is set up. You can save it with an email any time.'}
+            ? t('signup.guest.bodyNamed', { name: trimmed })
+            : t('signup.guest.body')}
         </p>
 
         {error && (
@@ -506,7 +509,7 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
         )}
 
         <PrimaryButton type="button" onClick={onStart} disabled={loading} aria-disabled={loading}>
-          {loading ? 'Setting up…' : 'Start your board'}
+          {loading ? t('signup.guest.settingUp') : t('signup.guest.start')}
         </PrimaryButton>
       </WizardStepCard>
     </div>
@@ -515,6 +518,8 @@ function StepGuestStart({ kidName, error, loading, onStart }) {
 
 /* ---------- Step 1 — value prop ---------- */
 function StepIntro({ isGuest, onStart, onTryGuest }) {
+  const { t } = useI18n()
+
   return (
     <div className="text-center">
       <div className="mb-6 max-w-md mx-auto lg:hidden">
@@ -525,19 +530,19 @@ function StepIntro({ isGuest, onStart, onTryGuest }) {
         <span className="text-2xl font-black text-earthy-cocoa">Winking Star</span>
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
-        Meet your weekly superstar.
+        {t('landing.title')}
       </h1>
       <p className="text-earthy-cocoaSoft text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-5">
         <span className="block text-xl font-black leading-snug text-earthy-cocoa sm:text-2xl">
-          A family achievement board.
+          {t('landing.subtitleLead')}
         </span>
         <span className="mt-3 block">
-          Open the weekly chart, switch superstars, and keep today&apos;s stars moving with your child nearby.
+          {t('landing.subtitleBody')}
         </span>
       </p>
       <TrustPills className="mb-4" />
       <p className="mb-9 text-[11px] font-extrabold uppercase tracking-[0.12em] text-earthy-cocoaSoft sm:text-xs">
-        Web app · Also available on iPhone
+        {t('landing.platform')}
       </p>
       <div className="flex flex-col items-center gap-3">
         <button
@@ -545,7 +550,7 @@ function StepIntro({ isGuest, onStart, onTryGuest }) {
           onClick={onStart}
           className="inline-flex items-center gap-2 px-8 py-4 rounded-pill bg-earthy-cocoa text-earthy-cream font-bold text-base shadow-earthy-soft hover:bg-earthy-cocoaDark hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
         >
-          {isGuest ? 'Set up a test board' : 'Start'} <span aria-hidden="true">▶</span>
+          {isGuest ? t('signup.intro.setUpTest') : t('signup.intro.start')} <span aria-hidden="true">▶</span>
         </button>
         {onTryGuest ? (
           <button
@@ -553,7 +558,7 @@ function StepIntro({ isGuest, onStart, onTryGuest }) {
             onClick={onTryGuest}
             className="text-sm font-extrabold text-earthy-cocoaSoft underline underline-offset-4 transition-colors hover:text-earthy-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill"
           >
-            Try the board first, no sign-up
+            {t('signup.intro.tryGuest')}
           </button>
         ) : null}
       </div>
@@ -563,6 +568,7 @@ function StepIntro({ isGuest, onStart, onTryGuest }) {
 
 /* ---------- Step 2 — pick theme ---------- */
 function StepTheme({ selected, onSelect, onContinue }) {
+  const { t, themeLabel } = useI18n()
   const entries = Object.entries(THEMES)
   const scrollerRef = useRef(null)
   const itemRefs = useRef({})
@@ -633,10 +639,10 @@ function StepTheme({ selected, onSelect, onContinue }) {
   return (
     <div className="pt-14">
       <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-        Pick a theme for them.
+        {t('signup.theme.title')}
       </h2>
       <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-5">
-        Swipe to explore. You can change this anytime.
+        {t('signup.theme.body')}
       </p>
 
       {/* Horizontal swipe. Scroll-snap centers whichever card is in view; the
@@ -647,7 +653,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
         <div
           ref={scrollerRef}
           role="radiogroup"
-          aria-label="Choose a theme"
+          aria-label={t('signup.theme.group')}
           className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[15%] pb-2 sm:px-[20%]"
           style={{
             scrollbarWidth: 'none',
@@ -657,17 +663,18 @@ function StepTheme({ selected, onSelect, onContinue }) {
         >
           <style>{`
             /* Hide native scrollbar inside the swiper without affecting other scrollers. */
-            [role="radiogroup"][aria-label="Choose a theme"]::-webkit-scrollbar { display: none; }
+            [role="radiogroup"]::-webkit-scrollbar { display: none; }
           `}</style>
-          {entries.map(([key, t]) => {
+          {entries.map(([key, theme]) => {
             const isSelected = selected === key
+            const label = themeLabel(key, theme.label)
             return (
               <button
                 key={key}
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                aria-label={`${t.label} theme`}
+                aria-label={t('signup.theme.ariaLabel', { theme: label })}
                 ref={(el) => { itemRefs.current[key] = el }}
                 onClick={() => { onSelect(key); scrollToTheme(key) }}
                 className={[
@@ -684,7 +691,8 @@ function StepTheme({ selected, onSelect, onContinue }) {
                   height={200}
                   animated={isSelected}
                   loading={isSelected ? 'eager' : 'lazy'}
-                  imageScale={1.16}
+                  imageScale={1.14}
+                  borderRadius={0}
                 />
               </button>
             )
@@ -697,7 +705,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
               type="button"
               onClick={() => moveTheme(-1)}
               disabled={!canGoPrevious}
-              aria-label="Previous theme"
+              aria-label={t('signup.theme.previous')}
               className={[
                 'absolute left-[12%] top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full',
                 'border border-earthy-dividerCream bg-white/95 text-earthy-cocoa shadow-earthy-card backdrop-blur-sm transition-all sm:flex',
@@ -712,7 +720,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
               type="button"
               onClick={() => moveTheme(1)}
               disabled={!canGoNext}
-              aria-label="Next theme"
+              aria-label={t('signup.theme.next')}
               className={[
                 'absolute right-[12%] top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full',
                 'border border-earthy-dividerCream bg-white/95 text-earthy-cocoa shadow-earthy-card backdrop-blur-sm transition-all sm:flex',
@@ -733,7 +741,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
           className="font-display font-black text-earthy-cocoa text-2xl tracking-tight min-h-[2rem]"
           aria-live="polite"
         >
-          {selectedTheme?.label || ' '}
+          {selectedTheme ? themeLabel(selected, selectedTheme.label) : ' '}
         </p>
         <div className="flex justify-center items-center gap-1.5 mt-3" aria-hidden="true">
           {entries.map(([key], idx) => (
@@ -746,7 +754,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
                 'block h-1.5 rounded-full transition-all',
                 idx === activeIdx ? 'w-4 bg-earthy-cocoa' : 'w-1.5 bg-earthy-divider hover:bg-earthy-cocoaSoft',
               ].join(' ')}
-              aria-label={`Jump to theme ${idx + 1}`}
+              aria-label={t('signup.theme.jump', { number: idx + 1 })}
             />
           ))}
         </div>
@@ -764,7 +772,7 @@ function StepTheme({ selected, onSelect, onContinue }) {
             : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed',
         ].join(' ')}
       >
-        {selected ? 'Continue ▶' : 'Pick one to continue'}
+        {selected ? t('signup.theme.continue') : t('signup.theme.pickOne')}
       </button>
     </div>
   )
@@ -772,6 +780,8 @@ function StepTheme({ selected, onSelect, onContinue }) {
 
 /* ---------- Step 3 — first kid ---------- */
 function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsent, onNext, onSkip }) {
+  const { t } = useI18n()
+
   if (!parentConsent) {
     return <ParentConsentGate onAccept={onConsent} />
   }
@@ -784,14 +794,14 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
     >
       <WizardStepCard illustration="intro-friend" heroHeight={184}>
         <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-          Tell me about them.
+          {t('signup.kid.title')}
         </h2>
         <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
-          For ages 3 to 12. You can add more kids after this.
+          {t('signup.kid.body')}
         </p>
 
         <label htmlFor="kid-name" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Their name
+          {t('signup.kid.name')}
         </label>
         <input
           id="kid-name"
@@ -800,24 +810,24 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
           onChange={(e) => setName(e.target.value)}
           autoComplete="off"
           autoFocus
-          placeholder="What do they go by?"
+          placeholder={t('signup.kid.namePlaceholder')}
           required
           className="w-full px-4 py-3 mb-5 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa placeholder:text-earthy-cocoaSoft/60 transition-colors"
         />
 
         <label className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Birthday <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">(optional)</span>
+          {t('signup.kid.birthday')} <span className="font-normal normal-case tracking-normal text-earthy-cocoaSoft/70">({t('signup.kid.optional')})</span>
         </label>
         <div className="mb-2">
           <EarthyDatePicker
             value={birthday}
             onChange={setBirthday}
-            placeholder="Add a birthday"
-            ariaLabel="Pick a birthday"
+            placeholder={t('signup.kid.birthdayPlaceholder')}
+            ariaLabel={t('signup.kid.birthdayA11y')}
           />
         </div>
         <p className="text-xs text-earthy-cocoaSoft/80 mb-8 leading-relaxed">
-          We use this to celebrate their birthday-week with a special banner. Skip if you’d rather not.
+          {t('signup.kid.birthdayHelp')}
         </p>
 
         <div className="flex items-center gap-3">
@@ -826,7 +836,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
             onClick={onSkip}
             className="text-earthy-cocoaSoft hover:text-earthy-cocoa font-bold text-sm underline underline-offset-2 transition-colors"
           >
-            Skip birthday
+            {t('signup.kid.skipBirthday')}
           </button>
           <button
             type="submit"
@@ -839,7 +849,7 @@ function StepKid({ name, setName, birthday, setBirthday, parentConsent, onConsen
                 : 'bg-earthy-divider text-earthy-cocoaSoft cursor-not-allowed',
             ].join(' ')}
           >
-            Next ▶
+            {t('signup.kid.next')}
           </button>
         </div>
       </WizardStepCard>
@@ -862,22 +872,24 @@ function StepAccount({
   isInviteSignup,
   onTryGuest,
 }) {
+  const { t } = useI18n()
+
   return (
     <form onSubmit={onSubmit} className="pt-2">
       <WizardStepCard illustration="intro-cake" heroHeight={184}>
         <h2 className="font-display font-black text-earthy-cocoa text-3xl sm:text-4xl tracking-tight mb-2">
-          {isUpgrade ? 'Save your board.' : isInviteSignup ? 'Join your family.' : 'One last step.'}
+          {isUpgrade ? t('signup.account.titleUpgrade') : isInviteSignup ? t('signup.account.titleInvite') : t('signup.account.title')}
         </h2>
         <p className="text-earthy-cocoaSoft text-sm sm:text-base mb-7">
           {isUpgrade
-            ? 'Add an email so you can come back to it from any device.'
+            ? t('signup.account.bodyUpgrade')
             : isInviteSignup
-              ? 'Create a parent account, then we will add you to the shared board.'
-              : 'Create your account so we can save their board.'}
+              ? t('signup.account.bodyInvite')
+              : t('signup.account.body')}
         </p>
 
         <label htmlFor="signup-email" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Email
+          {t('signup.account.email')}
         </label>
         <input
           id="signup-email"
@@ -890,7 +902,7 @@ function StepAccount({
         />
 
         <label htmlFor="signup-password" className="block text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft mb-2">
-          Password
+          {t('signup.account.password')}
         </label>
         <input
           id="signup-password"
@@ -902,7 +914,7 @@ function StepAccount({
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-3 mb-2 rounded-xl bg-earthy-ivory border-2 border-earthy-divider focus:border-earthy-cocoa focus:ring-2 focus:ring-earthy-cocoa/20 outline-none font-bold text-earthy-cocoa transition-colors"
         />
-        <p className="text-xs text-earthy-cocoaSoft/80 mb-5">At least 8 characters.</p>
+        <p className="text-xs text-earthy-cocoaSoft/80 mb-5">{t('signup.account.passwordHelp')}</p>
 
         {error && (
           <div role="alert" className="mb-4 px-4 py-3 rounded-xl bg-semantic-errorBg text-semantic-errorText text-sm font-bold">
@@ -911,13 +923,13 @@ function StepAccount({
         )}
 
         <PrimaryButton type="submit" disabled={loading} aria-disabled={loading}>
-          {loading ? 'Creating…' : 'Create →'}
+          {loading ? t('signup.account.creating') : t('signup.account.create')}
         </PrimaryButton>
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-6" role="presentation">
           <span className="flex-1 h-px bg-earthy-divider" />
-          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">or</span>
+          <span className="text-xs font-bold tracking-wider uppercase text-earthy-cocoaSoft">{t('signup.account.or')}</span>
           <span className="flex-1 h-px bg-earthy-divider" />
         </div>
 
@@ -927,20 +939,20 @@ function StepAccount({
             onClick={onApple}
             disabled={loading}
             aria-disabled={loading}
-            aria-label="Continue with Apple"
+            aria-label={t('signup.account.apple')}
             className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
           >
-            <span aria-hidden="true"></span> Continue with Apple
+            <span aria-hidden="true"></span> {t('signup.account.apple')}
           </button>
           <button
             type="button"
             onClick={onGoogle}
             disabled={loading}
             aria-disabled={loading}
-            aria-label="Continue with Google"
+            aria-label={t('signup.account.google')}
             className="w-full py-3.5 rounded-pill bg-earthy-ivory border-2 border-earthy-divider text-earthy-cocoa font-bold text-sm hover:border-earthy-cocoaSoft disabled:opacity-60 disabled:hover:border-earthy-divider transition-colors flex items-center justify-center gap-2"
           >
-            <span aria-hidden="true">G</span> Continue with Google
+            <span aria-hidden="true">G</span> {t('signup.account.google')}
           </button>
         </div>
 
@@ -952,7 +964,7 @@ function StepAccount({
                 onClick={onTryGuest}
                 className="mb-4 font-extrabold text-earthy-cocoa underline underline-offset-4 transition-colors hover:text-earthy-cocoaDark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-earthy-cocoa focus-visible:ring-offset-2 rounded-pill"
               >
-                Test the board without signing up
+                {t('signup.account.testWithoutSignup')}
               </button>
               <br />
             </>
@@ -961,7 +973,7 @@ function StepAccount({
             href={supportMailto('Help with Winking Star signup')}
             className="underline underline-offset-2 hover:text-earthy-cocoa transition-colors"
           >
-            Need help?
+            {t('signup.account.needHelp')}
           </a>
         </p>
       </WizardStepCard>
