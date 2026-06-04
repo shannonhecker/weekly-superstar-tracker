@@ -27,14 +27,7 @@ const WEB_DEST = path.join(ROOT, 'public/onboarding-art/hero')
 // and produces WebP variants at the listed widths.
 //
 // To add a new asset: add an entry. Both `from` and `to` are relative.
-const MANIFEST = [
-  {
-    from: 'header-art/family-board.png',
-    to: 'family-hero.png',
-    widths: [376, 768, 1200],
-    fallbackChain: ['header-art/family-board-simple.png'],
-  },
-]
+const MANIFEST = []
 
 const QUALITY = 78
 const EFFORT = 6
