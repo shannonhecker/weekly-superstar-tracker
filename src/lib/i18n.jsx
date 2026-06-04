@@ -2475,7 +2475,12 @@ export function normalizeLanguageTag(tag) {
 export function normalizeRegionTag(tag) {
   if (!tag || typeof tag !== 'string') return null
   const parts = tag.replace('_', '-').split('-')
-  for (const part of parts) {
+  // In a multi-subtag locale ("fr-CA") the first subtag is the language and
+  // must not be read as a region — the region codes FR/ES/DE collide with the
+  // language codes fr/es/de, so scanning the language part would resolve
+  // "fr-CA" to FR instead of CA. A bare region code ("CA") is a single part.
+  const candidates = parts.length > 1 ? parts.slice(1) : parts
+  for (const part of candidates) {
     const upper = part.toUpperCase()
     if (REGIONS.includes(upper)) return upper
   }
