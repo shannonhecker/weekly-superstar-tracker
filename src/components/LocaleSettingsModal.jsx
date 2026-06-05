@@ -71,8 +71,8 @@ export default function LocaleSettingsModal({ open, onClose }) {
                   }`}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-extrabold text-earthy-cocoa">{title}</span>
-                    <span className="mt-0.5 block truncate text-xs font-bold text-earthy-cocoaSoft">
+                    <span className="block leading-snug text-sm font-extrabold text-earthy-cocoa">{title}</span>
+                    <span className="mt-0.5 block leading-snug text-xs font-bold text-earthy-cocoaSoft">
                       {isSystem ? t('locale.languageSystemSubtitle') : subtitle}
                     </span>
                   </span>
@@ -114,8 +114,8 @@ export default function LocaleSettingsModal({ open, onClose }) {
                   }`}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-extrabold text-earthy-cocoa">{title}</span>
-                    <span className="mt-0.5 block truncate text-[11px] font-bold text-earthy-cocoaSoft">
+                    <span className="block leading-snug text-sm font-extrabold text-earthy-cocoa">{title}</span>
+                    <span className="mt-0.5 block leading-snug text-[11px] font-bold text-earthy-cocoaSoft">
                       {isSystem ? t('locale.regionSystemSubtitle') : subtitle}
                     </span>
                   </span>
