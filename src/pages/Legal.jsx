@@ -68,7 +68,7 @@ function LegalPage({ title, children }) {
           <div className="flex items-center gap-3">
             <Logo size={44} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">Winking Star</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-earthy-cocoaSoft">{t('brand.name')}</p>
               <h1 className="font-display text-3xl font-black tracking-tight text-earthy-cocoa">{title}</h1>
             </div>
           </div>

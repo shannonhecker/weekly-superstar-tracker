@@ -58,7 +58,7 @@ export default function Landing() {
             aria-label="Winking Star home"
           >
             <Logo size={40} />
-            <span className="text-lg font-black text-earthy-cocoa sm:text-xl">Winking Star</span>
+            <span className="text-lg font-black text-earthy-cocoa sm:text-xl">{t('brand.name')}</span>
           </Link>
           <div className="flex items-center gap-2">
             <LocaleSelectorButton />

@@ -47,7 +47,7 @@ export default function LandingV2() {
         <div className="flex items-center gap-2">
           <Logo size={40} />
           <span className="text-lg sm:text-xl font-extrabold text-earthy-cocoa">
-            Winking Star
+            {t('brand.name')}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export default function LandingV2() {
           />
         </div>
         <h1 className="mt-8 text-4xl sm:text-5xl font-extrabold tracking-tight text-earthy-cocoa">
-          Winking Star
+          {t('brand.name')}
         </h1>
         <p className="mt-4 text-base sm:text-lg font-bold text-earthy-cocoaSoft leading-relaxed max-w-xl">
           {t('landing.subtitleBody')}
