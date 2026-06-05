@@ -15,6 +15,7 @@ import {
   progressToStage,
 } from '../lib/themes'
 import { formatWeekRange, getWeekKey } from '../lib/week'
+import { useI18n } from '../lib/i18n'
 
 // Canonical sheet padding inside the printable page. These percentages MUST
 // match GRID_TOP_PADDING / BOTTOM / LEFT / RIGHT in functions/src/sheet-scan.ts
@@ -82,6 +83,7 @@ function buildSheetUrl(boardId, kidId, weekKey) {
 }
 
 function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
+  const { t } = useI18n()
   return (
     <div
       className="absolute left-0 right-0 top-0 flex flex-col gap-[1.4mm] px-[4mm] pt-[2.5mm]"
@@ -167,7 +169,7 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
                 border: `1px solid ${SHEET.dividerCream}`,
               }}
             >
-              Winking Star
+              {t('brand.name')}
             </span>
             <span
               className="h-[1.5mm] w-[1.5mm] rounded-full"
