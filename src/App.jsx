@@ -1,7 +1,31 @@
 import { Component, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
+import { useI18n } from './lib/i18n'
 import LogoLoader from './components/LogoLoader'
+
+// Localized fallback for the error boundary. Functional so it can use the
+// i18n hook (the boundary itself must be a class). Rendered inside
+// I18nProvider, so useI18n resolves.
+function ErrorFallback() {
+  const { t } = useI18n()
+  return (
+    <main id="main" className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory font-jakarta">
+      <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center p-8">
+        <h1 className="font-extrabold text-earthy-cocoa text-2xl mb-2">{t('error.title')}</h1>
+        <p className="text-earthy-cocoaSoft text-sm mb-5">{t('error.body')}</p>
+        <button
+          type="button"
+          onClick={() => { window.location.reload() }}
+          style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
+          className="px-5 py-3 rounded-pill font-bold text-sm hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
+        >
+          {t('error.reload')}
+        </button>
+      </div>
+    </main>
+  )
+}
 
 // Catches render-time throws from any route. Suspense (below) only catches
 // thrown promises for lazy chunks; it does NOT catch synchronous errors.
@@ -17,26 +41,7 @@ class RouteErrorBoundary extends Component {
   }
   render() {
     if (this.state.error) {
-      return (
-        <main id="main" className="min-h-screen flex items-center justify-center px-5 bg-earthy-ivory font-jakarta">
-          <div className="bg-earthy-card rounded-3xl shadow-earthy-lifted ring-1 ring-earthy-divider max-w-md w-full text-center p-8">
-            <h1 className="font-extrabold text-earthy-cocoa text-2xl mb-2">
-              Something went sideways.
-            </h1>
-            <p className="text-earthy-cocoaSoft text-sm mb-5">
-              Refresh the page — and let us know if it keeps happening.
-            </p>
-            <button
-              type="button"
-              onClick={() => { window.location.reload() }}
-              style={{ color: '#FFFAF0', backgroundColor: '#5A3A2E' }}
-              className="px-5 py-3 rounded-pill font-bold text-sm hover:bg-earthy-cocoaDark active:scale-[0.99] transition-all"
-            >
-              Reload
-            </button>
-          </div>
-        </main>
-      )
+      return <ErrorFallback />
     }
     return this.props.children
   }

@@ -577,6 +577,9 @@ const PET_CHAIN_LABEL_TRANSLATIONS = {
 }
 
 const EN = {
+  'error.title': "Something went sideways.",
+  'error.body': "Refresh the page. Let us know if it keeps happening.",
+  'error.reload': "Reload",
   'brand.name': 'Winking Star',
 
   'common.loading': 'Loading...',
@@ -1134,6 +1137,9 @@ const EN = {
 const TRANSLATIONS = {
   en: EN,
   'zh-Hant': {
+    'error.title': "糟糕，出了點問題。",
+    'error.body': "請重新整理頁面。如果問題持續，請告訴我們。",
+    'error.reload': "重新載入",
     'meta.privacy.title': "隱私權政策 : 眨眼星星",
     'meta.privacy.description': "眨眼星星收集哪些資料、為何收集，以及家庭如何掌控這些資料。",
     'meta.terms.title': "使用條款 : 眨眼星星",
@@ -1664,6 +1670,9 @@ const TRANSLATIONS = {
     'board.menu.deleteAccount': '刪除帳戶',
   },
   fr: {
+    'error.title': "Oups, un souci est survenu.",
+    'error.body': "Actualisez la page. Dites-le-nous si cela continue.",
+    'error.reload': "Recharger",
     'meta.privacy.title': "Politique de confidentialité : Étoile Clignante",
     'meta.privacy.description': "Ce que collecte Étoile Clignante, pourquoi, et comment les familles le contrôlent.",
     'meta.terms.title': "Conditions d'utilisation : Étoile Clignante",
@@ -2195,6 +2204,9 @@ const TRANSLATIONS = {
     'reward.clearError': 'Impossible de retirer la récompense. Réessayez.',
   },
   es: {
+    'error.title': "Vaya, algo salió mal.",
+    'error.body': "Actualiza la página. Avísanos si sigue ocurriendo.",
+    'error.reload': "Recargar",
     'meta.privacy.title': "Política de privacidad : Estrella Guiñante",
     'meta.privacy.description': "Qué recopila Estrella Guiñante, por qué y cómo lo controlan las familias.",
     'meta.terms.title': "Condiciones de uso : Estrella Guiñante",
@@ -2726,6 +2738,9 @@ const TRANSLATIONS = {
     'reward.clearError': 'No se pudo quitar la recompensa. Inténtalo de nuevo.',
   },
   de: {
+    'error.title': "Hoppla, etwas ist schiefgelaufen.",
+    'error.body': "Lade die Seite neu. Sag uns Bescheid, wenn es weiter auftritt.",
+    'error.reload': "Neu laden",
     'meta.privacy.title': "Datenschutzerklärung : Zwinkernder Stern",
     'meta.privacy.description': "Was Zwinkernder Stern erfasst, warum, und wie Familien dies steuern.",
     'meta.terms.title': "Nutzungsbedingungen : Zwinkernder Stern",
