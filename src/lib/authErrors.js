@@ -5,6 +5,20 @@ import { formatAuthError as sharedFormatAuthError } from '@weekly-superstar/shar
 
 const GENERIC_SIGN_IN_ERROR = 'Email or password is incorrect. Try again or reset your password.'
 
+// Provider display names for OAuth-specific copy.
+const PROVIDER_LABELS = { 'google.com': 'Google', 'apple.com': 'Apple' }
+
+// "The credential did not work" codes. On the password flow these are masked
+// to one generic message to avoid email enumeration. On an OAuth (Google /
+// Apple) flow there is no password to be wrong, so the masked copy is
+// misleading; surface a provider-specific message instead.
+const CREDENTIAL_FAILURE_CODES = new Set([
+  'auth/user-not-found',
+  'auth/wrong-password',
+  'auth/invalid-credential',
+  'auth/invalid-login-credentials',
+])
+
 const OAUTH_OVERRIDES = {
   'auth/user-not-found': GENERIC_SIGN_IN_ERROR,
   'auth/wrong-password': GENERIC_SIGN_IN_ERROR,
@@ -25,9 +39,17 @@ const OAUTH_OVERRIDES = {
   'auth/cancelled-popup-request': '',
 }
 
-export function formatAuthError(err) {
+export function formatAuthError(err, { flow = 'password', provider } = {}) {
   if (!err) return 'Something went wrong. Try again.'
   const code = (err && (err.code || err.message)) || ''
+  // On an OAuth flow, a credential failure must not claim "email or password
+  // is incorrect" (there is no password). De-mask to a provider message.
+  if (flow === 'oauth' && CREDENTIAL_FAILURE_CODES.has(code)) {
+    const label = PROVIDER_LABELS[provider]
+    return label
+      ? `${label} sign-in did not go through. Please try again.`
+      : 'Sign-in did not go through. Please try again.'
+  }
   if (Object.prototype.hasOwnProperty.call(OAUTH_OVERRIDES, code)) {
     return OAUTH_OVERRIDES[code]
   }

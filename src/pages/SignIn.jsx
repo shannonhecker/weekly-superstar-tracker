@@ -110,10 +110,10 @@ export default function SignIn() {
           setRecovery({ ...info, existingMethods })
           setShowEmailForm(true)
         } catch {
-          setError(formatAuthError(err))
+          setError(formatAuthError(err, { flow: 'oauth', provider: attemptedProviderId }))
         }
       } else if (!isSilentAuthError(err)) {
-        setError(formatAuthError(err))
+        setError(formatAuthError(err, { flow: 'oauth', provider: attemptedProviderId }))
       }
     } finally {
       setLoading(false)
@@ -139,7 +139,7 @@ export default function SignIn() {
       setRecovery(null)
       await completeOAuthSignIn(cred.user)
     } catch (err) {
-      if (!isSilentAuthError(err)) setRecoveryError(formatAuthError(err))
+      if (!isSilentAuthError(err)) setRecoveryError(formatAuthError(err, { flow: 'oauth', provider: originalProviderId }))
     } finally {
       setLinking(false)
     }

@@ -217,10 +217,10 @@ export default function SignUp() {
           const existingMethods = await getExistingSignInMethods(info.email)
           setRecovery({ ...info, existingMethods })
         } catch {
-          setError(friendlyAuthError(err, isUpgrade))
+          setError(friendlyAuthError(err, isUpgrade, attemptedProviderId))
         }
       } else if (!isSilentAuthError(err)) {
-        setError(friendlyAuthError(err, isUpgrade))
+        setError(friendlyAuthError(err, isUpgrade, attemptedProviderId))
       }
     } finally {
       setLoading(false)
@@ -246,7 +246,7 @@ export default function SignUp() {
       setRecovery(null)
       await completeOAuthSignUp(cred.user)
     } catch (err) {
-      if (!isSilentAuthError(err)) setRecoveryError(friendlyAuthError(err, isUpgrade))
+      if (!isSilentAuthError(err)) setRecoveryError(friendlyAuthError(err, isUpgrade, originalProviderId))
     } finally {
       setLinking(false)
     }
@@ -264,12 +264,15 @@ export default function SignUp() {
   // (or Google/Apple account) is already a Winking Star user. The "Use
   // existing account" link below the form is the action — this just tells
   // them why their input bounced.
-  function friendlyAuthError(err, upgrading) {
+  function friendlyAuthError(err, upgrading, provider) {
     const code = err?.code
     if (upgrading && (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use')) {
       return 'This email is already a Winking Star account. Use it below ↓'
     }
-    return formatAuthError(err)
+    // friendlyAuthError serves both the OAuth handlers and the email/password
+    // onCreate path, so de-mask to a provider message only when a provider is
+    // present; otherwise keep the password-flow enumeration mask.
+    return formatAuthError(err, provider ? { flow: 'oauth', provider } : { flow: 'password' })
   }
 
   // Guest path: signInAnonymously + seed a board using the wizard answers.
