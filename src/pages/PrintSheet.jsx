@@ -178,11 +178,11 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
             />
           </div>
           <div className="mt-[1mm] flex items-center gap-[2.2mm] font-body text-[8.5pt]" style={{ color: SHEET.cocoaSoft }}>
-            <span className="font-extrabold" style={{ color: SHEET.cocoa }}>Week of {weekRange}</span>
+            <span className="font-extrabold" style={{ color: SHEET.cocoa }}>{t('print.weekOf', { range: weekRange })}</span>
             <span style={{ color: SHEET.divider }}>·</span>
             <span className="font-bold">
               <span style={{ color: theme.deeper }}>{Math.round(hatchPercent)}%</span>{' '}
-              of the way ({totalStarsCopy(hatchPercent)})
+              {t('print.ofTheWay')} ({totalStarsCopy(hatchPercent, t)})
             </span>
           </div>
           <div
@@ -210,12 +210,13 @@ function Header({ kid, theme, weekRange, hatchPercent, sheetUrl, themeKey }) {
 
 // Tiny helper so the copy reads "23 / 60 stars" alongside the percent. Pulls
 // HATCH_GOAL from shared so today's bump 50→60 reflects automatically.
-function totalStarsCopy(hatchPercent) {
+function totalStarsCopy(hatchPercent, t) {
   const stars = Math.round((hatchPercent / 100) * HATCH_GOAL)
-  return `${stars} / ${HATCH_GOAL} stickers`
+  return t('print.stickersCount', { stars, goal: HATCH_GOAL })
 }
 
 function ColumnHeaders({ days, theme }) {
+  const { formatDate } = useI18n()
   return (
     <div
       className="absolute flex overflow-hidden rounded-t-[3mm]"
@@ -239,7 +240,7 @@ function ColumnHeaders({ days, theme }) {
             borderRight: index < days.length - 1 ? `1px solid ${SHEET.dividerCream}` : 'none',
           }}
         >
-          <span className="text-[9pt] font-black leading-none">{d.label}</span>
+          <span className="text-[9pt] font-black leading-none">{formatDate(d.date, { weekday: 'short', timeZone: 'UTC' })}</span>
           <span className="mt-[0.7mm] rounded-full px-[1.8mm] py-[0.4mm] text-[6.5pt] font-extrabold leading-none"
             style={{
               background: d.isWeekend ? SHEET.card : `${theme.accent}1E`,
@@ -256,6 +257,7 @@ function ColumnHeaders({ days, theme }) {
 }
 
 function RowLabels({ activities, theme }) {
+  const { activityLabel } = useI18n()
   return (
     <div
       className="absolute flex flex-col overflow-hidden rounded-l-[3mm]"
@@ -292,7 +294,7 @@ function RowLabels({ activities, theme }) {
             className="font-body font-black text-[9.5pt] leading-tight truncate"
             style={{ color: SHEET.cocoa }}
           >
-            {a.label || 'Activity'}
+            {activityLabel(a)}
           </span>
         </div>
       ))}
@@ -353,6 +355,7 @@ function CellGrid({ activities, days, theme }) {
 }
 
 function FootCaption() {
+  const { t } = useI18n()
   return (
     <div
       className="absolute flex items-center justify-center rounded-full font-body text-[7pt] font-extrabold"
@@ -366,7 +369,7 @@ function FootCaption() {
         border: `1px solid ${SHEET.dividerCream}`,
       }}
     >
-      Stick a sticker, draw a star, or colour the box — every {HATCH_GOAL} earns a new pet.
+      {t('print.foot', { goal: HATCH_GOAL })}
     </div>
   )
 }
@@ -376,6 +379,7 @@ export default function PrintSheet() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
+  const { t, formatDate, activityLabel, intlLocale } = useI18n()
   const weekKey = searchParams.get('week') || getWeekKey()
 
   const [board, setBoard] = useState(null)
@@ -389,7 +393,7 @@ export default function PrintSheet() {
       doc(db, 'boards', boardId),
       (snap) => {
         if (!snap.exists()) {
-          setError('Board not found.')
+          setError(t('print.boardNotFound'))
           setLoading(false)
           return
         }
@@ -409,7 +413,7 @@ export default function PrintSheet() {
       doc(db, 'boards', boardId, 'kids', kidId),
       (snap) => {
         if (!snap.exists()) {
-          setError('Kid not found on this board.')
+          setError(t('print.kidNotFound'))
           setLoading(false)
           return
         }
@@ -427,8 +431,15 @@ export default function PrintSheet() {
   const days = useMemo(() => weekKeyToDays(weekKey), [weekKey])
   const weekRange = useMemo(() => {
     if (days.length !== 7) return ''
-    return formatWeekRange(days[0].date, days[6].date)
-  }, [days])
+    try {
+      // Locale-aware compact range; strip Intl's en-dash separator (house copy rule).
+      return new Intl.DateTimeFormat(intlLocale, { month: 'short', day: 'numeric', timeZone: 'UTC' })
+        .formatRange(days[0].date, days[6].date)
+        .replace(/[–—]/g, '-')
+    } catch {
+      return formatWeekRange(days[0].date, days[6].date)
+    }
+  }, [days, intlLocale])
 
   const theme = useMemo(() => {
     if (!kid) return THEMES.unicorn
@@ -451,14 +462,14 @@ export default function PrintSheet() {
   const hatchPercent = Math.min(100, (totalStars / HATCH_GOAL) * 100)
 
   if (authLoading || loading) {
-    return <LogoLoader label="Loading sheet..." />
+    return <LogoLoader label={t('print.loading')} />
   }
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 font-body text-gray-700">
         <div>{error}</div>
         <button onClick={() => navigate(-1)} className="text-sm underline">
-          Go back
+          {t('print.goBack')}
         </button>
       </div>
     )
@@ -466,7 +477,7 @@ export default function PrintSheet() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center font-body">
-        <Link to="/signin" className="underline">Sign in to print this sheet</Link>
+        <Link to="/signin" className="underline">{t('print.signInToPrint')}</Link>
       </div>
     )
   }
@@ -484,14 +495,14 @@ export default function PrintSheet() {
           className="px-3 py-1.5 rounded-pill border font-extrabold transition-colors"
           style={{ color: SHEET.cocoa, background: SHEET.card, borderColor: SHEET.dividerCream }}
         >
-          ← Back
+          ← {t('print.back')}
         </button>
         <button
           onClick={() => window.print()}
           className="px-4 py-1.5 rounded-xl text-white font-bold shadow-card"
           style={{ background: theme.deeper }}
         >
-          Print this week
+          {t('print.printWeek')}
         </button>
       </div>
 
