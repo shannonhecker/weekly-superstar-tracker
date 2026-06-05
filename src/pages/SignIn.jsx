@@ -174,7 +174,7 @@ export default function SignIn() {
 
             <div className="mb-6 flex items-center justify-center gap-3">
               <Logo size={48} />
-              <span className="text-2xl font-black text-earthy-cocoa">Winking Star</span>
+              <span className="text-2xl font-black text-earthy-cocoa">{t('brand.name')}</span>
             </div>
 
             <h1 className="font-display text-4xl font-black leading-[1.05] tracking-normal text-earthy-cocoa sm:text-5xl">

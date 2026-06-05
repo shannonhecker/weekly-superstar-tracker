@@ -527,7 +527,7 @@ function StepIntro({ isGuest, onStart, onTryGuest }) {
       </div>
       <div className="mb-5 flex items-center justify-center gap-3">
         <Logo size={48} />
-        <span className="text-2xl font-black text-earthy-cocoa">Winking Star</span>
+        <span className="text-2xl font-black text-earthy-cocoa">{t('brand.name')}</span>
       </div>
       <h1 className="font-display font-black text-earthy-cocoa text-4xl sm:text-5xl tracking-tight leading-[1.05] mb-5">
         {t('landing.title')}
