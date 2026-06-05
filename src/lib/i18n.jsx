@@ -3396,9 +3396,17 @@ export function I18nProvider({ children }) {
   const initialSystem = useMemo(() => resolveSystemLocale(), [])
   const [systemLanguage, setSystemLanguage] = useState(initialSystem.language)
   const [systemRegion, setSystemRegion] = useState(initialSystem.region)
-  const [languageSetting, setLanguageSettingState] = useState(() =>
-    readStoredSetting(LANGUAGE_STORAGE_KEY, isLanguageSetting, 'system'),
-  )
+  const [languageSetting, setLanguageSettingState] = useState(() => {
+    // ?lang= override (e.g. the iOS app deep-links the print sheet in the user's
+    // chosen in-app language). One-shot for this load; not persisted to storage.
+    try {
+      const urlLang = new URLSearchParams(window.location.search).get('lang')
+      if (urlLang && urlLang !== 'system' && isLanguageSetting(urlLang)) return urlLang
+    } catch {
+      // window/URL unavailable; fall through to the stored setting.
+    }
+    return readStoredSetting(LANGUAGE_STORAGE_KEY, isLanguageSetting, 'system')
+  })
   const [regionSetting, setRegionSettingState] = useState(() =>
     readStoredSetting(REGION_STORAGE_KEY, isRegionSetting, 'system'),
   )
