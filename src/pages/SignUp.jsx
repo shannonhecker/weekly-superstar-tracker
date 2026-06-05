@@ -269,9 +269,10 @@ export default function SignUp() {
     if (upgrading && (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use')) {
       return 'This email is already a Winking Star account. Use it below ↓'
     }
-    // friendlyAuthError is only called from the OAuth handlers, so a credential
-    // failure should de-mask to a provider message rather than the password copy.
-    return formatAuthError(err, { flow: 'oauth', provider })
+    // friendlyAuthError serves both the OAuth handlers and the email/password
+    // onCreate path, so de-mask to a provider message only when a provider is
+    // present; otherwise keep the password-flow enumeration mask.
+    return formatAuthError(err, provider ? { flow: 'oauth', provider } : { flow: 'password' })
   }
 
   // Guest path: signInAnonymously + seed a board using the wizard answers.
