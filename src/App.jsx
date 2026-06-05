@@ -47,6 +47,28 @@ class RouteErrorBoundary extends Component {
   }
 }
 
+// Lazy import that recovers from a stale chunk after a deploy. A failed dynamic
+// import (an old chunk hash 404s once a new deploy lands) reloads the page once
+// to fetch the fresh bundle instead of dropping the user on the error boundary.
+// sessionStorage guards against a reload loop on a genuinely broken chunk.
+function lazyWithReload(importFn) {
+  return lazy(() =>
+    importFn()
+      .then((mod) => {
+        sessionStorage.removeItem('ws:chunkReloaded')
+        return mod
+      })
+      .catch((err) => {
+        if (!sessionStorage.getItem('ws:chunkReloaded')) {
+          sessionStorage.setItem('ws:chunkReloaded', '1')
+          window.location.reload()
+          return new Promise(() => {})
+        }
+        throw err
+      }),
+  )
+}
+
 // Route components are lazy-imported so each route only ships its own
 // JS on first paint. The signin page no longer drags in Board's deps,
 // the Board page no longer drags in PrintSheet's QR code lib, etc.
@@ -54,18 +76,18 @@ class RouteErrorBoundary extends Component {
 // LogoLoader stays eagerly imported because it's the Suspense fallback
 // — needs to be in the initial bundle so the loading state can render
 // before any chunk arrives.
-const Landing = lazy(() => import('./pages/Landing'))
-const LandingV2 = lazy(() => import('./pages/LandingV2'))
-const SignIn = lazy(() => import('./pages/SignIn'))
-const SignUp = lazy(() => import('./pages/SignUp'))
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
-const AuthAction = lazy(() => import('./pages/AuthAction'))
-const Join = lazy(() => import('./pages/Join'))
-const Board = lazy(() => import('./pages/Board'))
-const PrintSheet = lazy(() => import('./pages/PrintSheet'))
-const StyleGuide = lazy(() => import('./pages/StyleGuide'))
-const Privacy = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
-const Terms = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms })))
+const Landing = lazyWithReload(() => import('./pages/Landing'))
+const LandingV2 = lazyWithReload(() => import('./pages/LandingV2'))
+const SignIn = lazyWithReload(() => import('./pages/SignIn'))
+const SignUp = lazyWithReload(() => import('./pages/SignUp'))
+const ForgotPassword = lazyWithReload(() => import('./pages/ForgotPassword'))
+const AuthAction = lazyWithReload(() => import('./pages/AuthAction'))
+const Join = lazyWithReload(() => import('./pages/Join'))
+const Board = lazyWithReload(() => import('./pages/Board'))
+const PrintSheet = lazyWithReload(() => import('./pages/PrintSheet'))
+const StyleGuide = lazyWithReload(() => import('./pages/StyleGuide'))
+const Privacy = lazyWithReload(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
+const Terms = lazyWithReload(() => import('./pages/Legal').then((m) => ({ default: m.Terms })))
 
 // Dev-only peek routes. These render presentational mocks of Board / Pet /
 // Reward at phone-bezel dimensions so we can screenshot them for the signup
@@ -73,9 +95,9 @@ const Terms = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms
 // components fakes was more invasive than rendering visually-faithful stubs.
 // Lazy-loaded like the other routes, and only registered when
 // `import.meta.env.DEV` so production builds don't ship them.
-const PeekBoard = lazy(() => import('./dev/peek/PeekBoard'))
-const PeekPet = lazy(() => import('./dev/peek/PeekPet'))
-const PeekReward = lazy(() => import('./dev/peek/PeekReward'))
+const PeekBoard = lazyWithReload(() => import('./dev/peek/PeekBoard'))
+const PeekPet = lazyWithReload(() => import('./dev/peek/PeekPet'))
+const PeekReward = lazyWithReload(() => import('./dev/peek/PeekReward'))
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
