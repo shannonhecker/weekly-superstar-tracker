@@ -15,6 +15,33 @@ describe('formatAuthError — OAuth overrides', () => {
     expect(formatAuthError({ code: 'auth/invalid-login-credentials' })).toBe(GENERIC_SIGN_IN_ERROR)
   })
 
+  it('keeps the password mask when flow is explicitly password', () => {
+    expect(formatAuthError({ code: 'auth/invalid-credential' }, { flow: 'password' }))
+      .toBe(GENERIC_SIGN_IN_ERROR)
+  })
+
+  it('de-masks credential failures on the OAuth flow (Google)', () => {
+    const out = formatAuthError({ code: 'auth/invalid-credential' }, { flow: 'oauth', provider: 'google.com' })
+    expect(out).not.toBe(GENERIC_SIGN_IN_ERROR)
+    expect(out).toContain('Google')
+  })
+
+  it('de-masks credential failures on the OAuth flow (Apple)', () => {
+    expect(formatAuthError({ code: 'auth/user-not-found' }, { flow: 'oauth', provider: 'apple.com' }))
+      .toContain('Apple')
+  })
+
+  it('uses a generic OAuth message when the provider is unknown', () => {
+    const out = formatAuthError({ code: 'auth/invalid-login-credentials' }, { flow: 'oauth' })
+    expect(out).not.toBe(GENERIC_SIGN_IN_ERROR)
+    expect(out).toContain('did not go through')
+  })
+
+  it('still maps non-credential OAuth codes the same regardless of flow', () => {
+    expect(formatAuthError({ code: 'auth/popup-blocked' }, { flow: 'oauth', provider: 'google.com' }))
+      .toContain('Allow popups')
+  })
+
   it('maps popup-closed-by-user to friendly copy', () => {
     const err = { code: 'auth/popup-closed-by-user' }
     expect(formatAuthError(err)).toContain('closed before')
