@@ -93,8 +93,8 @@ function formatWeekRange(weekKey) {
     sun.setDate(d.getDate() + 6)
     const m1 = months[d.getMonth()]
     const m2 = months[sun.getMonth()]
-    if (m1 === m2) return `${m1} ${d.getDate()}–${sun.getDate()}`
-    return `${m1} ${d.getDate()} – ${m2} ${sun.getDate()}`
+    if (m1 === m2) return `${m1} ${d.getDate()}-${sun.getDate()}`
+    return `${m1} ${d.getDate()} - ${m2} ${sun.getDate()}`
   } catch { return weekKey }
 }
 
