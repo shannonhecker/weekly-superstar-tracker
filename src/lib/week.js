@@ -1,6 +1,13 @@
-import { formatWeekRange } from '@weekly-superstar/shared/week'
+import { formatWeekRange as sharedFormatWeekRange } from '@weekly-superstar/shared/week'
 
-export { getCurrentWeek, getWeekKey, formatWeekRange } from '@weekly-superstar/shared/week'
+export { getCurrentWeek, getWeekKey } from '@weekly-superstar/shared/week'
+
+// Strip the shared package's en-dash range separator (house rule: no en/em-dashes
+// in display copy). Covers the archive list + week recap; the print sheet has its
+// own locale-aware range.
+export function formatWeekRange(monday, sunday) {
+  return sharedFormatWeekRange(monday, sunday).replace(/[–—]/g, '-')
+}
 
 // Format a `weekKey` (the Monday's ISO date stored on archived weeks)
 // into the same `Mon 1–7` / `Mon 30 – Apr 5` short range that the live
