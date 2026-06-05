@@ -30,6 +30,7 @@ import { KidAvatar } from '../components/KidAvatar'
 import { BirthdayBanner } from '../components/BirthdayBanner'
 import { isMuted, setMuted } from '../lib/sounds'
 import { assignChainsForBoard, pickFreshChain, PET_CHAINS, stageToChainIdx } from '../lib/themes'
+import { nextFavoriteSync } from '../lib/favorite-pet'
 import Logo from '../components/Logo'
 import LogoLoader from '../components/LogoLoader'
 import ThemeScene from '../components/ThemeScene'
@@ -363,6 +364,23 @@ export default function Board() {
     }
   }, [loading, kids, thisWeekKey, boardId])
 
+  // When a kid's favoritePet IS the current week's pet, mirror live emoji
+  // and petName onto the stored favorite so PetGallery's star toggle and
+  // the BannerPet stay in sync after a level-up or rename. Idempotent —
+  // once the snapshot matches, the helper returns null and no write fires.
+  useEffect(() => {
+    if (loading || kids.length === 0) return
+    for (const kid of kids) {
+      const stars = totalStarsFor(kid)
+      const delta = nextFavoriteSync(kid, thisWeekKey, stars)
+      if (!delta) continue
+      updateDoc(doc(db, 'boards', boardId, 'kids', kid.id), delta).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.warn('[Board] favorite sync failed (kid', kid.id + ')', err)
+      })
+    }
+  }, [loading, kids, thisWeekKey, boardId])
+
   const onSignOut = async () => {
     await signOut(auth)
     navigate('/', { replace: true })
@@ -677,6 +695,7 @@ export default function Board() {
         open={tasksOpen}
         onClose={() => setTasksOpen(false)}
         kid={activeKid}
+        kids={kids}
         boardId={boardId}
       />
 
