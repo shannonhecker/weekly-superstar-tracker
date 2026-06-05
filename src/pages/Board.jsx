@@ -335,7 +335,7 @@ export default function Board() {
         // check this log first — both fields must appear in the write.
         // Fires once per kid per week-change, so noise is minimal.
         // eslint-disable-next-line no-console
-        console.log('[Board] rollover update', {
+        import.meta.env.DEV && console.log('[Board] rollover update', {
           kidId: kid.id,
           fromWeekKey: oldKey,
           toWeekKey: thisWeekKey,
