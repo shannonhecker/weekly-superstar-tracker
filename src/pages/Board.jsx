@@ -251,9 +251,18 @@ export default function Board() {
 
   useEffect(() => {
     const q = query(collection(db, 'boards', boardId, 'kids'), orderBy('order'))
-    const unsub = onSnapshot(q, (snap) => {
-      setKids(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-    })
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setKids(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      },
+      (err) => {
+        // Surface the failure rather than leaving the kids list silently empty
+        // (the board-doc listener above already handles its own errors).
+        // eslint-disable-next-line no-console
+        console.error('[Board] kids snapshot error', err)
+      }
+    )
     return unsub
   }, [boardId])
 
